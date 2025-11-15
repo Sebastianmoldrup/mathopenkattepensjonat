@@ -13,7 +13,7 @@ export default function Home() {
           height={300}
           alt="Picture of the author"
         />
-        <h1 className="text-2xl font-test font-semibold text-center">
+        <h1 className="text-2xl font-test font-semibold text-center px-4">
           Under konstruksjon - Lanseres 2026!
         </h1>
       </section>
