@@ -124,8 +124,20 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Our partners */}
+      <section className="flex flex-col items-center gap-8 py-16 px-4">
+        <h2 className="text-3xl font-semibold">Vårt samarbeid</h2>
+        <Image
+          src="/partners/buddy.webp"
+          alt="buddy"
+          width={150}
+          height={150}
+          className=""
+        />
+      </section>
+
       {/* Location & Facilities */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-slate-50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">
             Fasiliteter og beliggenhet
@@ -173,26 +185,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-12 p-8 bg-slate-50 rounded-lg border-l-4 border-slate-300">
-            <h4 className="text-lg font-semibold text-slate-900 mb-4">
-              Ansvar og forsikring
-            </h4>
-            <p className="text-slate-700 leading-relaxed mb-4">
-              Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
-              skader eller sykdom som fører til at katten blir syk, skadet, får
-              varige mén eller dør før, under eller etter oppholdet. Det
-              anbefales generelt å ha forsikring på katten.
-            </p>
-            <p className="text-slate-600 text-sm">
-              Pensjonatet tar heller ikke ansvar for skader eller tap som
-              skyldes tredjepart. Våre lokaler ligger på privat område, og
-              uvedkommende har ikke adgang uten godkjenning og tilstedeværelse
-              fra oss. Brudd på dette kan medføre erstatningsansvar for
-              eventuelle skader eller tap.
-            </p>
-          </div>
-
-          <div className="mt-12 p-8 bg-slate-50 rounded-lg">
+          <div className="mt-12 p-8 bg-white rounded-lg">
             <h3 className="text-xl font-semibold text-slate-900 mb-4">
               Et trygt og stimulerende miljø
             </h3>
@@ -207,6 +200,31 @@ export default function Home() {
               Vi anbefaler å ta med et teppe, en seng eller et annet trygt
               objekt med kattens egen lukt – dette kan gjøre overgangen til nye
               omgivelser enklere.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Responsibility and insurance */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">
+            Ansvar og forsikring
+          </h2>
+
+          <div className="max-w-4xl mx-auto">
+            <p className="text-slate-700 leading-relaxed mb-4">
+              Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
+              skader eller sykdom som fører til at katten blir syk, skadet, får
+              varige mén eller dør før, under eller etter oppholdet. Det
+              anbefales generelt å ha forsikring på katten.
+            </p>
+            <p className="text-slate-600 text-sm">
+              Pensjonatet tar heller ikke ansvar for skader eller tap som
+              skyldes tredjepart. Våre lokaler ligger på privat område, og
+              uvedkommende har ikke adgang uten godkjenning og tilstedeværelse
+              fra oss. Brudd på dette kan medføre erstatningsansvar for
+              eventuelle skader eller tap.
             </p>
           </div>
         </div>
@@ -307,8 +325,42 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Partnership */}
+      <section className="py-16 px-4 bg-slate-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
+            Samarbeid
+          </h2>
+
+          <div className="flex flex-col items-center">
+            {/* Contact Text */}
+            <div className="text-center max-w-2xl">
+              <p className="text-lg text-slate-700 leading-relaxed mb-4">
+                Vil du samarbeide med Mathopen Kattepensjonat?
+              </p>
+              <p className="text-slate-600 mb-6">
+                Ta gjerne kontakt direkte på telefon{" "}
+                <a
+                  href="tel:47322279"
+                  className="text-slate-900 font-semibold hover:text-slate-700 transition-colors"
+                >
+                  473 22 279
+                </a>{" "}
+                eller send en e-post til{" "}
+                <a
+                  href="mailto:mathopenkattepensjonat@hotmail.com"
+                  className="text-slate-900 font-semibold hover:text-slate-700 transition-colors"
+                >
+                  mathopenkattepensjonat@hotmail.com
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer note */}
-      <section className="py-8 px-4 bg-slate-50 border-t border-slate-200">
+      <section className="py-8 px-4 bg-white border-y border-slate-200">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm text-slate-600">
             Vi gleder oss til å ta imot katten din! 🐾
@@ -317,7 +369,7 @@ export default function Home() {
       </section>
 
       {/* Developer Credit */}
-      <section className="py-4 px-4 border-t border-slate-200">
+      <section className="py-4 px-4 bg-slate-50">
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-xs text-slate-600">
             © {CURRENT_YEAR} Utviklet av{" "}
