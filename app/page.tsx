@@ -119,7 +119,7 @@ export default function Home() {
             alt="hei"
             width={600}
             height={600}
-            className="w-[150px] md:w-[600px]"
+            className="w-[150px] md:w-[400px] h-auto"
           />
         </div>
       </section>
@@ -317,7 +317,7 @@ export default function Home() {
       </section>
 
       {/* Developer Credit */}
-      <section className="py-6 px-4 bg-slate-50 border-t border-slate-200">
+      <section className="py-4 px-4 border-t border-slate-200">
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-xs text-slate-600">
             © {CURRENT_YEAR} Utviklet av{" "}
