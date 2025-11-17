@@ -143,7 +143,7 @@ export default function Home() {
             Fasiliteter og beliggenhet
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-12">
+          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
             <div>
               <h3 className="text-xl font-semibold text-slate-900 mb-4 flex items-center">
                 <MapPin className="h-5 w-5 mr-2 text-slate-700" />
@@ -185,7 +185,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-12 p-8 bg-white rounded-lg">
+          <div className="mt-12 p-8 bg-white rounded-lg max-w-4xl mx-auto">
             <h3 className="text-xl font-semibold text-slate-900 mb-4">
               Et trygt og stimulerende miljø
             </h3>
