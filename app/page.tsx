@@ -3,6 +3,33 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Heart, Star, Shield, Camera } from "lucide-react";
+import Image from "next/image";
+
+type CardContent = {
+  img: string;
+  title: string;
+  desc: string;
+};
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+const CARD_CONTENT: CardContent[] = [
+  {
+    img: "experienced",
+    title: "Erfaren Omsorg",
+    desc: "Anja har drevet kattepass siden 2018 med bred erfaring i katteatferd og stell. Fosterhjem for Kattens Vern.",
+  },
+  {
+    img: "facility",
+    title: "Romslige fasiliteter",
+    desc: "Bur større enn Mattilsynets krav, åpen kattegård hele dagen, veggmonterte kloremøbler og aktivitetsområder.",
+  },
+  {
+    img: "updates",
+    title: "Oppdateringer underveis",
+    desc: "Følg kattens opphold på vår egen Snapchat-kanal. Få oppdateringer både under besøket og etterpå.",
+  },
+];
 
 export default function Home() {
   return (
@@ -17,8 +44,7 @@ export default function Home() {
             Mathopen Kattepensjonat
           </h1>
           <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Et trygt, rolig og omsorgsfullt sted for katter i hjertet av
-            Mathopen. Drevet av Anja og Martin siden 2018.
+            Det trygge hjemmet når du er borte
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="bg-slate-900 hover:bg-slate-800">
@@ -27,7 +53,7 @@ export default function Home() {
             </Button>
             <Button size="lg" variant="outline">
               <MapPin className="mr-2 h-5 w-5" />
-              Besøk oss
+              Storingavika 2, 5174 Mathopen
             </Button>
           </div>
         </div>
@@ -36,61 +62,39 @@ export default function Home() {
       {/* Features Grid */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border-slate-200 hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6">
-                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <Heart className="h-6 w-6 text-slate-700" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                  Erfaren omsorg
-                </h3>
-                <p className="text-slate-600">
-                  Anja har drevet kattepass siden 2018 med bred erfaring i
-                  katteatferd og stell. Fosterhjem for Kattens Vern.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200 hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6">
-                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <Star className="h-6 w-6 text-slate-700" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                  Romslige fasiliteter
-                </h3>
-                <p className="text-slate-600">
-                  Bur større enn Mattilsynets krav, åpen kattegård hele dagen,
-                  veggmonterte kloremøbler og aktivitetsområder.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200 hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6">
-                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                  <Camera className="h-6 w-6 text-slate-700" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                  Oppdateringer underveis
-                </h3>
-                <p className="text-slate-600">
-                  Følg kattens opphold på vår egen Snapchat-kanal. Få
-                  oppdateringer både under besøket og etterpå.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="grid md:grid-cols-3 place-content-center gap-8">
+            {CARD_CONTENT.map(({ img, title, desc }, index) => (
+              <Card
+                key={index}
+                className="border-slate-200 hover:shadow-lg transition-shadow max-w-[348px]"
+              >
+                <CardContent className="flex flex-col justify-end items-center pt-6 h-full">
+                  <Image
+                    src={`${"/illustration/" + img + ".webp"}`}
+                    alt="hei"
+                    width={150}
+                    height={150}
+                    className="rounded-lg mb-4 h-[150px] w-fit"
+                  />
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                      {title}
+                    </h3>
+                    <p className="text-slate-600">{desc}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* About Section */}
       <section className="py-16 px-4 bg-slate-50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
-            Om oss
-          </h2>
+        <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
+          Om oss
+        </h2>
+        <div className="max-w-4xl mx-auto flex flex-col-reverse items-center gap-8 md:flex-row">
           <div className="prose prose-slate max-w-none">
             <p className="text-lg text-slate-700 leading-relaxed mb-6">
               Vi er Anja og Martin – et par i 30-årene som bor i hjertet av
@@ -110,6 +114,13 @@ export default function Home() {
               masse tilsyn, omsorg og oppmerksomhet.
             </p>
           </div>
+          <Image
+            src="/img/om-oss.png"
+            alt="hei"
+            width={600}
+            height={600}
+            className="w-[150px] md:w-[600px]"
+          />
         </div>
       </section>
 
@@ -160,6 +171,25 @@ export default function Home() {
                 </li>
               </ul>
             </div>
+          </div>
+
+          <div className="mt-12 p-8 bg-slate-50 rounded-lg border-l-4 border-slate-300">
+            <h4 className="text-lg font-semibold text-slate-900 mb-4">
+              Ansvar og forsikring
+            </h4>
+            <p className="text-slate-700 leading-relaxed mb-4">
+              Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
+              skader eller sykdom som fører til at katten blir syk, skadet, får
+              varige mén eller dør før, under eller etter oppholdet. Det
+              anbefales generelt å ha forsikring på katten.
+            </p>
+            <p className="text-slate-600 text-sm">
+              Pensjonatet tar heller ikke ansvar for skader eller tap som
+              skyldes tredjepart. Våre lokaler ligger på privat område, og
+              uvedkommende har ikke adgang uten godkjenning og tilstedeværelse
+              fra oss. Brudd på dette kan medføre erstatningsansvar for
+              eventuelle skader eller tap.
+            </p>
           </div>
 
           <div className="mt-12 p-8 bg-slate-50 rounded-lg">
@@ -269,7 +299,7 @@ export default function Home() {
 
           <div className="space-y-2 text-slate-600">
             <p>📧 mathopenkattepensjonat@hotmail.com</p>
-            <p>📞 Anja: 473 22 279</p>
+            <p>📞 473 22 279</p>
             <p className="text-sm">
               Telefontid: kl. 11:00–12:00 og 17:00–20:00
             </p>
@@ -282,6 +312,23 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm text-slate-600">
             Vi gleder oss til å ta imot katten din! 🐾
+          </p>
+        </div>
+      </section>
+
+      {/* Developer Credit */}
+      <section className="py-6 px-4 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-6xl mx-auto">
+          <p className="text-center text-xs text-slate-600">
+            © {CURRENT_YEAR} Utviklet av{" "}
+            <a
+              href="https://sebastianmoldrup.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium hover:text-slate-400 transition-colors"
+            >
+              Sebastian Møldrup
+            </a>
           </p>
         </div>
       </section>
