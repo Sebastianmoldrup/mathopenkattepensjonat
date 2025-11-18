@@ -185,47 +185,71 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-12 p-8 bg-white rounded-lg max-w-4xl mx-auto">
+          <div className="mt-12 p-8 bg-white rounded-lg max-w-sm md:max-w-4xl mx-auto md:flex-row-reverse">
             <h3 className="text-xl font-semibold text-slate-900 mb-4">
               Et trygt og stimulerende miljø
             </h3>
-            <p className="text-slate-700 leading-relaxed mb-4">
-              Hver katt får sitt eget rom med seng, dokasse samt mat- og
-              vannskåler. På dagtid står døren til rommet åpen, slik at de kan
-              bevege seg fritt i fellesområdene og luftegårdene. Disse områdene
-              er romslige og utformet med mange rolige skjulesteder, slik at
-              kattene kan trekke seg tilbake når de ønsker det.
-            </p>
-            <p className="text-slate-600">
-              Vi anbefaler å ta med et teppe, en seng eller et annet trygt
-              objekt med kattens egen lukt – dette kan gjøre overgangen til nye
-              omgivelser enklere.
-            </p>
+
+            <div className="grid md:grid-cols-2 place-items-center">
+              <Image
+                src="/illustration/environment.webp"
+                alt=""
+                width={150}
+                height={150}
+                className="w-[300px] md:row-start-1 md:col-start-2"
+              />
+
+              <div className="md:row-start-1 md:col-start-1">
+                <p className="text-slate-700 leading-relaxed mb-4">
+                  Hver katt får sitt eget rom med seng, dokasse samt mat- og
+                  vannskåler. På dagtid står døren til rommet åpen, slik at de
+                  kan bevege seg fritt i fellesområdene og luftegårdene. Disse
+                  områdene er romslige og utformet med mange rolige
+                  skjulesteder, slik at kattene kan trekke seg tilbake når de
+                  ønsker det.
+                </p>
+                <p className="text-slate-600">
+                  Vi anbefaler å ta med et teppe, en seng eller et annet trygt
+                  objekt med kattens egen lukt – dette kan gjøre overgangen til
+                  nye omgivelser enklere.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Responsibility and insurance */}
       <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">
             Ansvar og forsikring
           </h2>
 
-          <div className="max-w-4xl mx-auto">
-            <p className="text-slate-700 leading-relaxed mb-4">
-              Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
-              skader eller sykdom som fører til at katten blir syk, skadet, får
-              varige mén eller dør før, under eller etter oppholdet. Det
-              anbefales generelt å ha forsikring på katten.
-            </p>
-            <p className="text-slate-600 text-sm">
-              Pensjonatet tar heller ikke ansvar for skader eller tap som
-              skyldes tredjepart. Våre lokaler ligger på privat område, og
-              uvedkommende har ikke adgang uten godkjenning og tilstedeværelse
-              fra oss. Brudd på dette kan medføre erstatningsansvar for
-              eventuelle skader eller tap.
-            </p>
+          <div className="grid md:grid-cols-2 place-items-center">
+            <Image
+              src="/illustration/handover.webp"
+              alt=""
+              width={150}
+              height={150}
+              className="w-[300px]"
+            />
+
+            <div className="max-w-4xl mx-auto">
+              <p className="text-slate-700 leading-relaxed mb-4">
+                Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
+                skader eller sykdom som fører til at katten blir syk, skadet,
+                får varige mén eller dør før, under eller etter oppholdet. Det
+                anbefales generelt å ha forsikring på katten.
+              </p>
+              <p className="text-slate-600 text-sm">
+                Pensjonatet tar heller ikke ansvar for skader eller tap som
+                skyldes tredjepart. Våre lokaler ligger på privat område, og
+                uvedkommende har ikke adgang uten godkjenning og tilstedeværelse
+                fra oss. Brudd på dette kan medføre erstatningsansvar for
+                eventuelle skader eller tap.
+              </p>
+            </div>
           </div>
         </div>
       </section>
