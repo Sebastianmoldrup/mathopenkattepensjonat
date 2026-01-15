@@ -1,7 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Heart, Star, Shield, Camera } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Heart,
+  House,
+  Star,
+  Shield,
+  Camera,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -192,7 +200,6 @@ export default function Home() {
             <h3 className="text-xl font-semibold text-slate-900 mb-4">
               Et trygt og stimulerende miljø
             </h3>
-
             <div className="grid md:grid-cols-2 place-items-center">
               <Image
                 src="/illustration/environment.webp"
@@ -218,6 +225,10 @@ export default function Home() {
                 </p>
               </div>
             </div>
+            <Button className="mr-2">
+              <House className="w-4 h-4 text-white" /> Utforsk kattens hjem
+            </Button>
+            [Link til info side om det nye pensjonatet, bilder osv av ting]
           </div>
         </div>
       </section>
