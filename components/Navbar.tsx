@@ -24,7 +24,7 @@ const LIST_ITEMS = [
     text: "Priser & betingelser",
   },
   {
-    url: "",
+    url: "bilder",
     text: "Bilder",
   },
   {
@@ -73,9 +73,11 @@ const Navbar = () => {
           </nav>
 
           {/* Desktop CTA */}
-          <Button size="lg" className="hidden lg:block shrink-0">
-            BOOK NÅ
-          </Button>
+          <Link href="/bestilling">
+            <Button size="lg" className="hidden lg:block shrink-0">
+              BOOK NÅ
+            </Button>
+          </Link>
 
           {/* Mobile Menu Button */}
           <button
@@ -136,13 +138,15 @@ const Navbar = () => {
 
             {/* CTA Button */}
             <div className="p-6 border-t border-border">
-              <Button
-                size="lg"
-                className="w-full text-lg"
-                onClick={() => setIsOpen(false)}
-              >
-                BOOK NÅ
-              </Button>
+              <Link href="/bestilling">
+                <Button
+                  size="lg"
+                  className="w-full text-lg"
+                  onClick={() => setIsOpen(false)}
+                >
+                  BOOK NÅ
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

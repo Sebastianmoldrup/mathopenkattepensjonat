@@ -62,10 +62,15 @@ export default function Home() {
                 Bestill opphold
               </Button>
             </Link>
-            <Button size="lg" variant="outline">
-              <MapPin className="mr-2 h-5 w-5" />
-              Storingavika 2, 5174 Mathopen
-            </Button>
+            <Link
+              href="https://maps.app.goo.gl/AdkUWXNkv9DGmobE6"
+              target="_blank"
+            >
+              <Button size="lg" variant="outline">
+                <MapPin className="mr-2 h-5 w-5" />
+                Storingavika 2, 5174 Mathopen
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -345,9 +350,11 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Button size="lg" className="bg-slate-900 hover:bg-slate-800">
-              Bestill nå
-            </Button>
+            <Link href="/bestilling">
+              <Button size="lg" className="bg-slate-900 hover:bg-slate-800">
+                Bestill nå
+              </Button>
+            </Link>
             <Button size="lg" variant="outline">
               Kontakt oss
             </Button>
