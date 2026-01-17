@@ -2,25 +2,33 @@
 
 import { useContext } from "react";
 import MultiStepProvider, { MultiStepContext } from "./MultiStepProvider";
-import StepIntro from "./steps/StepIntro";
-import StepCats from "./steps/StepCats";
-import StepDates from "./steps/StepDates";
-import StepAboutCats from "./steps/StepAboutCats";
-import StepUserInfo from "./steps/StepUserInfo";
-import StepReview from "./steps/StepReview";
-import StepThankYou from "./steps/StepThankYou";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import BookingLayout from "./BookingLayout";
+import StepCatAmount from "./steps/StepCatAmount";
+import StepTime from "./steps/StepTime";
+import StepDate from "./steps/StepDate";
+import StepCatInfo from "./steps/StepCatInfo";
+import StepOwnerInfo from "./steps/StepOwnerInfo";
+import StepConfirmation from "./steps/StepConfirmation";
+
+// Max cats 25
+// Max booking cats 2
+
+// Antall katter
+// Check in / check out
+// Ønsket klokke slett for levering og henting
+// Informasjon om katten
+// Informasjon om eier
+// Bekreftelse
 
 const steps = [
-  StepIntro,
-  StepCats,
-  StepDates,
-  StepAboutCats,
-  StepUserInfo,
-  StepReview,
-  StepThankYou,
+  StepCatAmount,
+  StepDate,
+  StepTime,
+  StepCatInfo,
+  StepOwnerInfo,
+  StepConfirmation,
 ];
 
 export default function MultiStepForm({

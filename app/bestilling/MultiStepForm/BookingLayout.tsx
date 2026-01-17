@@ -1,3 +1,15 @@
+function StepTitle(step: number) {
+  const titles = [
+    "Antall katter",
+    "Dato",
+    "Levering / henting",
+    "Informasjon om katten(e)",
+    "Eiers informasjon",
+    "Bekreftelse",
+  ];
+  return titles[step];
+}
+
 const BookingLayout = ({
   children,
   currentStep,
@@ -12,7 +24,7 @@ const BookingLayout = ({
       <div className="w-full max-w-xl bg-background rounded-xl shadow-sm p-6 space-y-6">
         {/* Header */}
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold">Bestilling</h1>
+          <h1 className="text-xl font-semibold">{StepTitle(currentStep)}</h1>
           <p className="text-sm text-muted-foreground">
             Steg {currentStep + 1} av {totalSteps}
           </p>

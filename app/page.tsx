@@ -25,7 +25,7 @@ const CARD_CONTENT: CardContent[] = [
   {
     img: "experienced",
     title: "Erfaren Omsorg",
-    desc: "Anja har drevet kattepass siden 2018 med bred erfaring i katteatferd og stell. Fosterhjem for Kattens Vern.",
+    desc: "Anja har drevet kattepass siden 2018 med bred erfaring i katteatferd og stell.",
   },
   {
     img: "facility",
