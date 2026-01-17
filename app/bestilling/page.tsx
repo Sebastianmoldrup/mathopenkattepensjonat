@@ -1,4 +1,5 @@
-import { Suspense } from "react";
+"use client";
+import MultiStepForm from "./MultiStepForm";
 
 // BOOKING FLOW
 // 0. Introduksjon:
@@ -23,7 +24,7 @@ async function BookingData() {}
 const Page = () => {
   return (
     <main className="w-full h-screen grid place-content-center">
-      <Suspense fallback={<div>Laster...</div>}>Bestilling</Suspense>
+      <MultiStepForm initialCats={""} />
     </main>
   );
 };
