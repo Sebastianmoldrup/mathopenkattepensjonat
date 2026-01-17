@@ -23,7 +23,7 @@ async function BookingData() {}
 
 const Page = () => {
   return (
-    <main className="w-full h-screen grid place-content-center">
+    <main className="w-full h-screen grid place-content-center bg-muted/40">
       <MultiStepForm initialCats={""} />
     </main>
   );

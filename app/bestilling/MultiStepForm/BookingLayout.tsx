@@ -8,7 +8,7 @@ const BookingLayout = ({
   totalSteps: number;
 }) => {
   return (
-    <div className="min-w-[320px] md:min-w-[700px] flex justify-center bg-muted/40 px-4 py-10">
+    <div className="min-w-[320px] md:min-w-[700px] flex justify-center px-4 py-10">
       <div className="w-full max-w-xl bg-background rounded-xl shadow-sm p-6 space-y-6">
         {/* Header */}
         <div className="space-y-1">
