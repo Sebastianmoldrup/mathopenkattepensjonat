@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 type CatInfo = {
   name: string;
@@ -28,8 +28,7 @@ type CatInfo = {
   behavior: string;
 };
 
-const StepCatInfo = ({ catIndex }: { catIndex: number }) => {
-  // const { bookingData, setBookingData } = useBooking(); // hent context
+const StepCatInfo = () => {
   const [catInfo, setCatInfo] = useState<CatInfo>({
     name: "",
     breed: "",
@@ -47,55 +46,50 @@ const StepCatInfo = ({ catIndex }: { catIndex: number }) => {
     behavior: "",
   });
 
-  // Oppdater provider hver gang catInfo endres
-  // useEffect(() => {
-  //   const cats = [...(bookingData.cats || [])];
-  //   cats[catIndex] = catInfo;
-  //   setBookingData({ ...bookingData, cats });
-  // }, [catInfo]);
+  const handleChange = (field: keyof CatInfo, value: any) => {
+    setCatInfo((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">Informasjon om katten</h3>
-
       {/* Generell info */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label htmlFor={`cat-name-${catIndex}`}>Navn</Label>
+          <Label htmlFor="cat-name">Navn</Label>
           <Input
-            id={`cat-name-${catIndex}`}
+            id="cat-name"
             placeholder="Kattens navn"
             value={catInfo.name}
-            onChange={(e) => setCatInfo({ ...catInfo, name: e.target.value })}
+            onChange={(e) => handleChange("name", e.target.value)}
           />
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor={`cat-breed-${catIndex}`}>Rase</Label>
+          <Label htmlFor="cat-breed">Rase</Label>
           <Input
-            id={`cat-breed-${catIndex}`}
+            id="cat-breed"
             placeholder="Rase"
             value={catInfo.breed}
-            onChange={(e) => setCatInfo({ ...catInfo, breed: e.target.value })}
+            onChange={(e) => handleChange("breed", e.target.value)}
           />
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor={`cat-age-${catIndex}`}>Alder (år)</Label>
+          <Label htmlFor="cat-age">Alder (år)</Label>
           <Input
-            id={`cat-age-${catIndex}`}
+            id="cat-age"
             type="number"
             placeholder="F.eks. 3"
             value={catInfo.age}
-            onChange={(e) => setCatInfo({ ...catInfo, age: e.target.value })}
+            onChange={(e) => handleChange("age", e.target.value)}
           />
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor={`cat-gender-${catIndex}`}>Kjønn</Label>
+          <Label htmlFor="cat-gender">Kjønn</Label>
           <Select
             value={catInfo.gender}
-            onValueChange={(val) => setCatInfo({ ...catInfo, gender: val })}
+            onValueChange={(val) => handleChange("gender", val)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Velg kjønn" />
@@ -108,12 +102,12 @@ const StepCatInfo = ({ catIndex }: { catIndex: number }) => {
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor={`cat-chip-${catIndex}`}>Chip nummer</Label>
+          <Label htmlFor="cat-chip">Chip nummer</Label>
           <Input
-            id={`cat-chip-${catIndex}`}
+            id="cat-chip"
             placeholder="Chip nummer"
             value={catInfo.chip}
-            onChange={(e) => setCatInfo({ ...catInfo, chip: e.target.value })}
+            onChange={(e) => handleChange("chip", e.target.value)}
           />
         </div>
       </div>
@@ -121,114 +115,94 @@ const StepCatInfo = ({ catIndex }: { catIndex: number }) => {
       {/* Forsikring */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label htmlFor={`insurance-company-${catIndex}`}>
-            Forsikrings selskap
-          </Label>
+          <Label htmlFor="insurance-company">Forsikrings selskap</Label>
           <Input
-            id={`insurance-company-${catIndex}`}
+            id="insurance-company"
             placeholder="Selskap"
             value={catInfo.insuranceCompany}
-            onChange={(e) =>
-              setCatInfo({ ...catInfo, insuranceCompany: e.target.value })
-            }
+            onChange={(e) => handleChange("insuranceCompany", e.target.value)}
           />
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor={`insurance-number-${catIndex}`}>
-            Forsikrings nummer
-          </Label>
+          <Label htmlFor="insurance-number">Forsikrings nummer</Label>
           <Input
-            id={`insurance-number-${catIndex}`}
+            id="insurance-number"
             placeholder="Nummer"
             value={catInfo.insuranceNumber}
-            onChange={(e) =>
-              setCatInfo({ ...catInfo, insuranceNumber: e.target.value })
-            }
+            onChange={(e) => handleChange("insuranceNumber", e.target.value)}
           />
         </div>
       </div>
 
       {/* Helse */}
-      <div className="space-y-2">
+      <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Checkbox
-            id={`sterilized-${catIndex}`}
+            id="sterilized"
             checked={catInfo.sterilized}
-            onCheckedChange={(val) =>
-              setCatInfo({ ...catInfo, sterilized: !!val })
-            }
+            onCheckedChange={(val) => handleChange("sterilized", !!val)}
           />
-          <Label htmlFor={`sterilized-${catIndex}`}>Sterilisert</Label>
+          <Label htmlFor="sterilized">Sterilisert</Label>
         </div>
 
         <div className="flex items-center gap-2">
           <Checkbox
-            id={`vaccinated-${catIndex}`}
+            id="vaccinated"
             checked={catInfo.vaccinated}
-            onCheckedChange={(val) =>
-              setCatInfo({ ...catInfo, vaccinated: !!val })
-            }
+            onCheckedChange={(val) => handleChange("vaccinated", !!val)}
           />
-          <Label htmlFor={`vaccinated-${catIndex}`}>Vaksinert</Label>
+          <Label htmlFor="vaccinated">Vaksinert</Label>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <Label htmlFor={`worming-${catIndex}`}>Ormekur (sist gitt)</Label>
+            <Label htmlFor="worming">Ormekur (sist gitt)</Label>
             <Input
-              id={`worming-${catIndex}`}
+              id="worming"
               placeholder="MM/YYYY"
               value={catInfo.worming}
-              onChange={(e) =>
-                setCatInfo({ ...catInfo, worming: e.target.value })
-              }
+              onChange={(e) => handleChange("worming", e.target.value)}
             />
           </div>
 
           <div className="flex items-center gap-2">
             <Checkbox
-              id={`flea-${catIndex}`}
+              id="flea-treatment"
               checked={catInfo.fleaTreatment}
-              onCheckedChange={(val) =>
-                setCatInfo({ ...catInfo, fleaTreatment: !!val })
-              }
+              onCheckedChange={(val) => handleChange("fleaTreatment", !!val)}
             />
-            <Label htmlFor={`flea-${catIndex}`}>Under loppebehandling?</Label>
+            <Label htmlFor="flea-treatment">Under loppebehandling?</Label>
           </div>
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor={`diet-${catIndex}`}>Diett</Label>
+          <Label htmlFor="diet">Diett</Label>
           <Input
-            id={`diet-${catIndex}`}
+            id="diet"
             placeholder="F.eks. spesialfôr"
             value={catInfo.diet}
-            onChange={(e) => setCatInfo({ ...catInfo, diet: e.target.value })}
+            onChange={(e) => handleChange("diet", e.target.value)}
           />
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor={`medical-${catIndex}`}>Medisinsk info</Label>
+          <Label htmlFor="medical">Medisinsk info</Label>
           <Textarea
-            id={`medical-${catIndex}`}
+            id="medical"
             placeholder="Skriv om sykdommer, allergier osv."
             value={catInfo.medical}
-            onChange={(e) =>
-              setCatInfo({ ...catInfo, medical: e.target.value })
-            }
+            onChange={(e) => handleChange("medical", e.target.value)}
           />
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor={`behavior-${catIndex}`}>Atferd</Label>
+          <Label htmlFor="behavior">Atferd</Label>
           <Textarea
-            id={`behavior-${catIndex}`}
+            id="behavior"
             placeholder="Skriv om adferd, lek, sosialisering osv."
             value={catInfo.behavior}
-            onChange={(e) =>
-              setCatInfo({ ...catInfo, behavior: e.target.value })
-            }
+            onChange={(e) => handleChange("behavior", e.target.value)}
           />
         </div>
       </div>

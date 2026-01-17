@@ -1,5 +1,5 @@
 const StepConfirmation = () => {
-  return <div>Cat Amount</div>;
+  return <div>Takk for din bestilling</div>;
 };
 
 export default StepConfirmation;
