@@ -57,7 +57,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/bestilling">
               {" "}
-              <Button size="lg" className="bg-slate-900 hover:bg-slate-800">
+              <Button size="lg" className="">
                 <Calendar className="mr-2 h-5 w-5" />
                 Bestill opphold
               </Button>
@@ -142,7 +142,7 @@ export default function Home() {
 
       {/* Our partners */}
       <section className="flex flex-col items-center gap-8 py-16 px-4">
-        <h2 className="text-3xl font-semibold">Vårt samarbeid</h2>
+        <h2 className="text-3xl font-semibold">Vi samarbeider med</h2>
         <Image
           src="/partners/buddy.webp"
           alt="buddy"
@@ -230,10 +230,10 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <Button className="mr-2">
-              <House className="w-4 h-4 text-white" /> Utforsk kattens hjem
+            <Button className="mr-2 p-6">
+              <House className="w-4 h-4 text-white" /> Utforsk pensjonatet
             </Button>
-            [Link til info side om det nye pensjonatet, bilder osv av ting]
+            [Link til pensjonat artikkel/side]
           </div>
         </div>
       </section>
@@ -351,7 +351,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
             <Link href="/bestilling">
-              <Button size="lg" className="bg-slate-900 hover:bg-slate-800">
+              <Button size="lg" className="">
                 Bestill nå
               </Button>
             </Link>
