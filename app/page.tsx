@@ -41,9 +41,9 @@ const CARD_CONTENT: CardContent[] = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white mt-14">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-slate-50 to-white py-20 px-4">
+      <section className="relative bg-gradient-to-b from-slate-50 to-white pb-20 pt-10 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <Badge className="mb-4 bg-slate-100 text-slate-700 hover:bg-slate-200">
             Kattepensjonat i Bergen
@@ -55,7 +55,7 @@ export default function Home() {
             Det trygge hjemmet når du er borte
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/bestilling">
+            <Link href="/booking">
               {" "}
               <Button size="lg" className="">
                 <Calendar className="mr-2 h-5 w-5" />
@@ -350,7 +350,7 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link href="/bestilling">
+            <Link href="/booking">
               <Button size="lg" className="">
                 Bestill nå
               </Button>

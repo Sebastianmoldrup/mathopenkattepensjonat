@@ -37,8 +37,8 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <>
-      <header className="bg-accent py-6 shadow-xl">
+    <header className="bg-accent py-6 shadow-xl">
+      <div>
         <div className="container mx-auto flex items-center justify-between px-4 lg:justify-center lg:gap-8 lg:px-0">
           {/* Logo */}
           <Link href="/" aria-label="Home">
@@ -73,7 +73,7 @@ const Navbar = () => {
           </nav>
 
           {/* Desktop CTA */}
-          <Link href="/bestilling">
+          <Link href="/booking">
             <Button size="lg" className="hidden lg:block shrink-0">
               BOOK NÅ
             </Button>
@@ -88,7 +88,7 @@ const Navbar = () => {
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
-      </header>
+      </div>
 
       {/* Mobile Menu Overlay */}
       {isOpen && (
@@ -107,7 +107,7 @@ const Navbar = () => {
               </Link>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-2 hover:bg-accent-foreground/10 rounded-md transition-colors"
+                className="p-2 rounded-md transition-colors"
                 aria-label="Close menu"
               >
                 <X size={28} />
@@ -138,7 +138,7 @@ const Navbar = () => {
 
             {/* CTA Button */}
             <div className="p-6 border-t border-border">
-              <Link href="/bestilling">
+              <Link href="/booking">
                 <Button
                   size="lg"
                   className="w-full text-lg"
@@ -151,7 +151,7 @@ const Navbar = () => {
           </div>
         </div>
       )}
-    </>
+    </header>
   );
 };
 

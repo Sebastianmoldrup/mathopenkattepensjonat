@@ -74,7 +74,7 @@ const StepRenderer = () => {
         {!isLast ? (
           <Button onClick={next}>Neste</Button>
         ) : (
-          <Link href="/bestilling/bekreftet">
+          <Link href="/booking/bekreftet">
             <Button>Fullfør</Button>
           </Link>
         )}
