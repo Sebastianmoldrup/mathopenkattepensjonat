@@ -39,7 +39,7 @@ export function LoginForm({
       });
       if (error) throw error;
       // Oppdater denne ruten til å gå til en autentisert side. Brukeren har allerede en aktiv sesjon.
-      router.push("/protected");
+      router.push("/min-side");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "En feil oppstod");
     } finally {

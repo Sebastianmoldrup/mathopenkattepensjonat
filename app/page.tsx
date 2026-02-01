@@ -30,7 +30,7 @@ const CARD_CONTENT: CardContent[] = [
   {
     img: "facility",
     title: "Romslige fasiliteter",
-    desc: "Bur større enn Mattilsynets krav, åpen kattegård hele dagen, veggmonterte kloremøbler og aktivitetsområder.",
+    desc: "Hver katt får sitt eget rom med seng, dokasse og mat- og vannskåler. Ved behov kan vi legge til kattens egen seng eller hule for ekstra trygghet.",
   },
   {
     img: "updates",

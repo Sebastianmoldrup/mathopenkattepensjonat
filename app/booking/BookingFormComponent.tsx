@@ -5,5 +5,5 @@ interface User {
 
 export default function BookingFormComponent(user: User) {
   console.log("user:", user);
-  return <div></div>;
+  return <div>hei</div>;
 }
