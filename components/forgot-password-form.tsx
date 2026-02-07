@@ -1,7 +1,12 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { forgotPasswordSchema } from "@/schemas/forgotPasswordSchema";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,36 +17,61 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useState } from "react";
+
+type FieldErrors = {
+  email?: string;
+};
 
 export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState<string | null>(null);
+
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const supabase = createClient();
+  const handleForgotPassword = async () => {
     setIsLoading(true);
-    setError(null);
+    setFormError(null);
+    setFieldErrors({});
 
-    try {
-      // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+    const result = forgotPasswordSchema.safeParse({ email });
+
+    if (!result.success) {
+      const errors: FieldErrors = {};
+
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof FieldErrors;
+        if (field && !errors[field]) {
+          errors[field] = issue.message;
+        }
       });
-      if (error) throw error;
-      setSuccess(true);
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
+
+      setFieldErrors(errors);
       setIsLoading(false);
+      return;
     }
+
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      result.data.email,
+      {
+        redirectTo: `${window.location.origin}/endre-passord`,
+      },
+    );
+
+    if (error) {
+      setFormError("Kunne ikke sende e-post. Prøv igjen senere.");
+      setIsLoading(false);
+      return;
+    }
+
+    setSuccess(true);
+    setIsLoading(false);
   };
 
   return (
@@ -49,51 +79,64 @@ export function ForgotPasswordForm({
       {success ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>Password reset instructions sent</CardDescription>
+            <CardTitle className="text-2xl">Sjekk e-posten din</CardTitle>
+            <CardDescription>
+              Vi har sendt deg en lenke for å endre passord
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              If you registered using your email and password, you will receive
-              a password reset email.
+              Hvis e-postadressen er registrert hos oss, vil du motta en e-post
+              med instruksjoner for å tilbakestille passordet ditt.
             </p>
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+            <CardTitle className="text-2xl">Glemt passord</CardTitle>
             <CardDescription>
-              Type in your email and we&apos;ll send you a link to reset your
-              password
+              Skriv inn e-postadressen din, så sender vi deg en lenke for å lage
+              et nytt passord
             </CardDescription>
           </CardHeader>
+
           <CardContent>
-            <form onSubmit={handleForgotPassword}>
+            <form noValidate action={handleForgotPassword}>
               <div className="flex flex-col gap-6">
+                {/* E-post */}
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">E-post</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
-                    required
+                    placeholder="navn@eksempel.no"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
+                  {fieldErrors.email && (
+                    <p className="text-sm text-red-500">{fieldErrors.email}</p>
+                  )}
                 </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
+
+                {formError && (
+                  <p className="text-sm text-red-500">{formError}</p>
+                )}
+
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Sending..." : "Send reset email"}
+                  {isLoading
+                    ? "Sender e-post..."
+                    : "Send lenke for nytt passord"}
                 </Button>
               </div>
+
               <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
+                Har du allerede en konto?{" "}
                 <Link
                   href="/auth/login"
                   className="underline underline-offset-4"
                 >
-                  Login
+                  Logg inn
                 </Link>
               </div>
             </form>

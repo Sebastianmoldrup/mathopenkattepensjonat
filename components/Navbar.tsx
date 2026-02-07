@@ -7,10 +7,10 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const LIST_ITEMS = [
-  {
-    url: "",
-    text: "Hjem",
-  },
+  // {
+  //   url: "",
+  //   text: "Hjem",
+  // },
   {
     url: "",
     text: "Om oss",
@@ -73,9 +73,9 @@ const Navbar = () => {
           </nav>
 
           {/* Desktop CTA */}
-          <Link href="/bestilling">
+          <Link href="/login">
             <Button size="lg" className="hidden lg:block shrink-0">
-              BOOK NÅ
+              Login
             </Button>
           </Link>
 

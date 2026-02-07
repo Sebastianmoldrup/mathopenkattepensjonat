@@ -1,7 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { loginSchema } from "@/schemas/loginSchema";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,94 +18,137 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+
+type FieldErrors = {
+  email?: string;
+  password?: string;
+};
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async () => {
+    setIsLoading(true);
+    setFormError(null);
+    setFieldErrors({});
+
+    const result = loginSchema.safeParse({
+      email,
+      password,
+    });
+
+    if (!result.success) {
+      const errors: FieldErrors = {};
+
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof FieldErrors;
+        if (field && !errors[field]) {
+          errors[field] = issue.message;
+        }
       });
-      if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/minside");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
-    } finally {
+
+      setFieldErrors(errors);
       setIsLoading(false);
+      return;
     }
+
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: result.data.email,
+      password: result.data.password,
+    });
+
+    if (error?.message === "Email not confirmed") {
+      setFormError(
+        "E-posten er ikke bekreftet. Sjekk innboksen din for bekreftelseslenke.",
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    if (error) {
+      setFormError("Feil e-post eller passord. Prøv igjen.");
+      setIsLoading(false);
+      return;
+    }
+
+    router.push("/minside");
   };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Logg inn</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Skriv inn e-postadressen og passordet ditt
           </CardDescription>
         </CardHeader>
+
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form noValidate action={handleLogin}>
             <div className="flex flex-col gap-6">
+              {/* E-post */}
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">E-post</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
-                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
+                {fieldErrors.email && (
+                  <p className="text-sm text-red-500">{fieldErrors.email}</p>
+                )}
               </div>
+
+              {/* Passord */}
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Passord</Label>
                   <Link
-                    href="/auth/forgot-password"
+                    href="/glemt-passord"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    Glemt passord?
                   </Link>
                 </div>
                 <Input
                   id="password"
                   type="password"
-                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                {fieldErrors.password && (
+                  <p className="text-sm text-red-500">{fieldErrors.password}</p>
+                )}
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+
+              {formError && <p className="text-sm text-red-500">{formError}</p>}
+
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? "Logger inn..." : "Logg inn"}
               </Button>
             </div>
+
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
+              Har du ikke en konto?{" "}
               <Link
-                href="/auth/sign-up"
+                href="/registrering"
                 className="underline underline-offset-4"
               >
-                Sign up
+                Opprett konto
               </Link>
             </div>
           </form>

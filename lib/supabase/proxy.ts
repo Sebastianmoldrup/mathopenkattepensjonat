@@ -51,12 +51,18 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname !== "/" &&
     !user &&
     !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth") &&
-    !request.nextUrl.pathname.startsWith("/bestilling")
+    !request.nextUrl.pathname.startsWith("/registrering") &&
+    !request.nextUrl.pathname.startsWith("/registrering-bekreftet") &&
+    !request.nextUrl.pathname.startsWith("/glemt-passord") &&
+    !request.nextUrl.pathname.startsWith("/booking")
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  } else if (user && request.nextUrl.pathname.startsWith("/login")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/minside";
     return NextResponse.redirect(url);
   }
 

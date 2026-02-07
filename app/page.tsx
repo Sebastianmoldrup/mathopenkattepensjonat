@@ -52,7 +52,7 @@ export default function Home() {
             Mathopen Kattepensjonat
           </h1>
           <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-            Det trygge hjemmet når du er borte
+            Det trygge hjemmet når du er bortreist
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/bestilling">
