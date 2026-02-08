@@ -8,6 +8,6 @@ const CatUpdateLoader = async ({ catId }: { catId: string }) => {
     return <div>Katt ikke funnet.</div>;
   }
 
-  return <UpdateCatForm cat={cat} photoUrl="" />;
+  return <UpdateCatForm cat={cat} />;
 };
 export default CatUpdateLoader;
