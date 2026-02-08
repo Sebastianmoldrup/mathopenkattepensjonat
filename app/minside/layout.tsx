@@ -15,7 +15,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <LogoutButton />
         </div>
 
-        <MinSideSubHeader />
+        <Suspense
+          fallback={
+            <div className="mb-4 h-6 w-1/3 rounded bg-muted animate-pulse" />
+          }
+        >
+          <MinSideSubHeader />
+        </Suspense>
 
         <main className="rounded-2xl border bg-background p-4 shadow-sm md:p-6">
           {children}
