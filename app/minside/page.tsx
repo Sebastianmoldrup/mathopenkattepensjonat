@@ -1,95 +1,145 @@
-"use client";
-
-import React from "react";
-import { redirect } from "next/navigation";
-import { readUser } from "@/lib/supabase/utils";
-import { createClient } from "@/lib/supabase/client";
-import { User } from "@/types";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { readUser } from "@/actions/user/readUser";
+import { createClient } from "@/lib/supabase/server";
+import { User, Cat, Calendar, Lock, Mail } from "lucide-react";
 
-const getUserId = async () => {
-  const supabase = createClient();
+export default async function Page() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase.auth.getClaims();
-  if (error) {
-    console.error("Error getting user claims:", error.message);
-    return null;
-  }
-  return data?.claims.sub || null;
-};
+  if (!user) return null;
 
-const Page = () => {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    const fetchUser = async () => {
-      setLoading(true);
-
-      const userId = await getUserId();
-      if (!userId) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      const user = await readUser(userId);
-      setUser(user);
-      setLoading(false);
-    };
-
-    fetchUser();
-  }, []);
-
-  if (loading) {
-    return <div>Laster...</div>;
-  }
-
-  if (!user) {
-    redirect("/login");
-  }
+  const profile = await readUser(user.id);
 
   return (
-    <div className="flex justify-center items-center h-full flex-col gap-4 p-4 md:p-8">
-      {user?.profile_completed && (
-        <>
-          <h2 className="capitalize font-xl mb-4">
-            {user?.first_name} {user?.last_name}
-          </h2>
+    <div className="space-y-10">
+      {/* Header */}
+      {/* <div className="rounded-2xl bg-primary/5 p-6"> */}
+      {/*   <h2 className="text-3xl font-semibold tracking-tight">Min side</h2> */}
+      {/**/}
+      {/*   {profile?.profile_completed && ( */}
+      {/*     <p className="mt-2 text-muted-foreground"> */}
+      {/*       Hei{" "} */}
+      {/*       <span className="font-medium text-foreground"> */}
+      {/*         {profile.first_name} {profile.last_name} */}
+      {/*       </span> */}
+      {/*     </p> */}
+      {/*   )} */}
+      {/* </div> */}
 
-          <div className="flex flex-col gap-4 w-full">
-            <Link href="/minside/profil">
-              <Button className="w-full">Gå til profilen min</Button>
-            </Link>
+      {/* <div className="flex flex-col items-start gap-1"> */}
+      {/*   <Button */}
+      {/*     size="lg" */}
+      {/*     className="w-full sm:w-auto bg-primary text-primary-foreground opacity-80 cursor-not-allowed" */}
+      {/*     disabled */}
+      {/*   > */}
+      {/*     Book opphold */}
+      {/*   </Button> */}
+      {/**/}
+      {/*   <span className="text-xs text-muted-foreground"> */}
+      {/*     Booking åpner snart */}
+      {/*   </span> */}
+      {/* </div> */}
 
-            <Link href="/minside/bookinger">
-              <Button className="w-full">Se mine bookinger</Button>
-            </Link>
+      {profile?.profile_completed ? (
+        <div className="grid gap-8">
+          {/* Hovedvalg */}
+          <section>
+            <h3 className="mb-4 text-lg font-medium">Oversikt</h3>
 
-            <Link href="/minside/minekatter">
-              <Button className="w-full">Se mine katter</Button>
-            </Link>
-          </div>
-        </>
-      )}
-      {!user.profile_completed && (
-        <>
-          <div
-            className="p-4 mb-4 text-sm text-yellow-800 bg-yellow-200 rounded-lg"
-            role="alert"
-          >
-            <span className="font-medium">Viktig!</span> Din profil er ikke
-            fullstendig. Vennligst oppdater din informasjon.
-            <br />
-            <a href="/minside/profil" className="underline">
-              Oppdater profil
-            </a>
-          </div>
-        </>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Link href="/minside/profil" className="group">
+                <div className="rounded-2xl border bg-background p-5 transition hover:bg-muted/50">
+                  <div className="flex items-center gap-4">
+                    <User className="h-6 w-6 text-primary" />
+                    <div>
+                      <p className="font-medium">Profil</p>
+                      <p className="text-sm text-muted-foreground">
+                        Se og oppdater dine opplysninger
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/minside/minekatter" className="group">
+                <div className="rounded-2xl border bg-background p-5 transition hover:bg-muted/50">
+                  <div className="flex items-center gap-4">
+                    <Cat className="h-6 w-6 text-primary" />
+                    <div>
+                      <p className="font-medium">Mine katter</p>
+                      <p className="text-sm text-muted-foreground">
+                        Administrer kattene dine
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+
+              <Link href="/minside/bookinger" className="group sm:col-span-2">
+                <div className="rounded-2xl border bg-background p-5 transition hover:bg-muted/50">
+                  <div className="flex items-center gap-4">
+                    <Calendar className="h-6 w-6 text-primary" />
+                    <div>
+                      <p className="font-medium">Bookinger</p>
+                      <p className="text-sm text-muted-foreground">
+                        Se og administrer dine bookinger
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </section>
+
+          {/* Konto */}
+          <section>
+            <h3 className="mb-4 text-lg font-medium">Konto</h3>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl border bg-muted/40 p-5">
+                <div className="flex items-center gap-4 opacity-70">
+                  <Mail className="h-6 w-6" />
+                  <div>
+                    <p className="font-medium">Endre e-post</p>
+                    <p className="text-sm text-muted-foreground">
+                      Kommer snart
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border bg-muted/40 p-5">
+                <div className="flex items-center gap-4 opacity-70">
+                  <Lock className="h-6 w-6" />
+                  <div>
+                    <p className="font-medium">Endre passord</p>
+                    <p className="text-sm text-muted-foreground">
+                      Kommer snart
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-6">
+          <p className="font-medium text-yellow-900">
+            Profilen din er ikke fullført
+          </p>
+          <p className="mt-1 text-yellow-800">
+            Fullfør profilen for å få tilgang til alle funksjoner.
+          </p>
+
+          <Link href="/minside/profil" className="mt-4 inline-block">
+            <Button>Fullfør profil</Button>
+          </Link>
+        </div>
       )}
     </div>
   );
-};
-
-export default Page;
+}

@@ -1,17 +1,30 @@
+import { Suspense } from "react";
+import { MinSideHeader } from "@/components/minside-header";
+import { MinSideSubHeader } from "@/components/minside-subheader";
 import { LogoutButton } from "@/components/logout-button";
-import Link from "next/link";
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full max-w-3xl mx-auto p-4 md:p-8 shadow-lg mt-14 rounded-lg bg-gray-100">
-      <div className="flex items-center justify-between mb-8">
-        <Link href="/minside">
-          <h1 className="text-2xl font-bold mb-4">Min Side</h1>
-        </Link>
-        <LogoutButton />
+    <div className="min-h-screen bg-muted">
+      <div className="mx-auto max-w-4xl px-4 py-6 md:px-8 md:py-10">
+        <div className="mb-8 flex items-start justify-between gap-4 rounded-2xl bg-primary/5 p-6">
+          <Suspense fallback={<HeaderSkeleton />}>
+            <MinSideHeader />
+          </Suspense>
+
+          <LogoutButton />
+        </div>
+
+        <MinSideSubHeader />
+
+        <main className="rounded-2xl border bg-background p-4 shadow-sm md:p-6">
+          {children}
+        </main>
       </div>
-      {children}
     </div>
   );
-};
-export default Layout;
+}
+
+function HeaderSkeleton() {
+  return <div className="h-24 w-full rounded-2xl bg-muted animate-pulse" />;
+}

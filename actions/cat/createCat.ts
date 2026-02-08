@@ -33,10 +33,7 @@ export async function createCat(values: CatInput, file: File) {
 
   if (uploadError) throw uploadError;
 
-  // console.log(photoPath);
   const ImageUrl = await readCatBucket(imagePath);
-  // console.log("Image URL:", ImageUrl);
-  console.log("imagePath:", imagePath);
 
   const { error: updateError } = await supabase
     .from("cats")

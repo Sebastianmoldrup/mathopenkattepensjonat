@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+
 import { CatSchema, type CatInput } from "@/lib/validation/cat";
+import { createCat } from "@/actions/cat/createCat";
+
 import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Field,
   FieldError,
@@ -23,14 +29,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { createCat } from "@/actions/cat/createCat";
 
 export default function AddCatForm() {
-  const [preview, setPreview] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  const [preview, setPreview] = React.useState<string | null>(null);
+  const [file, setFile] = React.useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const form = useForm<CatInput>({
     resolver: zodResolver(CatSchema),
@@ -44,18 +48,20 @@ export default function AddCatForm() {
     },
   });
 
+  React.useEffect(() => {
+    form.reset();
+    setFile(null);
+    setPreview(null);
+  }, []);
+
   const onSubmit = async (values: CatInput) => {
     if (!file) {
       alert("Vennligst last opp et bilde av katten.");
       return;
     }
-    console.log(values);
-    await createCat(values, file);
 
-    form.reset();
-    setPreview(null);
-    setFile(null);
-    redirect("/minside/minekatter");
+    await createCat(values, file);
+    router.replace("/minside/minekatter");
   };
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +70,15 @@ export default function AddCatForm() {
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
+
+  if (form.formState.isSubmitting) {
+    return (
+      <div className="flex items-center justify-center gap-3 py-10">
+        <Spinner className="size-6" />
+        Lagrer katt…
+      </div>
+    );
+  }
 
   return (
     <form
@@ -77,28 +92,37 @@ export default function AddCatForm() {
         </p>
       </div>
 
+      {/* ===================== */}
+      {/* Om katten */}
+      {/* ===================== */}
       <FieldSet>
         <FieldLegend>Om din katt</FieldLegend>
         <FieldGroup className="grid gap-5 md:grid-cols-2">
           <Field className="md:col-span-2">
             <FieldLabel>Bilde *</FieldLabel>
-            <div className="flex space-y-1 justify-center items-center flex-col md:flex-row gap-4">
-              <div className="h-32 w-32  overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4 md:flex-row">
+              <div className="h-32 w-32 overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
                 {preview ? (
-                  <img src={preview} className="h-full w-full object-cover" />
+                  <img
+                    src={preview}
+                    alt="Forhåndsvisning"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <span className="text-xs text-muted-foreground text-center px-2">
                     Forhåndsvisning
                   </span>
                 )}
               </div>
+
               <Input
                 type="file"
-                accept=".jpeg, .png, .webp"
+                accept=".jpeg,.jpg,.png,.webp"
                 hidden
-                onChange={handleImage}
                 ref={fileInputRef}
+                onChange={handleImage}
               />
+
               <div className="flex flex-col gap-2">
                 <Button
                   type="button"
@@ -107,7 +131,7 @@ export default function AddCatForm() {
                   Velg bilde
                 </Button>
                 <span className="text-xs text-muted-foreground">
-                  Støttede formater: JPEG, PNG, WEBP. Maks størrelse: 5MB.
+                  JPEG, PNG eller WEBP. Maks 5MB.
                 </span>
               </div>
             </div>
@@ -157,7 +181,7 @@ export default function AddCatForm() {
             <Input
               type="checkbox"
               {...form.register("is_sterilized")}
-              className="w-4 h-4"
+              className="h-4 w-4"
             />
             <FieldLabel>Katten er sterilisert/kastrert</FieldLabel>
           </Field>
@@ -166,6 +190,9 @@ export default function AddCatForm() {
 
       <FieldSeparator />
 
+      {/* ===================== */}
+      {/* ID & forsikring */}
+      {/* ===================== */}
       <FieldSet>
         <FieldLegend>ID & Forsikring</FieldLegend>
         <FieldGroup className="grid gap-5 md:grid-cols-2">
@@ -174,6 +201,7 @@ export default function AddCatForm() {
             <Input {...form.register("id_chip")} />
             <FieldError errors={[form.formState.errors.id_chip]} />
           </Field>
+
           <Field data-invalid={!!form.formState.errors.insurance_number}>
             <FieldLabel>Forsikringsnummer *</FieldLabel>
             <Input {...form.register("insurance_number")} />
@@ -184,6 +212,9 @@ export default function AddCatForm() {
 
       <FieldSeparator />
 
+      {/* ===================== */}
+      {/* Helse */}
+      {/* ===================== */}
       <FieldSet>
         <FieldLegend>Helse</FieldLegend>
         <FieldGroup className="space-y-5">
@@ -215,6 +246,9 @@ export default function AddCatForm() {
 
       <FieldSeparator />
 
+      {/* ===================== */}
+      {/* Daglig pleie */}
+      {/* ===================== */}
       <FieldSet>
         <FieldLegend>Daglig pleie & atferd</FieldLegend>
         <FieldGroup className="space-y-5">

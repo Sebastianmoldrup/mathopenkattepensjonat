@@ -1,12 +1,17 @@
-import { createClient } from "@/lib/supabase/client";
+"use server";
+import { createClient } from "@/lib/supabase/server";
 
 export const getUserId = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.getClaims();
-  if (error) {
-    console.error("Error getting user claims:", error.message);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
     return null;
   }
-  return data?.claims.sub || null;
+
+  return user.id;
 };

@@ -12,42 +12,53 @@ export async function updateCat(
 ) {
   const supabase = await createClient();
 
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser();
-
   const cat = await readCat(catId);
+  if (!cat) {
+    throw new Error("Cat not found or access denied");
+  }
 
-  if (file) {
-    const ext = file.name.split(".").pop();
-    const bucket = cat.image_path.split("/").slice(0, -1).join("/");
-    const newPath = `${bucket}/${cat.name}.${ext}`;
-
-    if (cat.image_path !== newPath) {
-      await supabase.storage.from("catphotos").remove([cat.image_path]);
-    }
-
-    await supabase.storage.from("catphotos").upload(newPath, file, {
-      upsert: true,
-      contentType: file.type,
-    });
-
-    const imageUrl = await readCatBucket(newPath);
-
-    const { error: updateError } = await supabase
+  // No new image → only update fields
+  if (!file) {
+    const { error } = await supabase
       .from("cats")
-      .update({ ...values, image_path: newPath, image_url: imageUrl })
-      .eq("id", catId);
+      .update(values)
+      .eq("id", catId)
+      .eq("owner_id", cat.owner_id);
 
-    if (updateError) throw updateError;
+    if (error) throw error;
     return;
   }
 
-  const { error: updateError } = await supabase
-    .from("cats")
-    .update({ ...values })
-    .eq("id", catId);
+  // Image update
+  const ext = file.type.split("/")[1] ?? "jpg";
+  const bucketPath = cat.image_path.split("/").slice(0, -1).join("/");
+  const newPath = `${bucketPath}/${cat.name}.${ext}`;
 
-  if (updateError) throw updateError;
-  return;
+  // Remove old image if path changed
+  if (cat.image_path && cat.image_path !== newPath) {
+    await supabase.storage
+      .from("catphotos")
+      .remove([cat.image_path])
+      .catch(() => {});
+  }
+
+  await supabase.storage.from("catphotos").upload(newPath, file, {
+    upsert: true,
+    contentType: file.type,
+    cacheControl: "3600",
+  });
+
+  const imageUrl = await readCatBucket(newPath);
+
+  const { error } = await supabase
+    .from("cats")
+    .update({
+      ...values,
+      image_path: newPath,
+      image_url: imageUrl,
+    })
+    .eq("id", catId)
+    .eq("owner_id", cat.owner_id);
+
+  if (error) throw error;
 }

@@ -1,17 +1,22 @@
 "use server";
+
 import { createClient } from "@/lib/supabase/server";
 
 export async function readCat(catId: string) {
   const supabase = await createClient();
-  await supabase.auth.getUser();
 
-  const { data, error } = await supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data } = await supabase
     .from("cats")
     .select("*")
     .eq("id", catId)
-    .single();
-
-  if (error) throw error;
+    .eq("owner_id", user.id)
+    .maybeSingle();
 
   return data;
 }

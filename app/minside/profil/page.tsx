@@ -5,8 +5,6 @@ import { readUser } from "@/lib/supabase/utils";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@/types";
 import { ProfileForm } from "@/components/profile-form";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 const getUserId = async () => {
   const supabase = createClient();
@@ -38,9 +36,6 @@ const Page = () => {
 
   return (
     <div className="flex justify-center items-center h-full flex-col gap-4 p-4 md:p-8">
-      <Link href="/minside" className="self-start">
-        <Button>Tilbake</Button>
-      </Link>
       <ProfileForm user={user} />
     </div>
   );

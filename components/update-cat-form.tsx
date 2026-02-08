@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+
 import { CatSchema, type CatInput } from "@/lib/validation/cat";
+import { updateCat } from "@/actions/cat/updateCat";
+import { Cat } from "@/types";
+
 import { Button } from "@/components/ui/button";
-import { redirect } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Field,
   FieldError,
@@ -23,49 +30,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { updateCat } from "@/actions/cat/updateCat";
-import { Cat } from "@/types";
 
 export default function UpdateCatForm({ cat }: { cat: Cat }) {
-  const [preview, setPreview] = useState<string | null>(null);
+  const router = useRouter();
+  const [preview, setPreview] = useState<string | null>(cat.image_url);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // console.log("Cat data in form:", cat);
-  // console.log("Initial photo URL:", photoUrl);
-  console.log("Preview state:", preview);
-
-  useEffect(() => {
-    setPreview(cat.image_url || null);
-  }, [cat.image_url]);
 
   const form = useForm<CatInput>({
     resolver: zodResolver(CatSchema),
     defaultValues: {
       name: cat.name,
       gender: cat.gender as "hann" | "hunn",
-      breed: cat.breed || "",
+      breed: cat.breed ?? "",
       age: cat.age,
-      id_chip: cat.id_chip || "",
-      insurance_number: cat.insurance_number || "",
+      id_chip: cat.id_chip ?? "",
+      insurance_number: cat.insurance_number ?? "",
       last_vaccine_date: cat.last_vaccine_date,
-      deworming_info: cat.deworming_info || "",
-      flea_treatment_info: cat.flea_treatment_info || "",
-      medical_notes: cat.medical_notes || "",
-      diet: cat.diet || "",
-      behavior_notes: cat.behavior_notes || "",
+      deworming_info: cat.deworming_info ?? "",
+      flea_treatment_info: cat.flea_treatment_info ?? "",
+      medical_notes: cat.medical_notes ?? "",
+      diet: cat.diet ?? "",
+      behavior_notes: cat.behavior_notes ?? "",
       is_sterilized: cat.is_sterilized,
     },
   });
 
   const onSubmit = async (values: CatInput) => {
     await updateCat(cat.id, values, file);
-
-    form.reset();
-    setPreview(null);
-    setFile(null);
-    redirect("/minside/minekatter");
+    router.replace("/minside/minekatter");
   };
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,57 +68,74 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
     setPreview(URL.createObjectURL(f));
   };
 
+  if (form.formState.isSubmitting) {
+    return (
+      <div className="flex items-center justify-center gap-3 py-10">
+        <Spinner className="size-6" />
+        Lagrer katt…
+      </div>
+    );
+  }
+
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="mx-auto max-w-3xl space-y-8 rounded-2xl border bg-background p-6 shadow-sm"
+      className="mx-auto max-w-3xl space-y-8 rounded-2xl bg-background p-4"
     >
       <div className="space-y-1">
-        <h2 className="text-2xl font-semibold">Oppdater din katt</h2>
+        <h2 className="text-2xl font-semibold">Oppdater katt</h2>
         <p className="text-sm text-muted-foreground">
           Felter merket med * er obligatoriske.
         </p>
       </div>
 
+      {/* ===================== */}
+      {/* Om katten */}
+      {/* ===================== */}
       <FieldSet>
-        <FieldLegend>Om din katt</FieldLegend>
+        <FieldLegend>Om katten</FieldLegend>
         <FieldGroup className="grid gap-5 md:grid-cols-2">
           <Field className="md:col-span-2">
-            <FieldLabel>Bilde *</FieldLabel>
-            <div className="flex space-y-1 justify-start items-center flex-col md:flex-row gap-4">
-              <div className="h-32 w-32  overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
+            <FieldLabel>Bilde</FieldLabel>
+            <div className="flex flex-col items-center gap-4 md:flex-row">
+              <div className="h-32 w-32 overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
                 {preview ? (
-                  <img src={preview} className="h-full w-full object-cover" />
+                  <img
+                    src={preview}
+                    alt="Forhåndsvisning"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <span className="text-xs text-muted-foreground text-center px-2">
                     Forhåndsvisning
                   </span>
                 )}
               </div>
+
               <Input
                 type="file"
-                accept=".jpeg, .png, .webp"
+                accept=".jpeg,.png,.webp"
                 hidden
-                onChange={handleImage}
                 ref={fileInputRef}
+                onChange={handleImage}
               />
-              <div className="flex flex-col gap-2">
-                <Button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  Velg bilde
-                </Button>
-                <span className="text-xs text-muted-foreground">
-                  Støttede formater: JPEG, PNG, WEBP. Maks størrelse: 5MB.
-                </span>
-              </div>
+
+              <Button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Velg nytt bilde
+              </Button>
+
+              <span className="text-xs text-muted-foreground">
+                Støttede formater: JPEG, PNG, WEBP. Maks 5&nbsp;MB.
+              </span>
             </div>
           </Field>
 
           <Field data-invalid={!!form.formState.errors.name}>
             <FieldLabel>Navn *</FieldLabel>
-            <Input {...form.register("name")} placeholder="f.eks. Luna" />
+            <Input {...form.register("name")} />
             <FieldError errors={[form.formState.errors.name]} />
           </Field>
 
@@ -167,7 +177,7 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
             <Input
               type="checkbox"
               {...form.register("is_sterilized")}
-              className="w-4 h-4"
+              className="h-4 w-4"
             />
             <FieldLabel>Katten er sterilisert/kastrert</FieldLabel>
           </Field>
@@ -176,6 +186,9 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
 
       <FieldSeparator />
 
+      {/* ===================== */}
+      {/* ID & Forsikring */}
+      {/* ===================== */}
       <FieldSet>
         <FieldLegend>ID & Forsikring</FieldLegend>
         <FieldGroup className="grid gap-5 md:grid-cols-2">
@@ -184,6 +197,7 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
             <Input {...form.register("id_chip")} />
             <FieldError errors={[form.formState.errors.id_chip]} />
           </Field>
+
           <Field data-invalid={!!form.formState.errors.insurance_number}>
             <FieldLabel>Forsikringsnummer *</FieldLabel>
             <Input {...form.register("insurance_number")} />
@@ -194,6 +208,9 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
 
       <FieldSeparator />
 
+      {/* ===================== */}
+      {/* Helse */}
+      {/* ===================== */}
       <FieldSet>
         <FieldLegend>Helse</FieldLegend>
         <FieldGroup className="space-y-5">
@@ -225,6 +242,9 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
 
       <FieldSeparator />
 
+      {/* ===================== */}
+      {/* Daglig pleie & atferd */}
+      {/* ===================== */}
       <FieldSet>
         <FieldLegend>Daglig pleie & atferd</FieldLegend>
         <FieldGroup className="space-y-5">

@@ -4,6 +4,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { redirect } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,8 @@ import { updateUser } from "@/actions/user/updateUser";
 import { User } from "@/types";
 
 export function ProfileForm({ user }: { user: User | null }) {
+  const [loading, setLoading] = React.useState(false);
+
   const form = useForm<ProfileInput>({
     resolver: zodResolver(ProfileSchema),
     defaultValues: {
@@ -51,16 +54,27 @@ export function ProfileForm({ user }: { user: User | null }) {
 
   const onSubmit = async (values: ProfileInput) => {
     if (!user) return;
+    setLoading(true);
 
     await updateUser(user.id, values);
     form.reset(values);
+    setLoading(false);
     redirect("/minside");
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-32">
+        <Spinner className="size-6" />{" "}
+        <p className="text-muted-foreground">Lagrer profil...</p>
+      </div>
+    );
+  }
 
   return (
     <form
       onSubmit={form.handleSubmit(onSubmit)}
-      className="mx-auto max-w-3xl space-y-8 rounded-2xl border bg-background p-6 shadow-sm"
+      className="mx-auto max-w-3xl space-y-8 rounded-2xl"
     >
       <div className="space-y-1">
         <h2 className="text-2xl font-semibold">Oppdater din profil</h2>

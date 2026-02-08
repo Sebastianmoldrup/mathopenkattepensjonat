@@ -1,7 +1,7 @@
 import { readCat } from "@/actions/cat/readCat";
-import UpdateCatForm from "./update-cat-form";
+import UpdateCatForm from "@/components/update-cat-form";
 
-const CatUpdateLoader = async ({ catId }: { catId: string }) => {
+export default async function CatUpdateLoader({ catId }: { catId: string }) {
   const cat = await readCat(catId);
 
   if (!cat) {
@@ -9,5 +9,4 @@ const CatUpdateLoader = async ({ catId }: { catId: string }) => {
   }
 
   return <UpdateCatForm cat={cat} />;
-};
-export default CatUpdateLoader;
+}

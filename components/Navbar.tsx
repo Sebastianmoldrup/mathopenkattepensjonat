@@ -46,6 +46,7 @@ const Navbar = () => {
               src="/img/cropped.webp"
               width={150}
               height={150}
+              loading="eager"
               alt="Picture of the author"
               className="w-24 h-24 lg:w-[120px] lg:h-[120px]"
             />
