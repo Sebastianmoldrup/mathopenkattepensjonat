@@ -55,7 +55,7 @@ export default function Home() {
             Det trygge hjemmet når du er bortreist
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/bestilling">
+            <Link href="/booking">
               {" "}
               <Button size="lg" className="">
                 <Calendar className="mr-2 h-5 w-5" />

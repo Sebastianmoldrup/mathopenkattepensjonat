@@ -138,13 +138,13 @@ const Navbar = () => {
 
             {/* CTA Button */}
             <div className="p-6 border-t border-border">
-              <Link href="/bestilling">
+              <Link href="/login">
                 <Button
                   size="lg"
                   className="w-full text-lg"
                   onClick={() => setIsOpen(false)}
                 >
-                  BOOK NÅ
+                  Login
                 </Button>
               </Link>
             </div>
