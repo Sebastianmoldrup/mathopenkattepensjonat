@@ -1,29 +1,47 @@
+"use client";
+
 import Link from "next/link";
-import { Button } from "./ui/button";
-import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "./logout-button";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
-export async function AuthButton() {
-  const supabase = await createClient();
+export function AuthButton({ fullWidth = false }: { fullWidth?: boolean }) {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
-  // You can also use getUser() which will be slower.
-  const { data } = await supabase.auth.getClaims();
+  const className = fullWidth ? "w-full" : "";
 
-  const user = data?.claims;
+  useEffect(() => {
+    const supabase = createClient();
 
-  return user ? (
-    <div className="flex items-center gap-4">
-      Hey, {user.email}!
-      <LogoutButton />
-    </div>
+    supabase.auth.getSession().then(({ data }) => {
+      setIsLoggedIn(!!data.session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Optional: avoid flicker
+  if (isLoggedIn === null) {
+    return (
+      <Button variant="ghost" disabled>
+        Laster…
+      </Button>
+    );
+  }
+
+  return isLoggedIn ? (
+    <Button asChild variant="outline" className={className}>
+      <Link href="/minside">Min side</Link>
+    </Button>
   ) : (
-    <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/auth/login">Sign in</Link>
-      </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/auth/sign-up">Sign up</Link>
-      </Button>
-    </div>
+    <Button asChild className={className}>
+      <Link href="/login">Logg inn</Link>
+    </Button>
   );
 }

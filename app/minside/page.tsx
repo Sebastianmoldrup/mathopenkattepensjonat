@@ -16,34 +16,6 @@ export default async function Page() {
 
   return (
     <div className="space-y-10">
-      {/* Header */}
-      {/* <div className="rounded-2xl bg-primary/5 p-6"> */}
-      {/*   <h2 className="text-3xl font-semibold tracking-tight">Min side</h2> */}
-      {/**/}
-      {/*   {profile?.profile_completed && ( */}
-      {/*     <p className="mt-2 text-muted-foreground"> */}
-      {/*       Hei{" "} */}
-      {/*       <span className="font-medium text-foreground"> */}
-      {/*         {profile.first_name} {profile.last_name} */}
-      {/*       </span> */}
-      {/*     </p> */}
-      {/*   )} */}
-      {/* </div> */}
-
-      {/* <div className="flex flex-col items-start gap-1"> */}
-      {/*   <Button */}
-      {/*     size="lg" */}
-      {/*     className="w-full sm:w-auto bg-primary text-primary-foreground opacity-80 cursor-not-allowed" */}
-      {/*     disabled */}
-      {/*   > */}
-      {/*     Book opphold */}
-      {/*   </Button> */}
-      {/**/}
-      {/*   <span className="text-xs text-muted-foreground"> */}
-      {/*     Booking åpner snart */}
-      {/*   </span> */}
-      {/* </div> */}
-
       {profile?.profile_completed ? (
         <div className="grid gap-8">
           {/* Hovedvalg */}

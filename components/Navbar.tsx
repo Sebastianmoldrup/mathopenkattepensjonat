@@ -1,159 +1,142 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { AuthButton } from "./auth-button";
 
 const LIST_ITEMS = [
-  // {
-  //   url: "",
-  //   text: "Hjem",
-  // },
-  {
-    url: "/om-oss",
-    text: "Om oss",
-  },
-  {
-    url: "/informasjon",
-    text: "Informasjon",
-  },
-  {
-    url: "/priser",
-    text: "Priser & betingelser",
-  },
-  {
-    url: "/bilder",
-    text: "Bilder",
-  },
-  {
-    url: "/kontakt",
-    text: "Kontakt oss",
-  },
+  { url: "/", text: "Hjem" },
+  { url: "/om-oss", text: "Om oss" },
+  { url: "/informasjon", text: "Informasjon" },
+  { url: "/priser", text: "Priser & betingelser" },
+  { url: "/bilder", text: "Bilder" },
+  { url: "/kontakt", text: "Kontakt oss" },
 ];
 
-const Navbar = () => {
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <header className="bg-accent py-6 shadow-xl">
-        <div className="container mx-auto flex items-center justify-between px-4 lg:justify-center lg:gap-8 lg:px-0">
-          {/* Logo */}
-          <Link href="/" aria-label="Home">
-            <Image
-              src="/img/cropped.webp"
-              width={150}
-              height={150}
-              loading="eager"
-              alt="Picture of the author"
-              className="w-24 h-24 lg:w-[120px] lg:h-[120px]"
-            />
-          </Link>
+      {/* ================= HEADER ================= */}
+      <header className="sticky top-0 z-40 border-b border-border bg-accent/95 backdrop-blur p-2">
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="flex h-24 items-center justify-between">
+            {/* Logo */}
+            <Link href="/" aria-label="Hjem" className="flex items-center">
+              <Image
+                src="/img/cropped.webp"
+                width={160}
+                height={160}
+                priority
+                alt="Logo"
+                className="h-24 w-24 object-contain"
+              />
+            </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex justify-center">
-            <ul className="flex gap-2 items-center">
-              {LIST_ITEMS.map(
-                (
-                  { url, text }: { url: string; text: string },
-                  index: number,
-                ) => (
-                  <li key={index}>
-                    <Link
-                      href={url}
-                      className="inline-block px-4 py-2 text-md font-medium transition-transform hover:scale-110"
-                    >
-                      {text}
-                    </Link>
-                  </li>
-                ),
-              )}
-            </ul>
-          </nav>
+            {/* Desktop navigation */}
+            <nav className="hidden lg:flex items-center gap-6">
+              {LIST_ITEMS.map(({ url, text }) => (
+                <Link
+                  key={url}
+                  href={url}
+                  className="text-sm font-medium text-foreground/80 transition-colors hover:text-foreground"
+                >
+                  {text}
+                </Link>
+              ))}
+            </nav>
 
-          {/* Desktop CTA */}
-          <Link href="/login">
-            <Button size="lg" className="hidden lg:block shrink-0">
-              Login
-            </Button>
-          </Link>
+            {/* Desktop CTA */}
+            <div className="hidden lg:block">
+              <AuthButton />
+            </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 hover:bg-accent-foreground/10 rounded-md transition-colors"
-            aria-label="Toggle menu"
-          >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setIsOpen(true)}
+              className="lg:hidden rounded-md p-2 transition-colors hover:bg-accent-foreground/10"
+              aria-label="Åpne meny"
+            >
+              <Menu size={28} />
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-accent z-50 lg:hidden">
-          <div className="flex flex-col h-full">
-            {/* Header with close button */}
-            <div className="flex items-center justify-between p-6 border-b border-border">
-              <Link href="/" aria-label="Home" onClick={() => setIsOpen(false)}>
-                <Image
-                  src="/img/cropped.webp"
-                  width={100}
-                  height={100}
-                  alt="Picture of the author"
-                  className="w-20 h-20"
-                />
-              </Link>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-2 hover:bg-accent-foreground/10 rounded-md transition-colors"
-                aria-label="Close menu"
-              >
-                <X size={28} />
-              </button>
-            </div>
+      {/* ================= MOBILE MENU ================= */}
+      <div
+        className={`
+          fixed inset-0 z-50 bg-accent
+          transition-all duration-300 ease-out
+          ${
+            isOpen
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }
+        `}
+      >
+        <div
+          className={`
+            flex h-full flex-col
+            transform transition-transform duration-300 ease-out
+            ${isOpen ? "translate-y-0" : "-translate-y-4"}
+          `}
+        >
+          {/* Top bar */}
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+            <Image
+              src="/img/cropped.webp"
+              width={120}
+              height={120}
+              alt="Logo"
+              className="h-14 w-14 object-contain"
+            />
+            <button
+              onClick={() => setIsOpen(false)}
+              className="rounded-md p-2 transition-colors hover:bg-accent-foreground/10"
+              aria-label="Lukk meny"
+            >
+              <X size={28} />
+            </button>
+          </div>
 
-            {/* Navigation Links */}
-            <nav className="flex-1 flex items-center justify-center">
-              <ul className="flex flex-col gap-6 text-center">
-                {LIST_ITEMS.map(
-                  (
-                    { url, text }: { url: string; text: string },
-                    index: number,
-                  ) => (
-                    <li key={index}>
-                      <Link
-                        href={url}
-                        onClick={() => setIsOpen(false)}
-                        className="block text-2xl font-medium hover:text-primary transition-colors"
-                      >
-                        {text}
-                      </Link>
-                    </li>
-                  ),
-                )}
-              </ul>
-            </nav>
-
-            {/* CTA Button */}
-            <div className="p-6 border-t border-border">
-              <Link href="/login">
-                <Button
-                  size="lg"
-                  className="w-full text-lg"
-                  onClick={() => setIsOpen(false)}
+          {/* Navigation (centered vertically) */}
+          <nav className="flex flex-1 items-center justify-center">
+            <ul className="flex flex-col gap-8 text-center">
+              {LIST_ITEMS.map(({ url, text }, index) => (
+                <li
+                  key={url}
+                  style={{ transitionDelay: `${index * 40}ms` }}
+                  className={`
+                    transform transition-all duration-300 ease-out
+                    ${
+                      isOpen
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-2"
+                    }
+                  `}
                 >
-                  Login
-                </Button>
-              </Link>
-            </div>
+                  <Link
+                    href={url}
+                    onClick={() => setIsOpen(false)}
+                    className="text-3xl font-medium tracking-tight text-foreground transition-colors hover:text-primary"
+                  >
+                    {text}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Bottom CTA */}
+          <div className="border-t border-border px-6 py-6">
+            <AuthButton fullWidth />
           </div>
         </div>
-      )}
+      </div>
     </>
   );
-};
-
-export default Navbar;
+}
