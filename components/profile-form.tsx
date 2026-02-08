@@ -1,221 +1,155 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { profileSchema } from "@/schemas/profileSchema";
-import { User } from "@/types";
-import { useState, useEffect } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { updateUserProfile } from "@/lib/supabase/utils";
 
-type FieldErrors = {
-  first_name?: string;
-  last_name?: string;
-  address?: string;
-  phone?: string;
-  emergency_contact?: string;
-  notes?: string;
-};
+import { ProfileSchema, type ProfileInput } from "@/lib/validation/profile";
+import { updateUser } from "@/actions/user/updateUser";
+import { User } from "@/types";
 
 export function ProfileForm({ user }: { user: User | null }) {
-  const [first_name, setFirstName] = useState("");
-  const [last_name, setLastName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [emergency_contact, setEmergencyContact] = useState("");
-  const [notes, setNotes] = useState("");
+  const form = useForm<ProfileInput>({
+    resolver: zodResolver(ProfileSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      address: "",
+      phone: "",
+      emergency_contact: "",
+      notes: "",
+    },
+  });
 
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // Sync form when user loads or changes
+  React.useEffect(() => {
+    if (!user) return;
 
-  useEffect(() => {
-    setFirstName(user?.first_name || "");
-    setLastName(user?.last_name || "");
-    setAddress(user?.address || "");
-    setPhone(user?.phone || "");
-    setEmergencyContact(user?.emergency_contact || "");
-    setNotes(user?.notes || "");
-  }, [user]);
-
-  const handleProfileUpdate = async () => {
-    setIsLoading(true);
-    setFormError(null);
-    setFieldErrors({});
-
-    const result = profileSchema.safeParse({
-      first_name,
-      last_name,
-      address,
-      phone,
-      emergency_contact,
-      notes,
+    form.reset({
+      first_name: user.first_name ?? "",
+      last_name: user.last_name ?? "",
+      address: user.address ?? "",
+      phone: user.phone ?? "",
+      emergency_contact: user.emergency_contact ?? "",
+      notes: user.notes ?? "",
     });
+  }, [user, form]);
 
-    if (!result.success) {
-      const errors: FieldErrors = {};
+  const onSubmit = async (values: ProfileInput) => {
+    if (!user) return;
 
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof FieldErrors;
-        if (field && !errors[field]) {
-          errors[field] = issue.message;
-        }
-      });
-
-      setFieldErrors(errors);
-      setIsLoading(false);
-      return;
-    }
-
-    const newProfileData = {
-      id: user?.id,
-      first_name,
-      last_name,
-      address,
-      phone,
-      emergency_contact,
-      notes,
-      profile_completed: true,
-    };
-
-    const response = await updateUserProfile(newProfileData);
-
-    if (response.error) {
-      setFormError("Kunne ikke oppdatere profilen. Prøv igjen.");
-      setIsLoading(false);
-      return;
-    }
-
-    setIsLoading(false);
+    await updateUser(user.id, values);
+    form.reset(values);
+    redirect("/minside");
   };
 
   return (
-    <div className={cn("flex flex-col gap-6 w-full")}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Min profil</CardTitle>
-          <CardDescription>
-            Se og oppdater kontaktinformasjonen din
-          </CardDescription>
-        </CardHeader>
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="mx-auto max-w-3xl space-y-8 rounded-2xl border bg-background p-6 shadow-sm"
+    >
+      <div className="space-y-1">
+        <h2 className="text-2xl font-semibold">Oppdater din profil</h2>
+        <p className="text-sm text-muted-foreground">
+          Felter merket med * er obligatoriske.
+        </p>
+      </div>
 
-        <CardContent>
-          <form noValidate action={handleProfileUpdate}>
-            <div className="grid w-full items-center gap-4">
-              <div className="">
-                <Label htmlFor="first_name">Fornavn</Label>
-                <Input
-                  id="first_name"
-                  type="text"
-                  value={first_name}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1"
-                />
-                {fieldErrors.first_name && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.first_name}
-                  </p>
-                )}
-              </div>
+      <FieldSet>
+        <FieldLegend>Personlig informasjon</FieldLegend>
 
-              <div className="w-full">
-                <Label htmlFor="last_name">Etternavn</Label>
-                <Input
-                  id="last_name"
-                  type="text"
-                  value={last_name}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="mt-1"
-                />
-                {fieldErrors.last_name && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.last_name}
-                  </p>
-                )}
-              </div>
+        <FieldGroup>
+          <Field data-invalid={!!form.formState.errors.first_name}>
+            <FieldLabel htmlFor="first_name">Fornavn *</FieldLabel>
+            <Input
+              id="first_name"
+              placeholder="Fornavn"
+              {...form.register("first_name")}
+            />
+            <FieldError errors={[form.formState.errors.first_name]} />
+          </Field>
 
-              <div className="w-full">
-                <Label htmlFor="address">Adresse</Label>
-                <Input
-                  id="address"
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="mt-1"
-                />
-                {fieldErrors.address && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.address}
-                  </p>
-                )}
-              </div>
+          <Field data-invalid={!!form.formState.errors.last_name}>
+            <FieldLabel htmlFor="last_name">Etternavn *</FieldLabel>
+            <Input
+              id="last_name"
+              placeholder="Etternavn"
+              {...form.register("last_name")}
+            />
+            <FieldError errors={[form.formState.errors.last_name]} />
+          </Field>
 
-              <div className="w-full">
-                <Label htmlFor="phone">Telefonnummer</Label>
-                <Input
-                  id="phone"
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="mt-1"
-                />
-                {fieldErrors.phone && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.phone}
-                  </p>
-                )}
-              </div>
+          <Field data-invalid={!!form.formState.errors.address}>
+            <FieldLabel htmlFor="address">Adresse *</FieldLabel>
+            <Input
+              id="address"
+              placeholder="Adresse"
+              {...form.register("address")}
+            />
+            <FieldError errors={[form.formState.errors.address]} />
+          </Field>
 
-              <div className="w-full">
-                <Label htmlFor="emergency_contact">Nødtelefon</Label>
-                <Input
-                  id="emergency_contact"
-                  type="text"
-                  value={emergency_contact}
-                  onChange={(e) => setEmergencyContact(e.target.value)}
-                  className="mt-1"
-                />
-                {fieldErrors.emergency_contact && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.emergency_contact}
-                  </p>
-                )}
-              </div>
+          <Field data-invalid={!!form.formState.errors.phone}>
+            <FieldLabel htmlFor="phone">Telefonnummer *</FieldLabel>
+            <Input
+              id="phone"
+              placeholder="+47 12345678"
+              {...form.register("phone")}
+            />
+            <FieldError errors={[form.formState.errors.phone]} />
+          </Field>
+        </FieldGroup>
 
-              <div className="w-full">
-                <Label htmlFor="notes">Notater</Label>
-                <Textarea
-                  id="notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="mt-1"
-                />
-                {fieldErrors.notes && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {fieldErrors.notes}
-                  </p>
-                )}
-              </div>
+        <FieldSeparator />
 
-              {formError && <p className="text-sm text-red-600">{formError}</p>}
+        <FieldGroup>
+          <Field data-invalid={!!form.formState.errors.emergency_contact}>
+            <FieldLabel htmlFor="emergency_contact">Nødtelefon</FieldLabel>
+            <Input
+              id="emergency_contact"
+              placeholder="+47 12345678"
+              {...form.register("emergency_contact")}
+            />
+            <FieldError errors={[form.formState.errors.emergency_contact]} />
+          </Field>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Lagrer..." : "Lagre profil"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          <Field data-invalid={!!form.formState.errors.notes}>
+            <FieldLabel htmlFor="notes">Notater</FieldLabel>
+            <Textarea
+              id="notes"
+              rows={3}
+              placeholder="Annen relevant informasjon om deg"
+              {...form.register("notes")}
+            />
+            <FieldError errors={[form.formState.errors.notes]} />
+          </Field>
+        </FieldGroup>
+      </FieldSet>
+
+      <div className="flex justify-end pt-2">
+        <Button
+          type="submit"
+          size="lg"
+          className="px-8"
+          disabled={form.formState.isSubmitting}
+        >
+          Lagre profil
+        </Button>
+      </div>
+    </form>
   );
 }
