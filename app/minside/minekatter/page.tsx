@@ -1,18 +1,12 @@
 "use client";
 import React from "react";
-import { Cat, User } from "@/types";
+import { Cat } from "@/types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-// import Image from "next/image";
-// import { redirect } from "next/navigation";
-// import { readUser } from "@/lib/supabase/utils";
-// import { readCatBucket } from "@/actions/cat/readCatBucket";
-// import { createClient } from "@/lib/supabase/client";
 import { getUserId } from "@/actions/user/getUserId";
 import { getUserCats } from "@/actions/user/getUserCats";
 
-const RenderCat = ({ index, cat }: { index: string; cat: Cat }) => {
-  // console.log("Rendering cat:", cat);
+const RenderCat = ({ cat }: { index: string; cat: Cat }) => {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-4">
@@ -55,9 +49,6 @@ const RenderCat = ({ index, cat }: { index: string; cat: Cat }) => {
 };
 
 const Page = () => {
-  // const [user, setUser] = React.useState<User | null>(null);
-  // const [cats, setCats] = React.useState<Cat | Cat[]>([]);
-  // const [catImage, setCatImage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [cats, setCats] = React.useState<Cat[]>([]);
 
@@ -71,10 +62,8 @@ const Page = () => {
       }
 
       const userCats = await getUserCats(userId);
-      console.log("Fetched cats:", userCats);
 
       setCats(userCats);
-      console.log("Cats with images:", userCats);
       setLoading(false);
     };
 
