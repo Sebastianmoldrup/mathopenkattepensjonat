@@ -12,23 +12,23 @@ const LIST_ITEMS = [
   //   text: "Hjem",
   // },
   {
-    url: "",
+    url: "/om-oss",
     text: "Om oss",
   },
   {
-    url: "",
+    url: "/informasjon",
     text: "Informasjon",
   },
   {
-    url: "",
+    url: "/priser",
     text: "Priser & betingelser",
   },
   {
-    url: "bilder",
+    url: "/bilder",
     text: "Bilder",
   },
   {
-    url: "",
+    url: "/kontakt",
     text: "Kontakt oss",
   },
 ];
