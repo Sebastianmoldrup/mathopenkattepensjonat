@@ -4,6 +4,63 @@
 
 @layer base {
   :root {
+    /* Base surfaces */
+    --background: 40 33% 97%; /* warm cream */
+    --foreground: 30 15% 15%; /* deep warm brown */
+
+    --card: 40 30% 99%;
+    --card-foreground: 30 15% 15%;
+
+    --popover: 40 30% 99%;
+    --popover-foreground: 30 15% 15%;
+
+    /* Brand / Primary (main beige) */
+    --primary: 38 32% 72%; /* professional beige */
+    --primary-foreground: 30 20% 15%;
+
+    /* Secondary (soft complementary neutral) */
+    --secondary: 35 25% 92%; /* light sand */
+    --secondary-foreground: 30 18% 22%;
+
+    /* Muted UI elements */
+    --muted: 35 20% 94%;
+    --muted-foreground: 30 10% 45%;
+
+    /* Accent (gentle sage for trust & calm) */
+    --accent: 31 69% 96%; /* soft sage */
+    --accent-foreground: 95 20% 25%;
+
+    /* Destructive (still visible but not harsh) */
+    --destructive: 5 65% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Borders & inputs */
+    --border: 35 18% 85%;
+    --input: 35 18% 85%;
+    --ring: 38 32% 72%;
+
+    /* Charts (soft, boutique-friendly) */
+    --chart-1: 38 32% 65%; /* beige */
+    --chart-2: 95 25% 55%; /* sage */
+    --chart-3: 210 20% 55%; /* muted blue */
+    --chart-4: 20 35% 65%; /* warm clay */
+    --chart-5: 45 45% 60%; /* soft gold */
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer deprecated {
+  :root {
     --background: 0 0% 100%;
     --foreground: 0 0% 4%;
 
@@ -38,14 +95,5 @@
     --chart-5: 45 55% 65%; /* soft gold */
 
     --radius: 0.75rem;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
   }
 }

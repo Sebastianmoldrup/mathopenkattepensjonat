@@ -47,7 +47,7 @@ const Navbar = () => {
               width={150}
               height={150}
               alt="Picture of the author"
-              className="w-24 h-24 lg:w-[150px] lg:h-[150px]"
+              className="w-24 h-24 lg:w-[120px] lg:h-[120px]"
             />
           </Link>
 

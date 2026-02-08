@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { CatInput } from "@/lib/validation/cat";
+import { readCatBucket } from "./readCatBucket";
 
 export async function createCat(values: CatInput, file: File) {
   const supabase = await createClient();
@@ -16,6 +17,7 @@ export async function createCat(values: CatInput, file: File) {
     .from("cats")
     .insert({
       ...values,
+      owner_id: user.id,
     })
     .select()
     .single();
@@ -23,17 +25,22 @@ export async function createCat(values: CatInput, file: File) {
   if (insertError) throw insertError;
 
   const ext = file.name.split(".").pop();
-  const photoPath = `cats/${cat.id}/photo.${ext}`;
+  const imagePath = `cats/${cat.id}/${cat.name}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from("catphotos")
-    .upload(photoPath, file);
+    .upload(imagePath, file);
 
   if (uploadError) throw uploadError;
 
+  // console.log(photoPath);
+  const ImageUrl = await readCatBucket(imagePath);
+  // console.log("Image URL:", ImageUrl);
+  console.log("imagePath:", imagePath);
+
   const { error: updateError } = await supabase
     .from("cats")
-    .update({ photo_path: photoPath })
+    .update({ image_url: ImageUrl, image_path: imagePath })
     .eq("id", cat.id);
 
   if (updateError) throw updateError;

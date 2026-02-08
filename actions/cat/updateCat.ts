@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { CatInput } from "@/lib/validation/cat";
+import { readCat } from "./readCat";
+import { readCatBucket } from "./readCatBucket";
 
 export async function updateCat(
   catId: string,
@@ -14,42 +16,93 @@ export async function updateCat(
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) throw new Error("You must be logged in");
+  console.log(catId, values, file);
 
-  console.log(file);
+  const cat = await readCat(catId);
 
-  const ext = file?.name.split(".").pop();
-  const photoPath = ext ? `cats/${catId}/photo-${Date.now()}.${ext}` : "";
-  console.log(photoPath);
+  if (file) {
+    const ext = file.name.split(".").pop();
+    // console.log("File extension:", ext);
+    const bucket = cat.image_path.split("/").slice(0, -1).join("/");
+    // console.log(bucket);
+    const newPath = `${bucket}/${cat.name}.${ext}`;
+    // console.log(newPath);
 
-  if (!file) {
-    return { success: true };
-  }
+    if (cat.image_path !== newPath) {
+      await supabase.storage.from("catphotos").remove([cat.image_path]);
+    }
 
-  const { data: existingCat } = await supabase
-    .from("cats")
-    .select("photo_path")
-    .eq("id", catId)
-    .single();
-
-  const oldPhotoPath = existingCat?.photo_path;
-  console.log("Old photo path:", oldPhotoPath);
-
-  const { error: uploadError } = await supabase.storage
-    .from("catphotos")
-    .upload(photoPath, file, {
+    await supabase.storage.from("catphotos").upload(newPath, file, {
       upsert: true,
       contentType: file.type,
     });
 
-  if (uploadError) throw uploadError;
+    const imageUrl = await readCatBucket(newPath);
 
-  const { error: updateError } = await supabase.storage
-    .from("catphotos")
-    .update(photoPath, file, {
-      cacheControl: "3600",
-      upsert: true,
-    });
+    const { error: updateError } = await supabase
+      .from("cats")
+      .update({ ...values, image_path: newPath, image_url: imageUrl })
+      .eq("id", catId);
+
+    if (updateError) throw updateError;
+
+    // console.log("prevPath", prevPath.split("/"));
+    // const photoPath = ext ? `cats/${catId}/photo-${Date.now()}.${ext}` : "";
+    // console.log(photoPath);
+
+    // const { error: uploadError } = await supabase.storage
+    //   .from("catphotos")
+    //   .upload(cat.image_path, file, {
+    //     upsert: true,
+    //     contentType: file.type,
+    //   });
+    //
+    // if (uploadError) throw uploadError;
+
+    // const { error: updateError } = await supabase
+    //   .from("cats")
+    //   .update({ ...values })
+    //   .eq("id", catId);
+    //
+    // if (updateError) throw updateError;
+  }
+
+  // if (!user) throw new Error("You must be logged in");
+  //
+  // console.log(file);
+  //
+  // const ext = file?.name.split(".").pop();
+  // const photoPath = ext ? `cats/${catId}/photo-${Date.now()}.${ext}` : "";
+  // console.log(photoPath);
+  //
+  // if (!file) {
+  //   return { success: true };
+  // }
+  //
+  // const { data: existingCat } = await supabase
+  //   .from("cats")
+  //   .select("photo_path")
+  //   .eq("id", catId)
+  //   .single();
+  //
+  // const oldPhotoPath = existingCat?.photo_path;
+  // console.log("Old photo path:", oldPhotoPath);
+  //
+  // const { error: uploadError } = await supabase.storage
+  //   .from("catphotos")
+  //   .upload(photoPath, file, {
+  //     upsert: true,
+  //     contentType: file.type,
+  //   });
+  //
+  // if (uploadError) throw uploadError;
+  //
+  // const { error: updateError } = await supabase.storage
+  //   .from("catphotos")
+  //   .update(photoPath, file, {
+  //     cacheControl: "3600",
+  //     upsert: true,
+  //   });
 
   // const { data, error } = await supabase.storage
   //   .from("catphotos")

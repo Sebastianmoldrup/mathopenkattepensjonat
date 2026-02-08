@@ -122,49 +122,49 @@ export const createCat = async (catData: {
   return data;
 };
 
-export const uploadCatPhoto = async (catId: string, file: File) => {
-  const supabase = createClient();
-  const fileExt = file.name.split(".").pop();
-  const fileName = `${catId}.${fileExt}`;
-  const filePath = `cat-photos/${fileName}`;
-
-  const { data, error } = await supabase.storage
-    .from("cat-photos")
-    .upload(filePath, file, {
-      cacheControl: "3600",
-      upsert: true,
-    });
-
-  if (error) {
-    console.error("Error uploading cat photo:", error.message);
-    return null;
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from("cat-photos")
-    .getPublicUrl(filePath);
-
-  return publicUrlData.publicUrl;
-};
+// export const uploadCatPhoto = async (catId: string, file: File) => {
+//   const supabase = createClient();
+//   const fileExt = file.name.split(".").pop();
+//   const fileName = `${catId}.${fileExt}`;
+//   const filePath = `cat-photos/${fileName}`;
+//
+//   const { data, error } = await supabase.storage
+//     .from("cat-photos")
+//     .upload(filePath, file, {
+//       cacheControl: "3600",
+//       upsert: true,
+//     });
+//
+//   if (error) {
+//     console.error("Error uploading cat photo:", error.message);
+//     return null;
+//   }
+//
+//   const { data: publicUrlData } = supabase.storage
+//     .from("cat-photos")
+//     .getPublicUrl(filePath);
+//
+//   return publicUrlData.publicUrl;
+// };
 
 // ========================================================
 // Linked Records Operations
 // ========================================================
 
-const linkCatToOwner = async (catId: string, ownerId: string) => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("user_cats")
-    .insert([{ user_id: ownerId, cat_id: catId }])
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error linking cat to owner:", error.message);
-    return null;
-  }
-  return data;
-};
+// const linkCatToOwner = async (catId: string, ownerId: string) => {
+//   const supabase = createClient();
+//   const { data, error } = await supabase
+//     .from("user_cats")
+//     .insert([{ user_id: ownerId, cat_id: catId }])
+//     .select()
+//     .single();
+//
+//   if (error) {
+//     console.error("Error linking cat to owner:", error.message);
+//     return null;
+//   }
+//   return data;
+// };
 
 // ========================================================
 // Utility Functions
@@ -186,26 +186,26 @@ export const getCatById = async (catId: string) => {
   return data;
 };
 
-export const updateCat = async (catId: string, updates: Partial<Cat>) => {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from("cats")
-    .update(updates)
-    .eq("id", catId)
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error updating cat:", error.message);
-    return null;
-  }
-
-  return data;
-};
-
-export const getCatPhoto = async (url: string) => {
-  const supabase = createClient();
-  const { data } = supabase.storage.from("catphotos").getPublicUrl(url);
-
-  return data.publicUrl;
-};
+// export const updateCat = async (catId: string, updates: Partial<Cat>) => {
+//   const supabase = createClient();
+//   const { data, error } = await supabase
+//     .from("cats")
+//     .update(updates)
+//     .eq("id", catId)
+//     .select()
+//     .single();
+//
+//   if (error) {
+//     console.error("Error updating cat:", error.message);
+//     return null;
+//   }
+//
+//   return data;
+// };
+//
+// export const getCatPhoto = async (url: string) => {
+//   const supabase = createClient();
+//   const { data } = supabase.storage.from("catphotos").getPublicUrl(url);
+//
+//   return data.publicUrl;
+// };

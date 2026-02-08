@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CatSchema, type CatInput } from "@/lib/validation/cat";
@@ -28,18 +28,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { updateCat } from "@/actions/cat/updateCat";
 import { Cat } from "@/types";
 
-export default function UpdateCatForm({
-  cat,
-  photoUrl,
-}: {
-  cat: Cat;
-  photoUrl: string;
-}) {
-  const [preview, setPreview] = useState<string | null>(photoUrl || null);
+export default function UpdateCatForm({ cat }: { cat: Cat }) {
+  const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // console.log("Cat data in form:", cat);
   // console.log("Initial photo URL:", photoUrl);
+  console.log("Preview state:", preview);
+
+  useEffect(() => {
+    setPreview(cat.image_url || null);
+  }, [cat.image_url]);
 
   const form = useForm<CatInput>({
     resolver: zodResolver(CatSchema),
@@ -82,7 +81,7 @@ export default function UpdateCatForm({
       className="mx-auto max-w-3xl space-y-8 rounded-2xl border bg-background p-6 shadow-sm"
     >
       <div className="space-y-1">
-        <h2 className="text-2xl font-semibold">Legg til katt</h2>
+        <h2 className="text-2xl font-semibold">Oppdater din katt</h2>
         <p className="text-sm text-muted-foreground">
           Felter merket med * er obligatoriske.
         </p>
@@ -93,8 +92,8 @@ export default function UpdateCatForm({
         <FieldGroup className="grid gap-5 md:grid-cols-2">
           <Field className="md:col-span-2">
             <FieldLabel>Bilde *</FieldLabel>
-            <div className="flex space-y-1 justify-center items-center flex-col md:flex-row gap-4">
-              <div className="h-24 w-24  overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
+            <div className="flex space-y-1 justify-start items-center flex-col md:flex-row gap-4">
+              <div className="h-32 w-32  overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
                 {preview ? (
                   <img src={preview} className="h-full w-full object-cover" />
                 ) : (
@@ -105,17 +104,22 @@ export default function UpdateCatForm({
               </div>
               <Input
                 type="file"
-                accept="image/*"
+                accept=".jpeg, .png, .webp"
                 hidden
                 onChange={handleImage}
                 ref={fileInputRef}
               />
-              <Button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Velg bilde
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Velg bilde
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Støttede formater: JPEG, PNG, WEBP. Maks størrelse: 5MB.
+                </span>
+              </div>
             </div>
           </Field>
 

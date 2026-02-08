@@ -4,7 +4,6 @@ import React from "react";
 import { readUser } from "@/lib/supabase/utils";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@/types";
-import { Button } from "@/components/ui/button";
 import AddCatForm from "@/components/add-cat-form";
 import { Suspense } from "react";
 

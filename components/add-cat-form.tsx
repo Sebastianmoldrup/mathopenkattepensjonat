@@ -49,6 +49,7 @@ export default function AddCatForm() {
       alert("Vennligst last opp et bilde av katten.");
       return;
     }
+    console.log(values);
     await createCat(values, file);
 
     form.reset();
@@ -82,7 +83,7 @@ export default function AddCatForm() {
           <Field className="md:col-span-2">
             <FieldLabel>Bilde *</FieldLabel>
             <div className="flex space-y-1 justify-center items-center flex-col md:flex-row gap-4">
-              <div className="h-24 w-24  overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
+              <div className="h-32 w-32  overflow-hidden rounded-xl border bg-muted flex items-center justify-center">
                 {preview ? (
                   <img src={preview} className="h-full w-full object-cover" />
                 ) : (
@@ -93,17 +94,22 @@ export default function AddCatForm() {
               </div>
               <Input
                 type="file"
-                accept="image/*"
+                accept=".jpeg, .png, .webp"
                 hidden
                 onChange={handleImage}
                 ref={fileInputRef}
               />
-              <Button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Velg bilde
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Velg bilde
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  Støttede formater: JPEG, PNG, WEBP. Maks størrelse: 5MB.
+                </span>
+              </div>
             </div>
           </Field>
 
