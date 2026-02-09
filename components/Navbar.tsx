@@ -89,10 +89,10 @@ export default function Navbar() {
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <Image
               src="/img/cropped.webp"
-              width={120}
-              height={120}
+              width={160}
+              height={160}
               alt="Logo"
-              className="h-14 w-14 object-contain"
+              className="h-24 w-24 object-contain"
             />
             <button
               onClick={() => setIsOpen(false)}

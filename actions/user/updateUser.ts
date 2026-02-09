@@ -1,6 +1,7 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { User } from "@/types";
+import { revalidatePath } from "next/cache";
 
 export const updateUser = async (
   userId: string | null,
@@ -23,6 +24,8 @@ export const updateUser = async (
     console.error("Error updating user:", error.message);
     return null;
   }
+
+  revalidatePath("/minside"); // Update the minside header with new name immediately
 
   return data;
 };

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { readUser } from "@/actions/user/readUser";
@@ -28,7 +27,7 @@ export async function MinSideHeader() {
         )}
       </div>
 
-      <div className="flex flex-col items-center justify-center gap-1">
+      <div className="flex flex-col lg:items-center justify-center gap-1">
         <Button
           disabled
           className="bg-primary text-primary-foreground opacity-80 cursor-not-allowed"

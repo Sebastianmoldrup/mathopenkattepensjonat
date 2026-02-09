@@ -18,7 +18,6 @@ export default async function Page() {
     <div className="space-y-10">
       {profile?.profile_completed ? (
         <div className="grid gap-8">
-          {/* Hovedvalg */}
           <section>
             <h3 className="mb-4 text-lg font-medium">Oversikt</h3>
 
@@ -67,7 +66,6 @@ export default async function Page() {
             </div>
           </section>
 
-          {/* Konto */}
           <section>
             <h3 className="mb-4 text-lg font-medium">Konto</h3>
 
