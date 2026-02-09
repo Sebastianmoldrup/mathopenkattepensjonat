@@ -24,17 +24,17 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 const CARD_CONTENT: CardContent[] = [
   {
-    img: "experienced",
+    img: "petting-no-bg",
     title: "Erfaren Omsorg",
     desc: "Anja har drevet kattepass siden 2018 med bred erfaring i katteatferd og stell.",
   },
   {
-    img: "facility",
+    img: "playing-no-bg",
     title: "Romslige fasiliteter",
     desc: "Bur større enn Mattilsynets krav, åpen kattegård hele dagen, veggmonterte kloremøbler og aktivitetsområder.",
   },
   {
-    img: "updates",
+    img: "phone-cat-playing-no-bg",
     title: "Oppdateringer underveis",
     desc: "Følg kattens opphold på vår egen Snapchat-kanal. Få oppdateringer både under besøket og etterpå.",
   },
@@ -211,7 +211,7 @@ export default function Home() {
             </h3>
             <div className="grid md:grid-cols-2 place-items-center">
               <Image
-                src="/illustration/environment.webp"
+                src="/illustration/cat-sleeping-no-bg.webp"
                 alt=""
                 width={150}
                 height={150}
@@ -251,7 +251,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 place-items-center">
             <Image
-              src="/illustration/handover.webp"
+              src="/illustration/handover-cat-no-bg.webp"
               alt=""
               width={150}
               height={150}
