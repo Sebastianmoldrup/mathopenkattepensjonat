@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import BookingUnderDevelopment from "@/features/BookingUnderDevelopment";
 
 type CardContent = {
   img: string;
@@ -74,6 +75,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Temporary booking under development */}
+      <BookingUnderDevelopment />
 
       {/* Features Grid */}
       <section className="py-16 px-4 bg-white">
@@ -230,10 +234,10 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <Button className="mr-2 p-6">
+            <Button className="mr-2 p-6" disabled>
               <House className="w-4 h-4 text-white" /> Utforsk pensjonatet
             </Button>
-            [Link til pensjonat artikkel/side]
+            <span className="text-muted-foreground">Kommer snart.</span>
           </div>
         </div>
       </section>
@@ -350,14 +354,16 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-            <Link href="/bestilling">
+            <Link href="/booking">
               <Button size="lg" className="">
                 Bestill nå
               </Button>
             </Link>
-            <Button size="lg" variant="outline">
-              Kontakt oss
-            </Button>
+            <Link href="/kontakt">
+              <Button size="lg" variant="outline">
+                Kontakt oss
+              </Button>
+            </Link>
           </div>
 
           <div className="space-y-2 text-slate-600">
