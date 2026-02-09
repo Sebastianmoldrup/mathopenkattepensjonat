@@ -122,7 +122,7 @@ export default function Page() {
         <p className="text-muted-foreground mt-3">
           Avbestilling skal gjøres per e-post:
           <br />
-          📧 mathopenkattepensjonat@hotmail.com
+          📧 post@mathopenkattepensjonat.no
         </p>
       </section>
 
