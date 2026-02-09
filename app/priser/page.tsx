@@ -8,7 +8,7 @@ export default function Page() {
       {/* Header */}
       <div className="mx-auto mb-12 max-w-4xl text-center">
         <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-          Priser & vilkår
+          Priser & betingelser
         </h1>
         <p className="mt-3 text-muted-foreground">
           Det bestilte oppholdet må betales i sin helhet, selv om levering skjer
@@ -95,7 +95,7 @@ export default function Page() {
             </Button>
 
             <div className="text-sm text-muted-foreground">
-              <p>📧 mathopenkattepensjonat@hotmail.com</p>
+              <p>📧 post@mathopenkattepensjonat.no</p>
               <p>📞 473 22 279</p>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function Page() {
       {/* Check in and check out */}
       <section className="mx-auto mt-16 max-w-5xl grid gap-8 md:grid-cols-2 md:items-center">
         <Image
-          src="/illustration/handover-cat.webp"
+          src="/illustration/handover-v2.webp"
           alt="Inn- og utsjekk"
           width={500}
           height={350}
