@@ -31,7 +31,7 @@ const CARD_CONTENT: CardContent[] = [
   {
     img: "playing-no-bg",
     title: "Romslige fasiliteter",
-    desc: "Bur større enn Mattilsynets krav, åpen kattegård hele dagen, veggmonterte kloremøbler og aktivitetsområder.",
+    desc: "Romslige bur, kattegård åpen hele dagen, veggmonterte kattemøbler og gode aktivitetsområdet",
   },
   {
     img: "phone-cat-playing-no-bg",
