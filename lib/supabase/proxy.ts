@@ -47,15 +47,21 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/registrering") &&
-    !request.nextUrl.pathname.startsWith("/registrering-bekreftet") &&
-    !request.nextUrl.pathname.startsWith("/glemt-passord") &&
-    !request.nextUrl.pathname.startsWith("/booking")
-  ) {
+  const isAuthPage =
+    request.nextUrl.pathname.startsWith("/login") ||
+    request.nextUrl.pathname.startsWith("/registrering") ||
+    request.nextUrl.pathname.startsWith("/registrering-bekreftet") ||
+    request.nextUrl.pathname.startsWith("/glemt-passord");
+
+  const isSubPage =
+    request.nextUrl.pathname.startsWith("/booking") ||
+    request.nextUrl.pathname.startsWith("/om-oss") ||
+    request.nextUrl.pathname.startsWith("/kontakt") ||
+    request.nextUrl.pathname.startsWith("/priser") ||
+    request.nextUrl.pathname.startsWith("/informasjon") ||
+    request.nextUrl.pathname.startsWith("/bilder");
+
+  if (request.nextUrl.pathname !== "/" && !user && !isAuthPage && !isSubPage) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/login";

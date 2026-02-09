@@ -367,7 +367,7 @@ export default function Home() {
           </div>
 
           <div className="space-y-2 text-slate-600">
-            <p>📧 mathopenkattepensjonat@hotmail.com</p>
+            <p>📧 post@mathopenkattepensjonat.no</p>
             <p>📞 473 22 279</p>
             <p className="text-sm">
               Telefontid: kl. 11:00–12:00 og 17:00–20:00

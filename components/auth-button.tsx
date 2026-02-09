@@ -5,10 +5,18 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
-export function AuthButton({ fullWidth = false }: { fullWidth?: boolean }) {
+export function AuthButton({
+  fullWidth = false,
+  mobile = false,
+}: {
+  fullWidth?: boolean;
+  mobile?: boolean;
+}) {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
-  const className = fullWidth ? "w-full" : "";
+  const mobileStyle = mobile ? "py-8" : "";
+  const fullWidthStyle = fullWidth ? "w-full" : "";
+  const className = `max-w-lg ${fullWidthStyle} ${mobileStyle}`;
 
   useEffect(() => {
     const supabase = createClient();

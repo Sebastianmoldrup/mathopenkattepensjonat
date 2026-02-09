@@ -132,8 +132,8 @@ export default function Navbar() {
           </nav>
 
           {/* Bottom CTA */}
-          <div className="border-t border-border px-6 py-6">
-            <AuthButton fullWidth />
+          <div className="flex justify-center border-t border-border p-4">
+            <AuthButton fullWidth mobile />
           </div>
         </div>
       </div>

@@ -19,10 +19,10 @@ const BookingUnderDevelopment = () => {
           gjerne sende oss en e-post på:
         </p>
         <a
-          href="mailto:anja.moldrup@hotmail.no"
+          href="mailto:post@mathopenkattepensjonat.no"
           className="text-blue-600 hover:underline mt-2 block"
         >
-          Mathopenkattepensjonat@gmail.com
+          post@mathopenkattepensjonat.no
         </a>
       </div>
     </div>
