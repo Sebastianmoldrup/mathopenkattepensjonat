@@ -1,13 +1,13 @@
 import Image from "next/image";
 const BookingUnderDevelopment = () => {
   return (
-    <div className="flex items-center justify-center max-w-xl mx-auto px-4 py-16 gap-12 text-center">
+    <div className="lg:flex items-center justify-center max-w-xl mx-auto px-4 py-16 gap-12 text-center">
       <Image
         src="/illustration/reserve-spots.webp"
         alt="Under development"
         width={200}
         height={200}
-        className="mb-6"
+        className="mb-6 rounded-md mx-auto"
       />
       <div>
         <h2 className="text-2xl font-bold mb-4">Booking kommer snart</h2>
