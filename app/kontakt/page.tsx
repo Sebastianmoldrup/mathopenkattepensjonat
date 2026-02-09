@@ -10,12 +10,11 @@ const Page = () => {
           Har du spørsmål eller trenger hjelp? Ta gjerne kontakt med oss via
           e-post på{" "}
           <a
-            href="mailto:anja.moldrup@hotmail.no"
+            href="mailto:post@mathopenkattepensjonat.no"
             className="text-blue-600 hover:underline"
           >
-            Vår mail
+            post@mathopenkattepensjonat.no
           </a>
-          .
         </p>
 
         <div className="h-px bg-gray-200 my-6" />
