@@ -11,8 +11,7 @@ export default function Page() {
           Priser & betingelser
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Det bestilte oppholdet må betales i sin helhet, selv om levering skjer
-          senere eller henting tidligere.
+          Alt du trenger å vite om priser, bestilling og opphold hos oss
         </p>
       </div>
 
@@ -89,10 +88,17 @@ export default function Page() {
             du ta kontakt med oss.
           </p>
 
+          <p className="text-muted-foreground">
+            Det bestilte oppholdet må betales i sin helhet, selv om levering
+            skjer senere eller henting tidligere enn avtalt.
+          </p>
+
           <div className="flex flex-col gap-3">
-            <Button size="lg" disabled>
-              Book opphold
-            </Button>
+            <Link href="/booking">
+              <Button size="lg" disabled>
+                Book opphold
+              </Button>
+            </Link>
 
             <div className="text-sm text-muted-foreground">
               <p>📧 post@mathopenkattepensjonat.no</p>

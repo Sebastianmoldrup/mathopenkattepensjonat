@@ -25,7 +25,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const CARD_CONTENT: CardContent[] = [
   {
     img: "petting-no-bg",
-    title: "Erfaren Omsorg",
+    title: "Erfaren omsorg",
     desc: "Anja har drevet kattepass siden 2018 med bred erfaring i katteatferd og stell.",
   },
   {
@@ -42,9 +42,9 @@ const CARD_CONTENT: CardContent[] = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-slate-50 to-white py-20 px-4">
+      <section className="relative bg-gradient-to-b from-background to-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <Badge className="mb-4 bg-slate-100 text-slate-700 hover:bg-slate-200">
             Kattepensjonat i Bergen
@@ -80,7 +80,7 @@ export default function Home() {
       <BookingUnderDevelopment />
 
       {/* Features Grid */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-3 place-content-center gap-8">
             {CARD_CONTENT.map(({ img, title, desc }, index) => (
@@ -110,7 +110,7 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section className="py-16 px-4 bg-slate-50">
+      <section className="py-16 px-4 bg-white">
         <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
           Om oss
         </h2>
@@ -157,7 +157,7 @@ export default function Home() {
       </section>
 
       {/* Location & Facilities */}
-      <section className="py-16 px-4 bg-slate-50">
+      <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">
             Fasiliteter og beliggenhet
@@ -173,9 +173,8 @@ export default function Home() {
                 <strong>Adresse:</strong> Storingavika 2, 5174 Mathopen
               </p>
               <p className="text-slate-600 mb-4">
-                Vi holder til like ved busstoppet Storingavika, noe som gjør
-                levering enkel for reisende. I tillegg tilbyr vi henting og
-                levering mot et tillegg.
+                Vi holder til like ved busstoppet Storingavika i Mathopen. I
+                tillegg tilbyr vi henting og levering mot et tillegg.
               </p>
             </div>
 
@@ -201,11 +200,25 @@ export default function Home() {
                   <span className="text-slate-400 mr-2">•</span>
                   <span>Kvalitetsfôr inkludert, mulighet for eget fôr</span>
                 </li>
+                <li className="flex items-start">
+                  <span className="text-slate-400 mr-2">•</span>
+                  <span>
+                    Nybygg fra 2026 med balansert ventilasjon og varmepumpe for
+                    å sikre et stabilt og godt inneklima
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-slate-400 mr-2">•</span>
+                  <span>
+                    Hvert enkelt bur har spesialtilpasset avtrekksventilasjon
+                    montert over hvert toalettområde
+                  </span>
+                </li>
               </ul>
             </div>
           </div>
 
-          <div className="mt-12 p-8 bg-white rounded-lg max-w-sm md:max-w-4xl mx-auto md:flex-row-reverse">
+          <div className="mt-12 p-8  rounded-lg max-w-sm md:max-w-4xl mx-auto md:flex-row-reverse bg-background">
             <h3 className="text-xl font-semibold text-slate-900 mb-4">
               Et trygt og stimulerende miljø
             </h3>
@@ -243,7 +256,7 @@ export default function Home() {
       </section>
 
       {/* Responsibility and insurance */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 ">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">
             Ansvar og forsikring
@@ -278,7 +291,7 @@ export default function Home() {
       </section>
 
       {/* Pricing Overview */}
-      <section className="py-16 px-4 bg-slate-50">
+      <section className="py-16 px-4 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
             Priser
@@ -287,17 +300,32 @@ export default function Home() {
           <Card className="border-slate-200">
             <CardContent className="pt-6">
               <div className="grid md:grid-cols-2 gap-8">
+                {/* PRISER */}
                 <div>
-                  <div className="mb-6">
-                    <p className="text-sm text-slate-500 mb-2">
-                      Per døgn per katt
-                    </p>
-                    <p className="text-4xl font-bold text-slate-900">250,-</p>
-                    <p className="text-sm text-slate-600 mt-2">
-                      Minstebeløp tilsvarer 2 døgn
-                    </p>
+                  <p className="text-sm text-slate-500 mb-6">
+                    Per døgn per katt
+                  </p>
+
+                  {/* Sesongpriser */}
+                  <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                    {/* Lavsesong */}
+                    <div className="border border-slate-200 rounded-lg p-4">
+                      <p className="text-sm text-slate-500 mb-1">Lavsesong</p>
+                      <p className="text-3xl font-bold text-slate-900">220,-</p>
+                    </div>
+
+                    {/* Høysesong */}
+                    <div className="border border-slate-200 rounded-lg p-4">
+                      <p className="text-sm text-slate-500 mb-1">Høysesong</p>
+                      <p className="text-3xl font-bold text-slate-900">250,-</p>
+                    </div>
                   </div>
 
+                  <p className="text-sm text-slate-600 mb-6">
+                    Minstebeløp tilsvarer 2 døgn
+                  </p>
+
+                  {/* Tillegg */}
                   <div className="space-y-3">
                     <div className="flex items-start">
                       <span className="text-slate-400 mr-2">•</span>
@@ -320,6 +348,7 @@ export default function Home() {
                   </div>
                 </div>
 
+                {/* INN- OG UTSJEKK */}
                 <div>
                   <h4 className="font-semibold text-slate-900 mb-4">
                     Inn- og utsjekk
@@ -343,14 +372,15 @@ export default function Home() {
       </section>
 
       {/* Contact CTA */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 ">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-slate-900 mb-6">
             Klar for å bestille?
           </h2>
           <p className="text-lg text-slate-600 mb-8">
-            Du er hjertelig velkommen til å komme på besøk for å se lokalene før
-            du bestiller opphold.
+            Du er hjertelig velkommen til å komme på besøk for å se lokalet før
+            du bestiller opphold. Kattpensjonatet åpner imidlertid først 1.
+            juli.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -377,7 +407,7 @@ export default function Home() {
       </section>
 
       {/* Footer note */}
-      <section className="py-8 px-4 bg-slate-50 border-y border-slate-200">
+      <section className="py-8 px-4  border-y border-slate-200 bg-white">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-sm text-slate-600">
             Vi gleder oss til å ta imot katten din! 🐾
@@ -386,7 +416,7 @@ export default function Home() {
       </section>
 
       {/* Developer Credit */}
-      <section className="py-4 px-4 bg-white">
+      <section className="py-4 px-4 ">
         <div className="max-w-6xl mx-auto">
           <p className="text-center text-xs text-slate-600">
             © {CURRENT_YEAR} Utviklet av{" "}

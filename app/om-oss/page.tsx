@@ -61,15 +61,26 @@ export default function Page() {
           </p>
         </div>
 
-        <div className="rounded-2xl bg-background p-6 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold text-foreground">
-            Sammen om driften
-          </h2>
-          <p className="text-muted-foreground">
-            Martin ble en del av driften i 2022, og har siden hatt stor glede av
-            å bidra til at kattene får et trygt og godt opphold. Sammen sørger
-            vi for struktur, tilsyn og en rolig hverdag for alle gjester.
-          </p>
+        <div className="flex flex-col-reverse md:flex-row items-start gap-6 md:items-center rounded-2xl bg-background p-6 shadow-sm">
+          <Image
+            src="/img/var-arbeider.webp"
+            alt="Vår arbeider"
+            width={100}
+            height={20}
+            className="rounded-2xl object-cover"
+          />
+          <div className="">
+            <h2 className="mb-3 text-lg font-semibold text-foreground md:col-span-2">
+              Sammen om driften
+            </h2>
+
+            <p className="text-muted-foreground">
+              Martin ble en del av driften i 2022, og har siden hatt stor glede
+              av å bidra til at kattene får et trygt og godt opphold. Sammen
+              sørger vi for struktur, tilsyn og en rolig hverdag for alle
+              gjester.
+            </p>
+          </div>
         </div>
 
         <div className="rounded-2xl bg-background p-6 shadow-sm">
@@ -82,8 +93,8 @@ export default function Page() {
             og komfortabelt kattepensjonat.
           </p>
           <p className="mt-4 text-muted-foreground">
-            Målet vårt er å skape et lite paradis for kattene – med ro,
-            forutsigbarhet, omsorg og tett oppfølging.
+            Målet vårt er å skape et trygt og godt sted for kattene - et sted
+            der kattene kan føle seg trygge og ivaretatt
           </p>
         </div>
       </section>

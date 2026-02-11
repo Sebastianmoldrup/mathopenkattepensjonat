@@ -12,6 +12,7 @@ const LIST_ITEMS = [
   { url: "/informasjon", text: "Informasjon" },
   { url: "/priser", text: "Priser & betingelser" },
   // { url: "/bilder", text: "Bilder" },
+  { url: "/rom-og-fasiliteter", text: "Rom & fasiliteter" },
   { url: "/kontakt", text: "Kontakt oss" },
 ];
 
