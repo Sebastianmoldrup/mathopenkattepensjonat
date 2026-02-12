@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
-import Script from "next/script";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -29,18 +28,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
-        <Script
-          async
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
-        ></Script>
-        <Script>
-          {`window.dataLayer = window.dataLayer || [];
-            functionnction gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            gtag('config', ${process.env.NEXT_PUBLIC_GA_ID});
-          `}
-        </Script>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
