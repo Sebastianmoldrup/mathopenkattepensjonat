@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -133,6 +134,9 @@ export function ProfileForm({ user }: { user: User | null }) {
         <FieldGroup>
           <Field data-invalid={!!form.formState.errors.emergency_contact}>
             <FieldLabel htmlFor="emergency_contact">Nødtelefon</FieldLabel>
+            <FieldDescription>
+              Legg ved en nødkontakt vi kan ringe hvis vi ikke får tak i deg
+            </FieldDescription>
             <Input
               id="emergency_contact"
               placeholder="+47 12345678"

@@ -45,13 +45,23 @@ export const CatSchema = z.object({
 
   is_sterilized: z.coerce.boolean().default(false),
 
-  id_chip: z.string().trim().regex(chipRegex, "Chip må være 15 sifre"),
+  id_chip: z
+    .string()
+    .trim()
+    .optional()
+    .refine(
+      (val) => !val || chipRegex.test(val),
+      "Chip må være nøyaktig 15 sifre",
+    ),
 
   insurance_number: z
     .string()
     .trim()
-    .min(3, "Ugyldig forsikringsnummer")
-    .max(50),
+    .optional()
+    .refine(
+      (val) => !val || (val.length >= 8 && val.length <= 15),
+      "Forsikringsnummer må være 8–15 tegn",
+    ),
 
   last_vaccine_date: z.coerce.date().refine((d) => !isNaN(d.getTime()), {
     message: "Velg gyldig dato",

@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { signUpSchema } from "@/schemas/signUpSchema";
 
@@ -23,23 +22,25 @@ type FieldErrors = {
   email?: string;
   password?: string;
   repeatPassword?: string;
+  privacyAccepted?: string;
 };
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+const SignUpForm = () => {
   const router = useRouter();
+  const supabase = createClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSignUp = async () => {
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     setIsLoading(true);
     setFormError(null);
     setFieldErrors({});
@@ -48,6 +49,7 @@ export function SignUpForm({
       email,
       password,
       repeatPassword,
+      privacyAccepted,
     });
 
     if (!result.success) {
@@ -65,13 +67,14 @@ export function SignUpForm({
       return;
     }
 
-    const supabase = createClient();
-
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: result.data.email,
       password: result.data.password,
       options: {
         emailRedirectTo: `${window.location.origin}/minside`,
+        data: {
+          privacy_accepted_at: new Date().toISOString(),
+        },
       },
     });
 
@@ -81,19 +84,27 @@ export function SignUpForm({
       return;
     }
 
+    if (!data.user) {
+      setFormError("Noe gikk galt. Prøv igjen.");
+      setIsLoading(false);
+      return;
+    }
+
     router.push("/registrering-bekreftet");
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className="flex flex-col gap-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Opprett konto</CardTitle>
-          <CardDescription>Lag en ny brukerkonto</CardDescription>
+          <CardDescription>
+            Lag en ny brukerkonto for å bestille opphold
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <form noValidate action={handleSignUp}>
+          <form onSubmit={handleSignUp} noValidate>
             <div className="flex flex-col gap-6">
               {/* E-post */}
               <div className="grid gap-2">
@@ -125,9 +136,9 @@ export function SignUpForm({
 
               {/* Gjenta passord */}
               <div className="grid gap-2">
-                <Label htmlFor="repeat-password">Gjenta passord</Label>
+                <Label htmlFor="repeatPassword">Gjenta passord</Label>
                 <Input
-                  id="repeat-password"
+                  id="repeatPassword"
                   type="password"
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
@@ -138,6 +149,41 @@ export function SignUpForm({
                   </p>
                 )}
               </div>
+
+              {/* GDPR checkbox */}
+              <div className="flex items-start gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  id="privacy"
+                  checked={privacyAccepted}
+                  onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                  className="mt-1"
+                />
+                <label htmlFor="privacy" className="leading-snug">
+                  Jeg har lest og godtar{" "}
+                  <Link
+                    href="/personvern"
+                    target="_blank"
+                    className="underline underline-offset-4"
+                  >
+                    personvernerklæringen
+                  </Link>{" "}
+                  og{" "}
+                  <Link
+                    href="/vilkar"
+                    target="_blank"
+                    className="underline underline-offset-4"
+                  >
+                    vilkårene
+                  </Link>
+                </label>
+              </div>
+
+              {fieldErrors.privacyAccepted && (
+                <p className="text-sm text-red-500">
+                  {fieldErrors.privacyAccepted}
+                </p>
+              )}
 
               {/* Generell feil */}
               {formError && <p className="text-sm text-red-500">{formError}</p>}
@@ -158,4 +204,6 @@ export function SignUpForm({
       </Card>
     </div>
   );
-}
+};
+
+export default SignUpForm;

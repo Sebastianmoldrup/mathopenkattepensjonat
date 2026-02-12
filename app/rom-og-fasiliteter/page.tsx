@@ -157,33 +157,42 @@ const Page = () => {
           </p>
         </div>
 
-        <div className="space-y-4 text-muted-foreground">
-          <h2 className="text-xl font-semibold text-foreground">
+        <div className="space-y-4 text-muted-foreground grid gap-x-6">
+          <h2 className="text-xl font-semibold text-foreground lg:col-start-1">
             Fokus på kvalitet og inneklima
           </h2>
-          <p>
-            Kattepensjonatet er nybygget i 2026 og oppført i henhold til
-            gjeldende TEK17-krav. Anlegget er utstyrt med balansert ventilasjon
-            og varmepumpe for å sikre et stabilt og helsemessig godt inneklima
-            for kattene gjennom hele året. Ventilasjonsløsningen sørger for
-            kontinuerlig tilførsel av frisk luft, optimal temperaturregulering
-            og god fuktighetskontroll. I tillegg har hvert enkelt bur
-            spesialtilpasset avtrekksventilasjon montert over hvert
-            toalettområde. Dette bidrar til redusert lukt og behagelig miljø for
-            kattene. Det er lagt stor vekt på romslige bur av høy kvalitet,
-            utformet for å gi kattene god plass til bevegelse, hvile og naturlig
-            atferd.
-          </p>
-          <p>
-            Vi tilbyr også egne tilpassede løsninger for eldre katter og katter
-            med helseutfordringer, som for eksempel artrose. Disse løsningene
-            inkluderer blant annet trapp mellom etasjene, ekstra myke
-            liggeplasser og tilrettelegging som reduserer belastning på ledd og
-            muskulatur. Alle oppholdsarealer er utviklet med fokus på trygghet,
-            ro og trivsel. Materialvalg og overflater er nøye utvalgt med tanke
-            på hygiene, slitestyrke og enkel rengjøring, noe som bidrar til et
-            trygt og sunt miljø for alle våre gjester.
-          </p>
+          <div className="lg:row-start-2">
+            <p>
+              Kattepensjonatet er nybygget i 2026 og oppført i henhold til
+              gjeldende TEK17-krav. Anlegget er utstyrt med balansert
+              ventilasjon og varmepumpe for å sikre et stabilt og helsemessig
+              godt inneklima for kattene gjennom hele året.
+              Ventilasjonsløsningen sørger for kontinuerlig tilførsel av frisk
+              luft, optimal temperaturregulering og god fuktighetskontroll. I
+              tillegg har hvert enkelt bur spesialtilpasset avtrekksventilasjon
+              montert over hvert toalettområde. Dette bidrar til redusert lukt
+              og behagelig miljø for kattene. Det er lagt stor vekt på romslige
+              bur av høy kvalitet, utformet for å gi kattene god plass til
+              bevegelse, hvile og naturlig atferd.
+            </p>
+            <p>
+              Vi tilbyr også egne tilpassede løsninger for eldre katter og
+              katter med helseutfordringer, som for eksempel artrose. Disse
+              løsningene inkluderer trapp mellom etasjene og ekstra myke
+              liggeplasser som reduserer belastning på ledd og muskulatur. Alle
+              oppholdsarealer er utviklet med fokus på trygghet, ro og trivsel.
+              Materialvalg og overflater er nøye utvalgt med tanke på hygiene,
+              slitestyrke og enkel rengjøring, noe som bidrar til et trygt og
+              sunt miljø for alle våre gjester.
+            </p>
+          </div>
+          <Image
+            src="/illustration/ventilation.webp"
+            alt="Rom og fasiliteter"
+            width={200}
+            height={200}
+            className="rounded-lg object-cover justify-self-center md:justify-self-start max-w-52 max-h-52 row-start-2 my-4 lg:col-start-2 lg:self-center"
+          />
         </div>
       </section>
     </div>

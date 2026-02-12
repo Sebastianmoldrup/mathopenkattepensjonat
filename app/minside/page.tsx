@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { readUser } from "@/actions/user/readUser";
 import { createClient } from "@/lib/supabase/server";
 import { User, Cat, Calendar, Lock, Mail } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 export default async function Page() {
   const supabase = await createClient();
@@ -95,6 +96,21 @@ export default async function Page() {
               </div>
             </div>
           </section>
+
+          <div className="flex items-start gap-3 rounded-lg border border-yellow-300 bg-yellow-50 p-2 text-yellow-900 mb-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium">
+                Gi beskjed dersom du ikke ønsker at kattens bilder deles på
+                sosiale medier.
+              </p>
+              <span className="text-sm text-muted-foreground">
+                <a href="mailto:post@mathopenkattepensjonat">
+                  post@mathopenkattepensjonat.no
+                </a>
+              </span>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="rounded-2xl border border-yellow-300 bg-yellow-50 p-6">

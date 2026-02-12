@@ -58,6 +58,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/om-oss") ||
     request.nextUrl.pathname.startsWith("/kontakt") ||
     request.nextUrl.pathname.startsWith("/priser") ||
+    request.nextUrl.pathname.startsWith("/personvern") ||
+    request.nextUrl.pathname.startsWith("/vilkar") ||
     request.nextUrl.pathname.startsWith("/informasjon") ||
     request.nextUrl.pathname.startsWith("/rom-og-fasiliteter") ||
     request.nextUrl.pathname.startsWith("/bilder");

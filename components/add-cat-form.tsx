@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -197,13 +198,19 @@ export default function AddCatForm() {
         <FieldLegend>ID & Forsikring</FieldLegend>
         <FieldGroup className="grid gap-5 md:grid-cols-2">
           <Field data-invalid={!!form.formState.errors.id_chip}>
-            <FieldLabel>ID-chip *</FieldLabel>
+            <FieldLabel>ID-chip</FieldLabel>
+            <FieldDescription>
+              Hvis katten ikke har chip, la feltet være tomt.
+            </FieldDescription>
             <Input {...form.register("id_chip")} />
             <FieldError errors={[form.formState.errors.id_chip]} />
           </Field>
 
           <Field data-invalid={!!form.formState.errors.insurance_number}>
-            <FieldLabel>Forsikringsnummer *</FieldLabel>
+            <FieldLabel>Forsikringsnummer</FieldLabel>
+            <FieldDescription>
+              Hvis katten ikke er forsikret, la feltet være tomt.
+            </FieldDescription>
             <Input {...form.register("insurance_number")} />
             <FieldError errors={[form.formState.errors.insurance_number]} />
           </Field>
@@ -223,22 +230,35 @@ export default function AddCatForm() {
             className="max-w-xs"
           >
             <FieldLabel>Sist vaksine *</FieldLabel>
+            <FieldDescription>
+              Hvis katten ikke har fått årets vaksine ennå, velg dato når den
+              skal tas
+            </FieldDescription>
             <Input type="date" {...form.register("last_vaccine_date")} />
             <FieldError errors={[form.formState.errors.last_vaccine_date]} />
           </Field>
 
           <Field>
-            <FieldLabel>Ormebehandling</FieldLabel>
+            <FieldLabel>Ormebehandling</FieldLabel>{" "}
+            <FieldDescription>
+              Relevant informasjon om ormebehandling, dersom aktuelt.
+            </FieldDescription>
             <Textarea {...form.register("deworming_info")} />
           </Field>
 
           <Field>
-            <FieldLabel>Loppebehandling</FieldLabel>
+            <FieldLabel>Loppebehandling</FieldLabel>{" "}
+            <FieldDescription>
+              Relevant informasjon om loppebehandling, dersom aktuelt.
+            </FieldDescription>
             <Textarea {...form.register("flea_treatment_info")} />
           </Field>
 
           <Field>
             <FieldLabel>Medisinske notater</FieldLabel>
+            <FieldDescription>
+              Annen helseinformasjon som er nyttig for oss å vite ved kattepass.
+            </FieldDescription>
             <Textarea {...form.register("medical_notes")} />
           </Field>
         </FieldGroup>
@@ -253,12 +273,18 @@ export default function AddCatForm() {
         <FieldLegend>Daglig pleie & atferd</FieldLegend>
         <FieldGroup className="space-y-5">
           <Field>
-            <FieldLabel>Kosthold</FieldLabel>
+            <FieldLabel>Kosthold</FieldLabel>{" "}
+            <FieldDescription>
+              Spesielle behov, rutiner eller annet som er nyttig å vite.
+            </FieldDescription>
             <Textarea {...form.register("diet")} />
           </Field>
 
           <Field>
-            <FieldLabel>Atferdsnotater</FieldLabel>
+            <FieldLabel>Atferdsnotater</FieldLabel>{" "}
+            <FieldDescription>
+              Personlighet, vaner eller ting vi bør ta hensyn til.
+            </FieldDescription>
             <Textarea {...form.register("behavior_notes")} />
           </Field>
         </FieldGroup>

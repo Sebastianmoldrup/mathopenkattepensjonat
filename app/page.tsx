@@ -36,7 +36,7 @@ const CARD_CONTENT: CardContent[] = [
   {
     img: "phone-cat-playing-no-bg",
     title: "Oppdateringer underveis",
-    desc: "Følg kattens opphold på vår egen Snapchat-kanal. Få oppdateringer både under besøket og etterpå.",
+    desc: "Følg kattens opphold på vår egen Snapchat-kanal og facebook-side, med jevnlige oppdateringer og bilder.",
   },
 ];
 
@@ -117,21 +117,22 @@ export default function Home() {
         <div className="max-w-4xl mx-auto flex flex-col-reverse items-center gap-8 md:flex-row">
           <div className="prose prose-slate max-w-none">
             <p className="text-lg text-slate-700 leading-relaxed mb-6">
-              Vi er Anja og Martin – et par i 30-årene som bor i hjertet av
-              Mathopen. Begge er utdannede ingeniører, men vi har også en stor
-              felles lidenskap: å skape et trygt, rolig og omsorgsfullt sted for
-              katter.
+              Vi er Anja Breivik Møldrup og Martin Grindheim Johannessen – et
+              par i 30-årene som bor i Mathopen og driver Mathopen
+              Kattepensjonat.
             </p>
             <p className="text-lg text-slate-700 leading-relaxed mb-6">
-              Martin ble en del av driften i 2022, og har siden funnet stor
-              glede i å gi kattene et godt opphold. Behovet for kattepass i
-              fellesferien har alltid vært større enn kapasiteten vår, og derfor
-              bestemte vi oss for å etablere et fullverdig – og litt luksuriøst
-              – kattepensjonat.
+              Anja har drevet med kattepass siden 2018, og har gjennom flere år
+              opparbeidet seg solid erfaring. Vi har et sterkt fokus på hver
+              enkelt katt – deres personlighet, trivsel og individuelle behov.
             </p>
             <p className="text-lg text-slate-700 leading-relaxed">
-              Målet vårt er å skape et lite paradis for kattene, der de får
-              tilsyn, omsorg og oppmerksomhet.
+              Behovet for kattepass i fellesferien har over tid vært større enn
+              kapasiteten vår. Derfor bygger vi kattepensjonatet for å møte den
+              økende etterspørselen etter trygge og gode løsninger for
+              kattepass. Vi ønsker å skape et rolig og trygt sted der hver katt
+              blir sett, og får et opphold tilpasset sin personlighet, trivsel
+              og behov.
             </p>
           </div>
           <Image
@@ -233,12 +234,11 @@ export default function Home() {
 
               <div className="md:row-start-1 md:col-start-1">
                 <p className="text-slate-700 leading-relaxed mb-4">
-                  Hver katt får sitt eget rom med seng, dokasse samt mat- og
-                  vannskåler. På dagtid står døren til rommet åpen, slik at de
-                  kan bevege seg fritt i fellesområdene og luftegårdene. Disse
-                  områdene er romslige og utformet med mange rolige
-                  skjulesteder, slik at kattene kan trekke seg tilbake når de
-                  ønsker det.
+                  Hvert rom har egen seng, dokasse samt mat- og vannskåler. På
+                  dagtid står døren til rommet åpen, slik at de kan bevege seg
+                  fritt i fellesområdene og luftegårdene. Disse områdene er
+                  romslige og utformet med mange rolige skjulesteder, slik at
+                  kattene kan trekke seg tilbake når de ønsker det.
                 </p>
                 <p className="text-slate-600">
                   Vi anbefaler å ta med et teppe, en seng eller et annet trygt
@@ -275,7 +275,7 @@ export default function Home() {
               <p className="text-slate-700 leading-relaxed mb-4">
                 Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
                 skader eller sykdom som fører til at katten blir syk, skadet,
-                får varige mén eller dør før, under eller etter oppholdet. Det
+                får varige mén eller dør, under eller etter oppholdet. Det
                 anbefales generelt å ha forsikring på katten.
               </p>
               <p className="text-slate-600 text-sm">
@@ -403,32 +403,6 @@ export default function Home() {
               Telefontid: kl. 11:00–12:00 og 17:00–20:00
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* Footer note */}
-      <section className="py-8 px-4  border-y border-slate-200 bg-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-sm text-slate-600">
-            Vi gleder oss til å ta imot katten din! 🐾
-          </p>
-        </div>
-      </section>
-
-      {/* Developer Credit */}
-      <section className="py-4 px-4 ">
-        <div className="max-w-6xl mx-auto">
-          <p className="text-center text-xs text-slate-600">
-            © {CURRENT_YEAR} Utviklet av{" "}
-            <a
-              href="https://sebastianmoldrup.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium hover:text-slate-400 transition-colors"
-            >
-              Sebastian Møldrup
-            </a>
-          </p>
         </div>
       </section>
     </div>

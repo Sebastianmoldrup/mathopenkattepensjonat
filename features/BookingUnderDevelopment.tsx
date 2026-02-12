@@ -9,21 +9,31 @@ const BookingUnderDevelopment = () => {
         height={200}
         className="mb-6 rounded-md mx-auto"
       />
+
       <div>
-        <h2 className="text-2xl font-bold mb-4">Booking kommer snart</h2>
+        <h2 className="text-2xl font-bold mb-4">Booking åpner snart</h2>
+
         <p className="text-lg text-gray-600">
-          Bookingsystemet er fortsatt under utvikling.
+          Vårt nye bookingsystem er for tiden under utvikling.
         </p>
+
         <p className="text-lg text-gray-600 mt-4">
-          Dersom du ønsker å reservere plass for opphold etter 1. juli, kan du
-          gjerne sende oss en e-post på:
+          Ønsker du å reservere plass for opphold etter 1. juli? Send oss gjerne
+          en e-post, så hjelper vi deg manuelt i mellomtiden.
         </p>
+
         <a
           href="mailto:post@mathopenkattepensjonat.no"
-          className="text-blue-600 hover:underline mt-2 block"
+          className="text-blue-600 hover:underline mt-1 mb-4 block font-medium"
         >
           post@mathopenkattepensjonat.no
         </a>
+
+        <p className="text-lg text-gray-600 mt-6">
+          Du kan allerede nå opprette en profil med nødvendig informasjon om deg
+          som eier og katten(e) dine, slik at alt er klart når bookingsystemet
+          lanseres.
+        </p>
       </div>
     </div>
   );
