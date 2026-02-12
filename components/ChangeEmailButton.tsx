@@ -8,7 +8,6 @@ const ChangeEmailButton = () => {
   const handleChangeEmail = () => {
     // Implement the logic to trigger the email change process
     // This could involve calling an API route or using a server action
-    console.log("Change email button clicked");
   };
 
   return (

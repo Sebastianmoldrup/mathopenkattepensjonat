@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Cat } from "@/types";
 import { Button } from "@/components/ui/button";
+import deleteCat from "@/actions/cat/deleteDat";
 
 function RenderCat({ cat }: { cat: Cat }) {
   return (
@@ -37,7 +38,7 @@ function RenderCat({ cat }: { cat: Cat }) {
           </Button>
         </Link>
 
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={() => deleteCat(cat)}>
           Slett
         </Button>
       </div>

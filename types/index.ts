@@ -16,6 +16,7 @@ export interface Cat {
   id: string;
   user_id: string;
   image_url: string;
+  image_path: string;
   name: string;
   breed: string | null;
   age: number | null;
