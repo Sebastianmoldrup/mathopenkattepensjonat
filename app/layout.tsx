@@ -5,14 +5,13 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
+  metadataBase: new URL(siteUrl),
   title: "Mathopen Kattepensjonat",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  description:
+    "Mathopen Kattepensjonat i Bergen – et trygt, rolig og moderne kattepensjonat med store rom, kattegård, tett oppfølging og omsorg. Perfekt for katter i alle aldre.",
 };
 
 const geistSans = Geist({
