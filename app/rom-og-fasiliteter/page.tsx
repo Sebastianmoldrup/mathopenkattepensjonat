@@ -78,7 +78,9 @@ const Page = () => {
             >
               <CardHeader className="mb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{cage.name}</CardTitle>
+                  <CardTitle className="text-lg capitalize">
+                    {cage.name}
+                  </CardTitle>
 
                   {cage.premium && <Badge variant="default">Premium</Badge>}
                   {cage.highlight && (
