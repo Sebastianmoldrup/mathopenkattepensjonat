@@ -133,7 +133,10 @@ export default function Navbar() {
           </nav>
 
           {/* Bottom CTA */}
-          <div className="flex justify-center border-t border-border p-4">
+          <div
+            className="flex justify-center border-t border-border p-4"
+            onClick={() => setIsOpen(false)}
+          >
             <AuthButton fullWidth mobile />
           </div>
         </div>
