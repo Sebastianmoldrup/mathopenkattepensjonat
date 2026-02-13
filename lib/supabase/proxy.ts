@@ -46,12 +46,21 @@ export async function updateSession(request: NextRequest) {
   // with the Supabase client, your users may be randomly logged out.
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
-
   const isAuthPages = request.nextUrl.pathname.startsWith("/minside");
 
-  if (!user && isAuthPages) {
+  // Only redirect if we're on an auth page AND there's no user
+  // AND we're not already redirecting to login (prevent redirect loops)
+  if (!user && isAuthPages && request.nextUrl.pathname !== "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    url.searchParams.set("redirectedFrom", request.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // If user exists but is on login page, redirect to /minside
+  if (user && request.nextUrl.pathname === "/login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/minside";
     return NextResponse.redirect(url);
   }
 
