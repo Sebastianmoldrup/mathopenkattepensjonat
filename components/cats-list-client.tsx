@@ -8,7 +8,7 @@ import { DeleteCatButton } from "./deleteCatButton";
 
 function RenderCat({ cat }: { cat: Cat }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="grid md:grid-flow-col auto-cols-max justify-between gap-y-4">
       <div className="flex items-center space-x-4">
         <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-full bg-gray-200">
           {cat.image_url ? (

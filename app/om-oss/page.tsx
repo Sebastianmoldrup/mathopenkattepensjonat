@@ -85,7 +85,7 @@ export default function Page() {
 
         <div className="rounded-2xl bg-background p-6 shadow-sm">
           <h2 className="mb-3 text-lg font-semibold text-foreground">
-            Et lite paradis for katter
+            Omsorg og trygghet når du er bortreist
           </h2>
           <p className="text-muted-foreground">
             Behovet for kattepass i fellesferien har alltid vært større enn
