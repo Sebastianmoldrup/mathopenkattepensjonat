@@ -41,7 +41,7 @@ export const CatSchema = z.object({
     .number()
     .int("Alder må være et helt tall")
     .min(0, "Ugyldig alder")
-    .max(40, "Lite sannsynlig katt 😄"),
+    .max(40, "Ugyldig alder"),
 
   is_sterilized: z.coerce.boolean().default(false),
 

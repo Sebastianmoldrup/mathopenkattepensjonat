@@ -61,8 +61,13 @@ export default function AddCatForm() {
       return;
     }
 
-    await createCat(values, file);
-    router.replace("/minside/minekatter");
+    try {
+      await createCat(values, file);
+      router.replace("/minside/minekatter");
+    } catch (err) {
+      console.error(err);
+      alert("Noe gikk galt ved lagring. Prøv igjen.");
+    }
   };
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {

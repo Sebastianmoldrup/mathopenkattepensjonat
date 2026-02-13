@@ -13,6 +13,8 @@ export async function createCat(values: CatInput, file: File) {
 
   if (!user) throw new Error("You must be logged in");
 
+  const uuid = crypto.randomUUID();
+
   const { data: cat, error: insertError } = await supabase
     .from("cats")
     .insert({
@@ -25,7 +27,7 @@ export async function createCat(values: CatInput, file: File) {
   if (insertError) throw insertError;
 
   const ext = file.name.split(".").pop();
-  const imagePath = `cats/${cat.id}/${cat.name}.${ext}`;
+  const imagePath = `${uuid}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from("catphotos")

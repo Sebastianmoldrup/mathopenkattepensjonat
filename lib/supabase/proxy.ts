@@ -47,31 +47,11 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  const isAuthPage =
-    request.nextUrl.pathname.startsWith("/login") ||
-    request.nextUrl.pathname.startsWith("/registrering") ||
-    request.nextUrl.pathname.startsWith("/registrering-bekreftet") ||
-    request.nextUrl.pathname.startsWith("/glemt-passord");
+  const isAuthPages = request.nextUrl.pathname.startsWith("/minside");
 
-  const isSubPage =
-    request.nextUrl.pathname.startsWith("/booking") ||
-    request.nextUrl.pathname.startsWith("/om-oss") ||
-    request.nextUrl.pathname.startsWith("/kontakt") ||
-    request.nextUrl.pathname.startsWith("/priser") ||
-    request.nextUrl.pathname.startsWith("/personvern") ||
-    request.nextUrl.pathname.startsWith("/vilkar") ||
-    request.nextUrl.pathname.startsWith("/informasjon") ||
-    request.nextUrl.pathname.startsWith("/rom-og-fasiliteter") ||
-    request.nextUrl.pathname.startsWith("/bilder");
-
-  if (request.nextUrl.pathname !== "/" && !user && !isAuthPage && !isSubPage) {
-    // no user, potentially respond by redirecting the user to the login page
+  if (!user && isAuthPages) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
-  } else if (user && request.nextUrl.pathname.startsWith("/login")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/minside";
     return NextResponse.redirect(url);
   }
 
