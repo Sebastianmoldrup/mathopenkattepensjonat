@@ -64,9 +64,6 @@ const LoginForm = () => {
       });
 
       if (error?.message === "Email not confirmed") {
-        // alert(
-        //   "E-posten er ikke bekreftet. Sjekk innboksen din for bekreftelseslenke.",
-        // );
         setError(
           "E-posten er ikke bekreftet. Sjekk innboksen din for bekreftelseslenke.",
         );
@@ -75,19 +72,14 @@ const LoginForm = () => {
       }
 
       if (error) {
-        // alert("Feil e-post eller passord. Prøv igjen.");
         setError("Feil e-post eller passord. Prøv igjen.");
         setLoading(false);
         return;
       }
 
-      form.reset();
-      setLoading(false);
-      // redirect("/minside");
       router.push("/minside");
     } catch (err) {
       console.error(err);
-      // alert("Noe gikk galt ved innlogging. Prøv igjen.");
       setError("Noe gikk galt ved innlogging. Prøv igjen.");
       setLoading(false);
     }

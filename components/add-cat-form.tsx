@@ -61,6 +61,9 @@ export default function AddCatForm() {
       return;
     }
 
+    // Scroll to top immediately when submitting
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     try {
       await createCat(values, file);
       router.replace("/minside/minekatter");

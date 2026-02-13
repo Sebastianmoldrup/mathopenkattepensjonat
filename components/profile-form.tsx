@@ -57,6 +57,9 @@ export function ProfileForm({ user }: { user: User | null }) {
     if (!user) return;
     setLoading(true);
 
+    // Scroll to top immediately when submitting
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     await updateUser(user.id, values);
     form.reset(values);
     setLoading(false);

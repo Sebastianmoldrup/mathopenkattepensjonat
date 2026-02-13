@@ -58,8 +58,18 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
   });
 
   const onSubmit = async (values: CatInput) => {
-    await updateCat(cat.id, values, file);
-    router.replace("/minside/minekatter");
+    // Scroll to top immediately when submitting
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    try {
+      await updateCat(cat.id, values, file);
+      router.replace("/minside/minekatter");
+    } catch (error) {
+      console.error("Feil ved oppdatering av katt:", error);
+      alert(
+        "Det skjedde en feil ved oppdatering av katten. Vennligst prøv igjen.",
+      );
+    }
   };
 
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
