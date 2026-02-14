@@ -7,11 +7,36 @@ import { readCatBucket } from "./readCatBucket";
 export async function createCat(values: CatInput, file: File) {
   const supabase = await createClient();
 
+  console.log("Auth check starting...");
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
+  console.log("User result:", { user: user?.id, error: userError });
 
-  if (!user) throw new Error("You must be logged in");
+  if (!user) {
+    // Add session fallback test
+    console.log("getUser() failed, checking session...");
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+    console.log("Session result:", {
+      session: session?.user?.id,
+      error: sessionError,
+    });
+
+    if (!session) {
+      console.error("Both auth checks failed");
+      throw new Error("You must be logged in");
+    }
+  }
+
+  // const {
+  //   data: { user },
+  // } = await supabase.auth.getUser();
+  //
+  // if (!user) throw new Error("You must be logged in");
 
   const uuid = crypto.randomUUID();
 

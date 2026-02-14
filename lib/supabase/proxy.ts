@@ -54,14 +54,21 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectedFrom", request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+
+    const redirectResponse = NextResponse.redirect(url);
+    redirectResponse.cookies.setAll(supabaseResponse.cookies.getAll());
+    console.log("🔄 Redirecting to login WITH cookies");
+    return redirectResponse;
   }
 
-  // If user exists but is on login page, redirect to /minside
   if (user && request.nextUrl.pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/minside";
-    return NextResponse.redirect(url);
+
+    const redirectResponse = NextResponse.redirect(url);
+    redirectResponse.cookies.setAll(supabaseResponse.cookies.getAll());
+    console.log("🔄 Redirecting to minside WITH cookies");
+    return redirectResponse;
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
