@@ -55,21 +55,54 @@ export default function AddCatForm() {
     setPreview(null);
   }, []);
 
+  // const onSubmit = async (values: CatInput) => {
+  //   if (!file) {
+  //     alert("Vennligst last opp et bilde av katten.");
+  //     return;
+  //   }
+  //
+  //   // Scroll to top immediately when submitting
+  //   window.scrollTo({ top: 0, behavior: "smooth" });
+  //
+  //   try {
+  //     await createCat(values, file);
+  //     router.replace("/minside/minekatter");
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("Noe gikk galt ved lagring. Prøv igjen.");
+  //   }
+  // };
+
   const onSubmit = async (values: CatInput) => {
     if (!file) {
       alert("Vennligst last opp et bilde av katten.");
       return;
     }
 
-    // Scroll to top immediately when submitting
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
     try {
       await createCat(values, file);
       router.replace("/minside/minekatter");
     } catch (err) {
-      console.error(err);
-      alert("Noe gikk galt ved lagring. Prøv igjen.");
+      console.error("Error creating cat:", err);
+
+      // Show user-friendly error message
+      let errorMessage = "Noe gikk galt ved lagring.";
+
+      if (err instanceof Error) {
+        if (err.message.includes("size") || err.message.includes("large")) {
+          errorMessage =
+            "Bildet er for stort. Vennligst velg et mindre bilde (maks 4.5MB).";
+        } else if (
+          err.message.includes("type") ||
+          err.message.includes("mime")
+        ) {
+          errorMessage = "Filtypen støttes ikke. Bruk JPEG, PNG eller WEBP.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      alert(errorMessage);
     }
   };
 
@@ -140,7 +173,7 @@ export default function AddCatForm() {
                   Velg bilde
                 </Button>
                 <span className="text-xs text-muted-foreground">
-                  JPEG, PNG eller WEBP. Maks 5MB.
+                  JPEG, PNG eller WEBP. Maks 4.5&nbsp;MB.
                 </span>
               </div>
             </div>

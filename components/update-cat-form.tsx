@@ -64,11 +64,27 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
     try {
       await updateCat(cat.id, values, file);
       router.replace("/minside/minekatter");
-    } catch (error) {
-      console.error("Feil ved oppdatering av katt:", error);
-      alert(
-        "Det skjedde en feil ved oppdatering av katten. Vennligst prøv igjen.",
-      );
+    } catch (err) {
+      console.error("Error creating cat:", err);
+
+      // Show user-friendly error message
+      let errorMessage = "Noe gikk galt ved lagring.";
+
+      if (err instanceof Error) {
+        if (err.message.includes("size") || err.message.includes("large")) {
+          errorMessage =
+            "Bildet er for stort. Vennligst velg et mindre bilde (maks 4.5MB).";
+        } else if (
+          err.message.includes("type") ||
+          err.message.includes("mime")
+        ) {
+          errorMessage = "Filtypen støttes ikke. Bruk JPEG, PNG eller WEBP.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      alert(errorMessage);
     }
   };
 
@@ -139,7 +155,7 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
               </Button>
 
               <span className="text-xs text-muted-foreground">
-                Støttede formater: JPEG, PNG, WEBP. Maks 5&nbsp;MB.
+                Støttede formater: JPEG, PNG, WEBP. Maks 4.5&nbsp;MB.
               </span>
             </div>
           </Field>
