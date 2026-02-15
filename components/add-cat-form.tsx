@@ -55,35 +55,20 @@ export default function AddCatForm() {
     setPreview(null);
   }, []);
 
-  // const onSubmit = async (values: CatInput) => {
-  //   if (!file) {
-  //     alert("Vennligst last opp et bilde av katten.");
-  //     return;
-  //   }
-  //
-  //   // Scroll to top immediately when submitting
-  //   window.scrollTo({ top: 0, behavior: "smooth" });
-  //
-  //   try {
-  //     await createCat(values, file);
-  //     router.replace("/minside/minekatter");
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("Noe gikk galt ved lagring. Prøv igjen.");
-  //   }
-  // };
-
   const onSubmit = async (values: CatInput) => {
     if (!file) {
       alert("Vennligst last opp et bilde av katten.");
       return;
     }
 
+    // Scroll to top immediately when submitting
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
     try {
       await createCat(values, file);
       router.replace("/minside/minekatter");
     } catch (err) {
-      console.error("Error creating cat:", err);
+      // console.error("Error creating cat:", err);
 
       // Show user-friendly error message
       let errorMessage = "Noe gikk galt ved lagring.";
@@ -91,7 +76,7 @@ export default function AddCatForm() {
       if (err instanceof Error) {
         if (err.message.includes("size") || err.message.includes("large")) {
           errorMessage =
-            "Bildet er for stort. Vennligst velg et mindre bilde (maks 4.5MB).";
+            "Bildet er for stort. Vennligst velg et mindre bilde (maks 4.4MB).";
         } else if (
           err.message.includes("type") ||
           err.message.includes("mime")
@@ -109,6 +94,25 @@ export default function AddCatForm() {
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
+
+    const maxSize = 4.4 * 1024 * 1024; // 4.4MB in bytes
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!validTypes.includes(f.type)) {
+      alert("Ugyldig filtype. Vennligst velg JPEG, PNG eller WEBP.");
+      return;
+    } else if (f.size > maxSize) {
+      alert(
+        `Filen er for stor (${Math.floor(f.size / 1024 / 1024)}MB). Vennligst velg et bilde mindre enn 4.4MB.`,
+      );
+
+      return;
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -173,7 +177,7 @@ export default function AddCatForm() {
                   Velg bilde
                 </Button>
                 <span className="text-xs text-muted-foreground">
-                  JPEG, PNG eller WEBP. Maks 4.5&nbsp;MB.
+                  JPEG, PNG eller WEBP. Maks 4.4&nbsp;MB.
                 </span>
               </div>
             </div>
@@ -275,7 +279,11 @@ export default function AddCatForm() {
               Hvis katten ikke har fått årets vaksine ennå, velg dato når den
               skal tas
             </FieldDescription>
-            <Input type="date" {...form.register("last_vaccine_date")} />
+            <Input
+              type="date"
+              {...form.register("last_vaccine_date")}
+              className="input-date"
+            />
             <FieldError errors={[form.formState.errors.last_vaccine_date]} />
           </Field>
 

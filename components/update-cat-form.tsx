@@ -65,7 +65,7 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
       await updateCat(cat.id, values, file);
       router.replace("/minside/minekatter");
     } catch (err) {
-      console.error("Error creating cat:", err);
+      // console.error("Error creating cat:", err);
 
       // Show user-friendly error message
       let errorMessage = "Noe gikk galt ved lagring.";
@@ -91,6 +91,25 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
   const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
+
+    const maxSize = 4.4 * 1024 * 1024; // 4.4MB in bytes
+    const validTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!validTypes.includes(f.type)) {
+      alert("Ugyldig filtype. Vennligst velg JPEG, PNG eller WEBP.");
+      return;
+    } else if (f.size > maxSize) {
+      alert(
+        `Filen er for stor (${Math.floor(f.size / 1024 / 1024)}MB). Vennligst velg et bilde mindre enn 4.4MB.`,
+      );
+
+      return;
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -155,7 +174,7 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
               </Button>
 
               <span className="text-xs text-muted-foreground">
-                Støttede formater: JPEG, PNG, WEBP. Maks 4.5&nbsp;MB.
+                Støttede formater: JPEG, PNG, WEBP. Maks 4.4&nbsp;MB.
               </span>
             </div>
           </Field>
@@ -256,7 +275,11 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
               Hvis katten ikke har fått årets vaksine ennå, velg dato når den
               skal tas
             </FieldDescription>
-            <Input type="date" {...form.register("last_vaccine_date")} />
+            <Input
+              type="date"
+              {...form.register("last_vaccine_date")}
+              className="input-date"
+            />
             <FieldError errors={[form.formState.errors.last_vaccine_date]} />
           </Field>
 

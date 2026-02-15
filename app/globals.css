@@ -57,6 +57,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  .input-date::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
 }
 
 @layer deprecated {
