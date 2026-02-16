@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from 'next/image'
 
 export default function Page() {
   return (
@@ -26,11 +26,11 @@ export default function Page() {
 
         <div className="space-y-5 text-muted-foreground">
           <p>
-            Vi er{" "}
-            <strong className="text-foreground">Anja Breivik Møldrup</strong> og{" "}
+            Vi er{' '}
+            <strong className="text-foreground">Anja Breivik Møldrup</strong> og{' '}
             <strong className="text-foreground">
               Martin Grindheim Johannessen
-            </strong>{" "}
+            </strong>{' '}
             – et par i 30-årene som bor i Mathopen og driver Mathopen
             Kattepensjonat.
           </p>
@@ -61,7 +61,7 @@ export default function Page() {
           </p>
         </div>
 
-        <div className="flex flex-col-reverse md:flex-row items-start gap-6 md:items-center rounded-2xl bg-background p-6 shadow-sm">
+        <div className="flex flex-col-reverse items-start gap-6 rounded-2xl bg-background p-6 shadow-sm md:flex-row md:items-center">
           <Image
             src="/img/var-arbeider.webp"
             alt="Vår arbeider"
@@ -99,5 +99,5 @@ export default function Page() {
         </div>
       </section>
     </div>
-  );
+  )
 }

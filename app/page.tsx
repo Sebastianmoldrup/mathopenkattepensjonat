@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Calendar,
   MapPin,
@@ -9,55 +9,55 @@ import {
   Star,
   Shield,
   Camera,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import BookingUnderDevelopment from "@/features/BookingUnderDevelopment";
+} from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import BookingUnderDevelopment from '@/features/BookingUnderDevelopment'
 
 type CardContent = {
-  img: string;
-  title: string;
-  desc: string;
-};
+  img: string
+  title: string
+  desc: string
+}
 
-const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_YEAR = new Date().getFullYear()
 
 const CARD_CONTENT: CardContent[] = [
   {
-    img: "petting-no-bg",
-    title: "Erfaren omsorg",
-    desc: "Anja har drevet kattepass siden 2018 med bred erfaring i katteatferd og stell.",
+    img: 'petting-no-bg',
+    title: 'Erfaren omsorg',
+    desc: 'Anja har drevet kattepass siden 2018 med bred erfaring i katteatferd og stell.',
   },
   {
-    img: "playing-no-bg",
-    title: "Romslige fasiliteter",
-    desc: "Romslige bur, kattegård åpen hele dagen, veggmonterte kattemøbler og gode aktivitetsområder",
+    img: 'playing-no-bg',
+    title: 'Romslige fasiliteter',
+    desc: 'Romslige bur, kattegård åpen hele dagen, veggmonterte kattemøbler og gode aktivitetsområder',
   },
   {
-    img: "phone-cat-playing-no-bg",
-    title: "Oppdateringer underveis",
-    desc: "Følg kattens opphold på vår egen Snapchat-kanal og facebook-side, med jevnlige oppdateringer og bilder.",
+    img: 'phone-cat-playing-no-bg',
+    title: 'Oppdateringer underveis',
+    desc: 'Følg kattens opphold på vår egen Snapchat-kanal og facebook-side, med jevnlige oppdateringer og bilder.',
   },
-];
+]
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-background to-white py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="relative bg-gradient-to-b from-background to-white px-4 py-20">
+        <div className="mx-auto max-w-4xl text-center">
           <Badge className="mb-4 bg-slate-100 text-slate-700 hover:bg-slate-200">
             Kattepensjonat i Bergen
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 leading-tight">
+          <h1 className="mb-6 text-4xl font-bold leading-tight text-slate-900 md:text-5xl">
             Mathopen Kattepensjonat
           </h1>
-          <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+          <p className="mx-auto mb-8 max-w-2xl text-xl text-slate-600">
             Det trygge hjemmet når du er bortreist
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Link href="/booking">
-              {" "}
+              {' '}
               <Button size="lg" className="">
                 <Calendar className="mr-2 h-5 w-5" />
                 Bestill opphold
@@ -80,24 +80,24 @@ export default function Home() {
       <BookingUnderDevelopment />
 
       {/* Features Grid */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 place-content-center gap-8">
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="grid place-content-center gap-8 md:grid-cols-3">
             {CARD_CONTENT.map(({ img, title, desc }, index) => (
               <Card
                 key={index}
-                className="border-slate-200 hover:shadow-lg transition-shadow max-w-[348px]"
+                className="max-w-[348px] border-slate-200 transition-shadow hover:shadow-lg"
               >
-                <CardContent className="flex flex-col justify-end items-center pt-6 h-full">
+                <CardContent className="flex h-full flex-col items-center justify-end pt-6">
                   <Image
-                    src={`${"/illustration/" + img + ".webp"}`}
+                    src={`${'/illustration/' + img + '.webp'}`}
                     alt="hei"
                     width={150}
                     height={150}
-                    className="rounded-lg mb-4 h-[150px] w-fit"
+                    className="mb-4 h-[150px] w-fit rounded-lg"
                   />
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    <h3 className="mb-2 text-lg font-semibold text-slate-900">
                       {title}
                     </h3>
                     <p className="text-slate-600">{desc}</p>
@@ -110,23 +110,23 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section className="py-16 px-4 bg-white">
-        <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
+      <section className="bg-white px-4 py-16">
+        <h2 className="mb-8 text-center text-3xl font-bold text-slate-900">
           Om oss
         </h2>
-        <div className="max-w-4xl mx-auto flex flex-col-reverse items-center gap-8 md:flex-row">
+        <div className="mx-auto flex max-w-4xl flex-col-reverse items-center gap-8 md:flex-row">
           <div className="prose prose-slate max-w-none">
-            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+            <p className="mb-6 text-lg leading-relaxed text-slate-700">
               Vi er Anja Breivik Møldrup og Martin Grindheim Johannessen – et
               par i 30-årene som bor i Mathopen og driver Mathopen
               Kattepensjonat.
             </p>
-            <p className="text-lg text-slate-700 leading-relaxed mb-6">
+            <p className="mb-6 text-lg leading-relaxed text-slate-700">
               Anja har drevet med kattepass siden 2018, og har gjennom flere år
               opparbeidet seg solid erfaring. Vi har et sterkt fokus på hver
               enkelt katt – deres personlighet, trivsel og individuelle behov.
             </p>
-            <p className="text-lg text-slate-700 leading-relaxed">
+            <p className="text-lg leading-relaxed text-slate-700">
               Behovet for kattepass i fellesferien har over tid vært større enn
               kapasiteten vår. Derfor bygger vi kattepensjonatet for å møte den
               økende etterspørselen etter trygge og gode løsninger for
@@ -140,13 +140,13 @@ export default function Home() {
             alt="hei"
             width={600}
             height={600}
-            className="w-[150px] md:w-[400px] h-auto rounded-lg"
+            className="h-auto w-[150px] rounded-lg md:w-[400px]"
           />
         </div>
       </section>
 
       {/* Our partners */}
-      <section className="flex flex-col items-center gap-8 py-16 px-4">
+      <section className="flex flex-col items-center gap-8 px-4 py-16">
         <h2 className="text-3xl font-semibold">Vi samarbeider med</h2>
         <Image
           src="/partners/buddy.webp"
@@ -158,58 +158,58 @@ export default function Home() {
       </section>
 
       {/* Location & Facilities */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">
+      <section className="bg-white px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
             Fasiliteter og beliggenhet
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+          <div className="mx-auto grid max-w-4xl gap-12 md:grid-cols-2">
             <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4 flex items-center">
-                <MapPin className="h-5 w-5 mr-2 text-slate-700" />
+              <h3 className="mb-4 flex items-center text-xl font-semibold text-slate-900">
+                <MapPin className="mr-2 h-5 w-5 text-slate-700" />
                 Beliggenhet
               </h3>
-              <p className="text-slate-700 mb-4">
+              <p className="mb-4 text-slate-700">
                 <strong>Adresse:</strong> Storingavika 2, 5174 Mathopen
               </p>
-              <p className="text-slate-600 mb-4">
+              <p className="mb-4 text-slate-600">
                 Vi holder til like ved busstoppet Storingavika i Mathopen. I
                 tillegg tilbyr vi henting og levering mot et tillegg.
               </p>
             </div>
 
             <div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-4 flex items-center">
-                <Shield className="h-5 w-5 mr-2 text-slate-700" />
+              <h3 className="mb-4 flex items-center text-xl font-semibold text-slate-900">
+                <Shield className="mr-2 h-5 w-5 text-slate-700" />
                 Sikkerhet og trivsel
               </h3>
               <ul className="space-y-2 text-slate-600">
                 <li className="flex items-start">
-                  <span className="text-slate-400 mr-2">•</span>
+                  <span className="mr-2 text-slate-400">•</span>
                   <span>Brannalarm, videoovervåkning og innbruddsalarm</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-slate-400 mr-2">•</span>
+                  <span className="mr-2 text-slate-400">•</span>
                   <span>Følger alle Mattilsynets krav og retningslinjer</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-slate-400 mr-2">•</span>
+                  <span className="mr-2 text-slate-400">•</span>
                   <span>Ekstra oppfølging for katter som trenger det</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-slate-400 mr-2">•</span>
+                  <span className="mr-2 text-slate-400">•</span>
                   <span>Kvalitetsfôr inkludert, mulighet for eget fôr</span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-slate-400 mr-2">•</span>
+                  <span className="mr-2 text-slate-400">•</span>
                   <span>
                     Nybygg fra 2026 med balansert ventilasjon og varmepumpe for
                     å sikre et stabilt og godt inneklima
                   </span>
                 </li>
                 <li className="flex items-start">
-                  <span className="text-slate-400 mr-2">•</span>
+                  <span className="mr-2 text-slate-400">•</span>
                   <span>
                     Hvert enkelt bur har spesialtilpasset avtrekksventilasjon
                     montert over hvert toalettområde
@@ -219,21 +219,21 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mt-12 p-8  rounded-lg max-w-sm md:max-w-4xl mx-auto md:flex-row-reverse bg-background">
-            <h3 className="text-xl font-semibold text-slate-900 mb-4">
+          <div className="mx-auto mt-12 max-w-sm rounded-lg bg-background p-8 md:max-w-4xl md:flex-row-reverse">
+            <h3 className="mb-4 text-xl font-semibold text-slate-900">
               Et trygt og stimulerende miljø
             </h3>
-            <div className="grid md:grid-cols-2 place-items-center">
+            <div className="grid place-items-center md:grid-cols-2">
               <Image
                 src="/illustration/cat-sleeping-no-bg.webp"
                 alt=""
                 width={150}
                 height={150}
-                className="w-[300px] md:row-start-1 md:col-start-2"
+                className="w-[300px] md:col-start-2 md:row-start-1"
               />
 
-              <div className="md:row-start-1 md:col-start-1">
-                <p className="text-slate-700 leading-relaxed mb-4">
+              <div className="md:col-start-1 md:row-start-1">
+                <p className="mb-4 leading-relaxed text-slate-700">
                   Hvert rom har egen seng, dokasse samt mat- og vannskåler. På
                   dagtid står døren til rommet åpen, slik at de kan bevege seg
                   fritt i fellesområdene og luftegårdene. Disse områdene er
@@ -248,7 +248,7 @@ export default function Home() {
               </div>
             </div>
             <Button className="mr-2 p-6" disabled>
-              <House className="w-4 h-4 text-white" /> Utforsk pensjonatet
+              <House className="h-4 w-4 text-white" /> Utforsk pensjonatet
             </Button>
             <span className="text-muted-foreground">Kommer snart.</span>
           </div>
@@ -256,13 +256,13 @@ export default function Home() {
       </section>
 
       {/* Responsibility and insurance */}
-      <section className="py-16 px-4 ">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 mb-12 text-center">
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
             Ansvar og forsikring
           </h2>
 
-          <div className="grid md:grid-cols-2 place-items-center">
+          <div className="grid place-items-center md:grid-cols-2">
             <Image
               src="/illustration/handover-cat-no-bg.webp"
               alt=""
@@ -271,14 +271,14 @@ export default function Home() {
               className="w-[300px]"
             />
 
-            <div className="max-w-sm md:max-w-4xl mx-auto">
-              <p className="text-slate-700 leading-relaxed mb-4">
+            <div className="mx-auto max-w-sm md:max-w-4xl">
+              <p className="mb-4 leading-relaxed text-slate-700">
                 Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
                 skader eller sykdom som fører til at katten blir syk, skadet,
                 får varige mén eller dør, under eller etter oppholdet. Det
                 anbefales generelt å ha forsikring på katten.
               </p>
-              <p className="text-slate-600 text-sm">
+              <p className="text-sm text-slate-600">
                 Pensjonatet tar heller ikke ansvar for skader eller tap som
                 skyldes tredjepart. Våre lokaler ligger på privat område, og
                 uvedkommende har ikke adgang uten godkjenning og tilstedeværelse
@@ -291,56 +291,56 @@ export default function Home() {
       </section>
 
       {/* Pricing Overview */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-slate-900 mb-8 text-center">
+      <section className="bg-white px-4 py-16">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-8 text-center text-3xl font-bold text-slate-900">
             Priser
           </h2>
 
           <Card className="border-slate-200">
             <CardContent className="pt-6">
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid gap-8 md:grid-cols-2">
                 {/* PRISER */}
                 <div>
-                  <p className="text-sm text-slate-500 mb-6">
+                  <p className="mb-6 text-sm text-slate-500">
                     Per døgn per katt
                   </p>
 
                   {/* Sesongpriser */}
-                  <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                  <div className="mb-6 grid gap-4 sm:grid-cols-2">
                     {/* Lavsesong */}
-                    <div className="border border-slate-200 rounded-lg p-4">
-                      <p className="text-sm text-slate-500 mb-1">Lavsesong</p>
+                    <div className="rounded-lg border border-slate-200 p-4">
+                      <p className="mb-1 text-sm text-slate-500">Lavsesong</p>
                       <p className="text-3xl font-bold text-slate-900">220,-</p>
                     </div>
 
                     {/* Høysesong */}
-                    <div className="border border-slate-200 rounded-lg p-4">
-                      <p className="text-sm text-slate-500 mb-1">Høysesong</p>
+                    <div className="rounded-lg border border-slate-200 p-4">
+                      <p className="mb-1 text-sm text-slate-500">Høysesong</p>
                       <p className="text-3xl font-bold text-slate-900">250,-</p>
                     </div>
                   </div>
 
-                  <p className="text-sm text-slate-600 mb-6">
+                  <p className="mb-6 text-sm text-slate-600">
                     Minstebeløp tilsvarer 2 døgn
                   </p>
 
                   {/* Tillegg */}
                   <div className="space-y-3">
                     <div className="flex items-start">
-                      <span className="text-slate-400 mr-2">•</span>
+                      <span className="mr-2 text-slate-400">•</span>
                       <span className="text-slate-700">
                         Katt nr. 2: kr 100,- (samme rom)
                       </span>
                     </div>
                     <div className="flex items-start">
-                      <span className="text-slate-400 mr-2">•</span>
+                      <span className="mr-2 text-slate-400">•</span>
                       <span className="text-slate-700">
                         Gratis medisinering
                       </span>
                     </div>
                     <div className="flex items-start">
-                      <span className="text-slate-400 mr-2">•</span>
+                      <span className="mr-2 text-slate-400">•</span>
                       <span className="text-slate-700">
                         Rabatt ved langtidsopphold
                       </span>
@@ -350,15 +350,15 @@ export default function Home() {
 
                 {/* INN- OG UTSJEKK */}
                 <div>
-                  <h4 className="font-semibold text-slate-900 mb-4">
+                  <h4 className="mb-4 font-semibold text-slate-900">
                     Inn- og utsjekk
                   </h4>
-                  <p className="text-slate-700 mb-4">
+                  <p className="mb-4 text-slate-700">
                     <strong>Mandag–fredag og søndag:</strong>
                     <br />
                     Kl. 17:00–20:00
                   </p>
-                  <p className="text-slate-700 mb-4">
+                  <p className="mb-4 text-slate-700">
                     <strong>Lørdag:</strong> Stengt
                   </p>
                   <p className="text-sm text-slate-600">
@@ -372,18 +372,18 @@ export default function Home() {
       </section>
 
       {/* Contact CTA */}
-      <section className="py-16 px-4 ">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-6">
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="mb-6 text-3xl font-bold text-slate-900">
             Klar for å bestille?
           </h2>
-          <p className="text-lg text-slate-600 mb-8">
+          <p className="mb-8 text-lg text-slate-600">
             Du er hjertelig velkommen til å komme på besøk for å se lokalet før
             du bestiller opphold. Kattpensjonatet åpner imidlertid først 1.
             juli.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <div className="mb-8 flex flex-col justify-center gap-4 sm:flex-row">
             <Link href="/booking">
               <Button size="lg" className="">
                 Bestill nå
@@ -406,5 +406,5 @@ export default function Home() {
         </div>
       </section>
     </div>
-  );
+  )
 }

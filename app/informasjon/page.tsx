@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from 'next/image'
 
 export default function Page() {
   return (
@@ -132,7 +132,7 @@ export default function Page() {
         </InfoRow>
       </div>
     </div>
-  );
+  )
 }
 
 function InfoRow({
@@ -142,19 +142,19 @@ function InfoRow({
   reverse,
   children,
 }: {
-  image: string;
-  alt: string;
-  title: string;
-  reverse?: boolean;
-  children: React.ReactNode;
+  image: string
+  alt: string
+  title: string
+  reverse?: boolean
+  children: React.ReactNode
 }) {
   return (
     <section
       className={`grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr] md:items-center ${
-        reverse ? "md:[grid-template-columns:1fr_220px]" : ""
+        reverse ? 'md:[grid-template-columns:1fr_220px]' : ''
       }`}
     >
-      <div className={`flex justify-center ${reverse ? "md:order-2" : ""}`}>
+      <div className={`flex justify-center ${reverse ? 'md:order-2' : ''}`}>
         <Image
           src={image}
           alt={alt}
@@ -169,5 +169,5 @@ function InfoRow({
         {children}
       </div>
     </section>
-  );
+  )
 }
