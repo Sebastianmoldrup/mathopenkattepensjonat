@@ -1,51 +1,57 @@
-import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Check } from "lucide-react";
+import Image from 'next/image'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Check } from 'lucide-react'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogTitle,
+  DialogContent,
+} from '@/components/ui/dialog'
 
 const CAGE_TYPES = [
   {
-    name: "standard",
+    name: 'standard',
     lowSeasonPrice: 220,
     highSeasonPrice: 250,
-    img: "standard",
+    img: 'hd-standard',
     perExtraCat: 100,
     list: [
-      "Eget rom på L85, D90, H100",
-      "seng, dokasse, mat- og vannskål",
-      "Plass til 2 katter fra samme husstand",
+      'Eget rom på L85, D90, H100',
+      'seng, dokasse, mat- og vannskål',
+      'Plass til 2 katter fra samme husstand',
     ],
   },
   {
-    name: "senior & comfort",
+    name: 'senior & comfort',
     lowSeasonPrice: 220,
     highSeasonPrice: 250,
-    img: "senior & comfort",
+    img: 'senior-&-comfort',
     perExtraCat: 100,
     list: [
-      "Eget rom på L90, D100, H80",
-      "seng, dokasse, mat- og vannskål",
-      "Plass til 2 katter fra samme husstand",
-      "Tilrettelagt for eldre katter og katter med helseutfordringer",
+      'Eget rom på L90, D100, H80',
+      'seng, dokasse, mat- og vannskål',
+      'Plass til 2 katter fra samme husstand',
+      'Tilrettelagt for eldre katter og katter med helseutfordringer',
     ],
     highlight: true,
   },
   {
-    name: "suite",
+    name: 'suite',
     lowSeasonPrice: 350,
     highSeasonPrice: 450,
-    img: "suite",
+    img: 'suite',
     perExtraCat: 100,
     list: [
-      "Eget rom på L85, D100, H240",
-      "seng, dokasse, mat- og vannskål",
-      "Plass til 3-4 katter fra samme husstand",
-      "Ekstra stor plass og tilrettelegging for katter som trives best med mer privat plass",
+      'Eget rom på L85, D100, H240',
+      'seng, dokasse, mat- og vannskål',
+      'Plass til 3-4 katter fra samme husstand',
+      'Ekstra stor plass og tilrettelegging for katter som trives best med mer privat plass',
     ],
     premium: true,
-    obs: "Dette buret kan bookes av alle som har 1–3 katter. Prisen er 450 kr per døgn. ⚠️ Begrenset antall – bestill i god tid",
+    obs: 'Dette buret kan bookes av alle som har 1–3 katter. Prisen er 450 kr per døgn. ⚠️ Begrenset antall – bestill i god tid',
   },
-];
+]
 
 const Page = () => {
   return (
@@ -68,12 +74,12 @@ const Page = () => {
         {CAGE_TYPES.map((cage) => (
           <article key={cage.name}>
             <Card
-              className={`rounded-2xl shadow-sm h-full ${
+              className={`h-full rounded-2xl shadow-sm ${
                 cage.premium
-                  ? "border-primary"
+                  ? 'border-primary'
                   : cage.highlight
-                    ? "border-muted-foreground/30"
-                    : ""
+                    ? 'border-muted-foreground/30'
+                    : ''
               }`}
             >
               <CardHeader className="mb-2">
@@ -91,37 +97,53 @@ const Page = () => {
                 <p className="text-2xl font-bold">
                   {cage.lowSeasonPrice} kr
                   <span className="text-sm font-normal text-muted-foreground">
-                    {" "}
+                    {' '}
                     / døgn (lavsesong)
                   </span>
                 </p>
               </CardHeader>
 
-              <CardContent className="">
-                <Image
-                  src={`/illustration/${cage.img}.webp`}
-                  alt={cage.name}
-                  width={400}
-                  height={300}
-                  className="w-full rounded-lg object-contain max-w-36 max-h-56 mx-auto"
-                />
-                <span className="text-xs text-muted-foreground mt-2 block">
+              <CardContent className="flex flex-col items-center">
+                <Dialog>
+                  <DialogTrigger>
+                    <Image
+                      src={`/illustration/${cage.img}.webp`}
+                      alt={cage.name}
+                      width={400}
+                      height={300}
+                      className="mx-auto max-h-56 w-36 rounded-lg object-contain transition-transform hover:scale-105"
+                    />
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-3xl">
+                    <DialogTitle className="text-center text-2xl font-semibold">
+                      {cage.name}
+                    </DialogTitle>
+                    <Image
+                      src={`/illustration/${cage.img}.webp`}
+                      alt={cage.name}
+                      width={300}
+                      height={300}
+                      className="mx-auto rounded-lg object-contain"
+                    />
+                  </DialogContent>
+                </Dialog>
+                <span className="mt-2 block text-xs text-muted-foreground">
                   Bildet er kun en illustrasjon og viser ikke det faktiske
                   produktet
                 </span>
 
-                <ul className="space-y-2 text-sm text-muted-foreground my-6">
+                <ul className="my-6 space-y-2 text-sm text-muted-foreground">
                   {cage.list.map((item) =>
-                    item === "" ? null : (
+                    item === '' ? null : (
                       <li key={item} className="flex gap-2">
-                        <Check className="h-4 w-4 shrink-0 mt-1 text-primary" />
+                        <Check className="mt-1 h-4 w-4 shrink-0 text-primary" />
                         <span>{item}</span>
                       </li>
-                    ),
+                    )
                   )}
                 </ul>
 
-                <div className="pt-4 border-t text-sm text-muted-foreground">
+                <div className="border-t pt-4 text-sm text-muted-foreground">
                   Ekstra katt: {cage.perExtraCat} kr
                 </div>
               </CardContent>
@@ -136,7 +158,7 @@ const Page = () => {
             Våre romtyper
           </h2>
 
-          <p className="text-muted-foreground leading-relaxed">
+          <p className="leading-relaxed text-muted-foreground">
             Hos Mathopen Kattepensjonat tilbyr vi tre ulike romtyper med
             forskjellig størrelse og tilrettelegging. Enten katten din er sosial
             og aktiv, senior med behov for ekstra tilrettelegging, eller trives
@@ -145,12 +167,12 @@ const Page = () => {
           </p>
         </div>
 
-        <div className="rounded-2xl bg-background p-8 shadow-sm space-y-4">
+        <div className="space-y-4 rounded-2xl bg-background p-8 shadow-sm">
           <h2 className="text-xl font-semibold text-foreground">
             Kattenes trivsel og trygghet står alltid i fokus hos oss.
           </h2>
 
-          <p className="text-muted-foreground leading-relaxed">
+          <p className="leading-relaxed text-muted-foreground">
             Hos oss er det ingen krav om at katter må sove i bur på natten,
             dersom eier ikke ønsker dette. Katter som går fint sammen med andre,
             får oppholde seg og sove fritt i felles område. Dette forutsetter at
@@ -159,7 +181,7 @@ const Page = () => {
           </p>
         </div>
 
-        <div className="space-y-4 text-muted-foreground grid gap-x-6">
+        <div className="grid gap-x-6 space-y-4 text-muted-foreground">
           <h2 className="text-xl font-semibold text-foreground lg:col-start-1">
             Fokus på kvalitet og inneklima
           </h2>
@@ -193,12 +215,12 @@ const Page = () => {
             alt="Rom og fasiliteter"
             width={200}
             height={200}
-            className="rounded-lg object-cover justify-self-center md:justify-self-start max-w-52 max-h-52 row-start-2 my-4 lg:col-start-2 lg:self-center"
+            className="row-start-2 my-4 max-h-52 max-w-52 justify-self-center rounded-lg object-cover md:justify-self-start lg:col-start-2 lg:self-center"
           />
         </div>
       </section>
     </div>
-  );
-};
+  )
+}
 
-export default Page;
+export default Page

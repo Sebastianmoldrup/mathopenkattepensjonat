@@ -1,6 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import Image from 'next/image'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 export default function Page() {
   return (
@@ -19,11 +19,11 @@ export default function Page() {
       <section className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
         {/* Low season */}
         <div className="rounded-2xl bg-background p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-foreground mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-foreground">
             Lavsesong
           </h2>
 
-          <p className="text-3xl font-bold mb-4">220 kr / døgn</p>
+          <p className="mb-4 text-3xl font-bold">220 kr / døgn</p>
 
           <ul className="space-y-2 text-muted-foreground">
             <li>Minstebeløp tilsvarer 2 døgn</li>
@@ -36,11 +36,11 @@ export default function Page() {
 
         {/* High season */}
         <div className="rounded-2xl bg-background p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-foreground mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-foreground">
             Høysesong
           </h2>
 
-          <p className="text-3xl font-bold mb-4">250 kr / døgn</p>
+          <p className="mb-4 text-3xl font-bold">250 kr / døgn</p>
 
           <ul className="space-y-2 text-muted-foreground">
             <li>Minstebeløp tilsvarer 2 døgn</li>
@@ -51,16 +51,23 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Addition */}
+      {/* Long stay */}
       <section className="mx-auto mt-12 max-w-5xl rounded-2xl bg-background p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground mb-3">
-          Langtidsopphold & medisinering
+        <h2 className="mb-3 text-lg font-semibold text-foreground">
+          Langtidsopphold
         </h2>
 
-        <p className="text-muted-foreground mb-2">
+        <p className="mb-2 text-muted-foreground">
           Langtidsopphold over 20 dager: Ta kontakt for pristilbud. Gjelder ikke
           i høysesong.
         </p>
+      </section>
+
+      {/* Medication */}
+      <section className="mx-auto mt-12 max-w-5xl rounded-2xl bg-background p-6 shadow-sm">
+        <h2 className="mb-3 text-lg font-semibold text-foreground">
+          Medisinering
+        </h2>
 
         <p className="text-muted-foreground">
           Vi tar ikke ekstra betalt for medisinering eller p-piller.
@@ -69,7 +76,7 @@ export default function Page() {
       </section>
 
       {/* Booking */}
-      <section className="mx-auto mt-16 max-w-5xl grid gap-8 md:grid-cols-2 md:items-center">
+      <section className="mx-auto mt-16 grid max-w-5xl gap-8 md:grid-cols-2 md:items-center">
         <Image
           src="/illustration/booking.webp"
           alt="Bestilling"
@@ -110,22 +117,22 @@ export default function Page() {
 
       {/* Cancellation */}
       <section className="mx-auto mt-16 max-w-5xl rounded-2xl bg-background p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground mb-3">
+        <h2 className="mb-3 text-lg font-semibold text-foreground">
           Avbestilling
         </h2>
 
-        <p className="text-muted-foreground mb-2">
+        <p className="mb-2 text-muted-foreground">
           Vi ønsker å være fleksible, men trenger forutsigbarhet for å sikre god
           drift.
         </p>
 
-        <ul className="list-disc list-inside text-muted-foreground space-y-1">
+        <ul className="list-inside list-disc space-y-1 text-muted-foreground">
           <li>Lavsesong: senest 24t før ankomst</li>
           <li>Høysesong: senest 7 dager før ankomst</li>
           <li>Deretter betales 50 % av oppholdet</li>
         </ul>
 
-        <p className="text-muted-foreground mt-3">
+        <p className="mt-3 text-muted-foreground">
           Avbestilling skal gjøres per e-post:
           <br />
           📧 post@mathopenkattepensjonat.no
@@ -134,19 +141,19 @@ export default function Page() {
 
       {/* High season dates */}
       <section className="mx-auto mt-16 max-w-5xl">
-        <h2 className="text-lg font-semibold text-foreground mb-3">
+        <h2 className="mb-3 text-lg font-semibold text-foreground">
           Høysesongdatoer
         </h2>
 
         <ul className="space-y-1 text-muted-foreground">
-          <li>Sommer: 1. juni – 31. august</li>
+          <li>Sommer: 15. juni – 15. august</li>
           <li>Jul: 20. desember – 2. januar</li>
           <li>Påske: Fredag før palmesøndag – 2. påskedag</li>
         </ul>
       </section>
 
       {/* Check in and check out */}
-      <section className="mx-auto mt-16 max-w-5xl grid gap-8 md:grid-cols-2 md:items-center">
+      <section className="mx-auto mt-16 grid max-w-5xl gap-8 md:grid-cols-2 md:items-center">
         <Image
           src="/illustration/handover-v2.webp"
           alt="Inn- og utsjekk"
@@ -166,14 +173,14 @@ export default function Page() {
           </p>
 
           <div className="text-muted-foreground">
-            <p className="font-medium text-foreground mb-1">Ordinære tider</p>
+            <p className="mb-1 font-medium text-foreground">Ordinære tider</p>
             <p>Man–fre og søndag: 17:00–19:00</p>
             <p>Lørdag: Stengt</p>
             <p>Andre tidspunkt: Kun etter avtale</p>
           </div>
 
           <div className="text-muted-foreground">
-            <p className="font-medium text-foreground mb-1">Sommertider</p>
+            <p className="mb-1 font-medium text-foreground">Sommertider</p>
             <p>Innsjekk: 17:00–20:00</p>
             <p>Utsjekk: 11:00–13:00</p>
           </div>
@@ -182,7 +189,7 @@ export default function Page() {
 
       {/* Closed days */}
       <section className="mx-auto mt-16 max-w-5xl rounded-2xl bg-background p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-foreground mb-3">
+        <h2 className="mb-3 text-lg font-semibold text-foreground">
           Stengt for inn- og utsjekk
         </h2>
 
@@ -220,7 +227,7 @@ export default function Page() {
               som oppholder seg hos oss være vaksinert.
             </p>
 
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-inside list-disc space-y-1">
               <li>Vaksinen må være gitt innenfor de siste 12 månedene</li>
               <li>Katten må være vaksinert minst 14 dager før innsjekk</li>
             </ul>
@@ -243,19 +250,19 @@ export default function Page() {
         </div>
 
         {/* Castration / sterilization */}
-        <div className="rounded-2xl bg-background p-6 shadow-sm space-y-4">
+        <div className="space-y-4 rounded-2xl bg-background p-6 shadow-sm">
           <h3 className="text-lg font-semibold text-foreground">
             Kastrering og sterilisering
           </h3>
 
           <div className="space-y-3 text-muted-foreground">
             <p>
-              <span className="font-medium text-foreground">Hannkatter:</span>{" "}
+              <span className="font-medium text-foreground">Hannkatter:</span>{' '}
               Hannkatter eldre enn 6 måneder skal være kastrerte.
             </p>
 
             <p>
-              <span className="font-medium text-foreground">Hunnkatter:</span>{" "}
+              <span className="font-medium text-foreground">Hunnkatter:</span>{' '}
               Sterilisering er anbefalt, men ikke et krav.
             </p>
 
@@ -313,7 +320,7 @@ export default function Page() {
         </h2>
 
         {/* Risk */}
-        <div className="rounded-2xl bg-background p-6 shadow-sm space-y-4 text-muted-foreground">
+        <div className="space-y-4 rounded-2xl bg-background p-6 text-muted-foreground shadow-sm">
           <h3 className="text-lg font-semibold text-foreground">Risiko</h3>
 
           <p>
@@ -359,5 +366,5 @@ export default function Page() {
         </div>
       </section>
     </div>
-  );
+  )
 }
