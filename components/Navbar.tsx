@@ -1,28 +1,28 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import Image from "next/image";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { AuthButton } from "./auth-button";
+import Link from 'next/link'
+import Image from 'next/image'
+import { useState } from 'react'
+import { Menu, X } from 'lucide-react'
+import { AuthButton } from './auth-button'
 
 const LIST_ITEMS = [
-  { url: "/", text: "Hjem" },
-  { url: "/om-oss", text: "Om oss" },
-  { url: "/informasjon", text: "Informasjon" },
-  { url: "/priser", text: "Priser & betingelser" },
-  // { url: "/bilder", text: "Bilder" },
-  { url: "/rom-og-fasiliteter", text: "Rom & fasiliteter" },
-  { url: "/kontakt", text: "Kontakt oss" },
-];
+  { url: '/', text: 'Hjem' },
+  { url: '/om-oss', text: 'Om oss' },
+  { url: '/informasjon', text: 'Informasjon' },
+  { url: '/priser', text: 'Priser & betingelser' },
+  { url: '/bilder', text: 'Bilder' },
+  { url: '/rom-og-fasiliteter', text: 'Rom & fasiliteter' },
+  { url: '/kontakt', text: 'Kontakt oss' },
+]
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <>
       {/* ================= HEADER ================= */}
-      <header className="sticky top-0 z-40 border-b border-border bg-accent/95 backdrop-blur p-2">
+      <header className="sticky top-0 z-40 border-b border-border bg-accent/95 p-2 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-24 items-center justify-between">
             {/* Logo */}
@@ -38,7 +38,7 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop navigation */}
-            <nav className="hidden lg:flex items-center gap-6">
+            <nav className="hidden items-center gap-6 lg:flex">
               {LIST_ITEMS.map(({ url, text }) => (
                 <Link
                   key={url}
@@ -58,7 +58,7 @@ export default function Navbar() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsOpen(true)}
-              className="lg:hidden rounded-md p-2 transition-colors hover:bg-accent-foreground/10"
+              className="rounded-md p-2 transition-colors hover:bg-accent-foreground/10 lg:hidden"
               aria-label="Åpne meny"
             >
               <Menu size={28} />
@@ -69,22 +69,14 @@ export default function Navbar() {
 
       {/* ================= MOBILE MENU ================= */}
       <div
-        className={`
-          fixed inset-0 z-50 bg-accent
-          transition-all duration-300 ease-out
-          ${
-            isOpen
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          }
-        `}
+        className={`fixed inset-0 z-50 bg-accent transition-all duration-300 ease-out ${
+          isOpen
+            ? 'pointer-events-auto opacity-100'
+            : 'pointer-events-none opacity-0'
+        } `}
       >
         <div
-          className={`
-            flex h-full flex-col
-            transform transition-transform duration-300 ease-out
-            ${isOpen ? "translate-y-0" : "-translate-y-4"}
-          `}
+          className={`flex h-full transform flex-col transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0' : '-translate-y-4'} `}
         >
           {/* Top bar */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
@@ -111,14 +103,11 @@ export default function Navbar() {
                 <li
                   key={url}
                   style={{ transitionDelay: `${index * 40}ms` }}
-                  className={`
-                    transform transition-all duration-300 ease-out
-                    ${
-                      isOpen
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-2"
-                    }
-                  `}
+                  className={`transform transition-all duration-300 ease-out ${
+                    isOpen
+                      ? 'translate-y-0 opacity-100'
+                      : 'translate-y-2 opacity-0'
+                  } `}
                 >
                   <Link
                     href={url}
@@ -142,5 +131,5 @@ export default function Navbar() {
         </div>
       </div>
     </>
-  );
+  )
 }
