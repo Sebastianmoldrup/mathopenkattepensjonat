@@ -148,13 +148,22 @@ export default function Home() {
       {/* Our partners */}
       <section className="flex flex-col items-center gap-8 px-4 py-16">
         <h2 className="text-3xl font-semibold">Vi samarbeider med</h2>
-        <Image
-          src="/partners/buddy.webp"
-          alt="buddy"
-          width={150}
-          height={150}
-          className=""
-        />
+        <div className="flex flex-wrap items-center justify-center gap-12">
+          <Image
+            src="/partners/buddy.webp"
+            alt="buddy"
+            width={150}
+            height={150}
+            className=""
+          />
+          <Image
+            src="/partners/no-bg-dyreklinikken.webp"
+            alt="buddy"
+            width={150}
+            height={150}
+            className=""
+          />
+        </div>
       </section>
 
       {/* Location & Facilities */}

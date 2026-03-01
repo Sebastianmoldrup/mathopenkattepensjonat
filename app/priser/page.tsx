@@ -18,36 +18,62 @@ export default function Page() {
       {/* Price overvieew */}
       <section className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
         {/* Low season */}
+
         <div className="rounded-2xl bg-background p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold text-foreground">
+          <h2 className="mb-6 text-xl font-semibold text-foreground">
             Lavsesong
           </h2>
 
-          <p className="mb-4 text-3xl font-bold">220 kr / døgn</p>
+          <div className="mb-6 space-y-3 text-lg">
+            <div className="flex justify-between font-medium">
+              <span>1 katt</span>
+              <span>220 kr / døgn</span>
+            </div>
+            <div className="flex justify-between">
+              <span>2 katter</span>
+              <span>320 kr / døgn</span>
+            </div>
+            <div className="flex justify-between">
+              <span>3 katter</span>
+              <span>400 kr / døgn</span>
+            </div>
+          </div>
 
-          <ul className="space-y-2 text-muted-foreground">
-            <li>Minstebeløp tilsvarer 2 døgn</li>
-            <li>Ekstra katt: 100 kr dersom kattene kan bo i samme bur</li>
-            <li>Ordinær pris per katt dersom de må bo på hvert sitt rom</li>
-            <li>Avbestilling senest 24t før ankomst</li>
-            <li>Deretter betales 50 % av oppholdet</li>
-          </ul>
+          <div className="space-y-2 border-t pt-4 text-sm text-muted-foreground">
+            <p>Minstebeløp tilsvarer 2 døgn</p>
+            <p>Ordinær pris per katt dersom de må bo på hvert sitt rom</p>
+            <p>Avbestilling senest 24t før ankomst</p>
+            <p>Deretter betales 50 % av oppholdet</p>
+          </div>
         </div>
 
         {/* High season */}
+
         <div className="rounded-2xl bg-background p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold text-foreground">
+          <h2 className="mb-6 text-xl font-semibold text-foreground">
             Høysesong
           </h2>
 
-          <p className="mb-4 text-3xl font-bold">250 kr / døgn</p>
+          <div className="mb-6 space-y-3 text-lg">
+            <div className="flex justify-between font-medium">
+              <span>1 katt</span>
+              <span>250 kr / døgn</span>
+            </div>
+            <div className="flex justify-between">
+              <span>2 katter</span>
+              <span>350 kr / døgn</span>
+            </div>
+            <div className="flex justify-between">
+              <span>3 katter</span>
+              <span>450 kr / døgn</span>
+            </div>
+          </div>
 
-          <ul className="space-y-2 text-muted-foreground">
-            <li>Minstebeløp tilsvarer 2 døgn</li>
-            <li>Katt nr. 2: 100 kr dersom kattene kan bo i samme bur</li>
-            <li>Avbestilling senest 7 dager før ankomst</li>
-            <li>Deretter betales 50 % av oppholdet</li>
-          </ul>
+          <div className="space-y-2 border-t pt-4 text-sm text-muted-foreground">
+            <p>Minstebeløp tilsvarer 2 døgn</p>
+            <p>Avbestilling senest 7 dager før ankomst</p>
+            <p>Deretter betales 50 % av oppholdet</p>
+          </div>
         </div>
       </section>
 
@@ -291,19 +317,30 @@ export default function Page() {
             </h3>
 
             <p>
-              Ved mistanke om sykdom tar vi katten til veterinær for
-              undersøkelse. Kostnader i forbindelse med veterinærbesøk dekkes av
-              eier.
+              Ved mistanke om sykdom under oppholdet tar vi katten med til
+              veterinær for undersøkelse og behandling ved behov. Dersom
+              situasjonen tillater det, kontakter vi eier før katten tas med til
+              veterinær. Vi forbeholder oss likevel retten til å kontakte
+              veterinær umiddelbart dersom vi vurderer det som nødvendig av
+              hensyn til kattens helse og velferd.
             </p>
 
             <p>
-              Dersom situasjonen tillater det, kontakter vi eier før katten tas
-              med til veterinær.
+              Vi har avtale med EMPET Bergen Vest Dyreklinikk, som benyttes ved
+              behov for veterinærhjelp.
             </p>
 
             <p>
-              Katter som trenger medisinering under oppholdet, får dette uten
-              ekstra kostnad.
+              Dersom katten trenger daglig medisinering under oppholdet, gis
+              dette uten ekstra kostnad.
+            </p>
+
+            <p>
+              Har katten en kjent sykdom, skade eller behov for spesielle hensyn
+              før oppholdet, ber vi om at dette oppgis i kattens profil under
+              «Dine katter» på nettsiden og informere om ved levering.
+              Eventuelle viktige opplysninger eller begrensninger knyttet til
+              behandling må også informeres om der.
             </p>
 
             <p>Vi anbefaler alle eiere å ha forsikring på katten(e) sine.</p>

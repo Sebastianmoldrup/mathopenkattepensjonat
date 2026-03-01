@@ -11,8 +11,8 @@ const LIST_ITEMS = [
   { url: '/om-oss', text: 'Om oss' },
   { url: '/informasjon', text: 'Informasjon' },
   { url: '/priser', text: 'Priser & betingelser' },
-  { url: '/bilder', text: 'Bilder' },
   { url: '/rom-og-fasiliteter', text: 'Rom & fasiliteter' },
+  { url: '/bilder', text: 'Bilder' },
   { url: '/kontakt', text: 'Kontakt oss' },
 ]
 
