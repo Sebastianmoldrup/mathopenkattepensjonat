@@ -308,7 +308,7 @@ export default function Home() {
 
           <Card className="border-slate-200">
             <CardContent className="pt-6">
-              <div className="grid gap-8 md:grid-cols-2">
+              <div className="grid gap-8 md:grid-cols-2 md:items-center">
                 {/* PRISER */}
                 <div>
                   <p className="mb-6 text-sm text-slate-500">
@@ -318,15 +318,59 @@ export default function Home() {
                   {/* Sesongpriser */}
                   <div className="mb-6 grid gap-4 sm:grid-cols-2">
                     {/* Lavsesong */}
-                    <div className="rounded-lg border border-slate-200 p-4">
-                      <p className="mb-1 text-sm text-slate-500">Lavsesong</p>
-                      <p className="text-3xl font-bold text-slate-900">220,-</p>
+                    <div className="rounded-lg border border-slate-200 p-5">
+                      <p className="mb-4 text-sm font-medium text-slate-500">
+                        Lavsesong
+                      </p>
+
+                      <div className="space-y-2 text-sm text-slate-700">
+                        <div className="flex justify-between">
+                          <span>1 katt</span>
+                          <span className="font-semibold text-slate-900">
+                            220 kr
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>2 katter</span>
+                          <span className="font-semibold text-slate-900">
+                            320 kr
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>3 katter</span>
+                          <span className="font-semibold text-slate-900">
+                            400 kr
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Høysesong */}
-                    <div className="rounded-lg border border-slate-200 p-4">
-                      <p className="mb-1 text-sm text-slate-500">Høysesong</p>
-                      <p className="text-3xl font-bold text-slate-900">250,-</p>
+                    <div className="rounded-lg border border-slate-200 p-5">
+                      <p className="mb-4 text-sm font-medium text-slate-500">
+                        Høysesong
+                      </p>
+
+                      <div className="space-y-2 text-sm text-slate-700">
+                        <div className="flex justify-between">
+                          <span>1 katt</span>
+                          <span className="font-semibold text-slate-900">
+                            250 kr
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>2 katter</span>
+                          <span className="font-semibold text-slate-900">
+                            350 kr
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>3 katter</span>
+                          <span className="font-semibold text-slate-900">
+                            450 kr
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -336,12 +380,6 @@ export default function Home() {
 
                   {/* Tillegg */}
                   <div className="space-y-3">
-                    <div className="flex items-start">
-                      <span className="mr-2 text-slate-400">•</span>
-                      <span className="text-slate-700">
-                        Katt nr. 2: kr 100,- (samme rom)
-                      </span>
-                    </div>
                     <div className="flex items-start">
                       <span className="mr-2 text-slate-400">•</span>
                       <span className="text-slate-700">

@@ -51,7 +51,7 @@ const CAGE_TYPES = [
     list: [
       'Eget rom på L85, D100, H240',
       'Seng, dokasse, mat- og vannskål',
-      'Plass til 3–4 katter fra samme husstand',
+      'Plass til 3 katter fra samme husstand',
       'Ekstra stor plass og privat område',
     ],
     premium: true,
