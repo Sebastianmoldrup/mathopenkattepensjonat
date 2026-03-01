@@ -308,13 +308,9 @@ export default function Home() {
 
           <Card className="border-slate-200">
             <CardContent className="pt-6">
-              <div className="grid gap-8 md:grid-cols-2 md:items-center">
+              <div className="grid gap-8 md:grid-cols-2">
                 {/* PRISER */}
                 <div>
-                  <p className="mb-6 text-sm text-slate-500">
-                    Per døgn per katt
-                  </p>
-
                   {/* Sesongpriser */}
                   <div className="mb-6 grid gap-4 sm:grid-cols-2">
                     {/* Lavsesong */}
@@ -375,7 +371,7 @@ export default function Home() {
                   </div>
 
                   <p className="mb-6 text-sm text-slate-600">
-                    Minstebeløp tilsvarer 2 døgn
+                    Priser er per døgn, minstebeløp tilsvarer 2 døgn
                   </p>
 
                   {/* Tillegg */}
