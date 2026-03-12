@@ -275,16 +275,6 @@ const Page = () => {
                           ))}
                         </div>
                       )}
-
-                      {/* Suite extra */}
-                      {cage.extra && (
-                        <div className="space-y-2 border-t pt-3">
-                          <p>{cage.extra.info}</p>
-                          {cage.extra.prices.map((price, index) => (
-                            <p key={index}>{price}</p>
-                          ))}
-                        </div>
-                      )}
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
