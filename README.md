@@ -1,109 +1,126 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Mathopen Kattepensjonat
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+> A simple, modern booking system for **Mathopen Kattepensjonat** — where customers can easily book stays for their cats while the owner manages bookings efficiently.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+---
 
 ## Features
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Proxy
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+- Cat stay booking flow
+- Step-based booking UI
+- Form validation
+- Booking overview
+- Supabase backend
+- Responsive design
+- Progressive Web App support _(planned)_
 
-## Demo
+---
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+## Tech Stack
 
-## Deploy to Vercel
+| Layer              | Technology                          |
+| ------------------ | ----------------------------------- |
+| Framework          | [Next.js](https://nextjs.org/)      |
+| Language           | TypeScript                          |
+| Database & Backend | [Supabase](https://supabase.com/)   |
+| UI Components      | [shadcn/ui](https://ui.shadcn.com/) |
+| Styling            | Tailwind CSS                        |
 
-Vercel deployment will guide you through creating a Supabase account and project.
+---
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+## Project Structure
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+```
+├── app/
+│   ├── (auth)/
+│   │   ├── login/
+│   │   ├── registrering/
+│   │   ├── registrering-bekreftet/
+│   │   ├── glemt-passord/
+│   │   ├── endre-passord/
+│   │   ├── confirm/
+│   │   └── error/
+│   ├── booking/
+│   │   └── steps/        # Step-based booking flow
+│   └── minside/
+│       └── minekatter/
+│           ├── [id]/     # Dynamic cat profile page
+│           └── legg-til/ # Add new cat
+├── components/           # Reusable UI components
+├── lib/                  # Helper functions and utilities
+└── types/                # TypeScript type definitions
+```
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+---
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+## Getting Started
 
-## Clone and run locally
+### 1. Clone the repository
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+```bash
+git clone https://github.com/yourusername/mathopenkattepensjonat.git
+cd mathopenkattepensjonat
+```
 
-2. Create a Next.js app using the Supabase Starter template npx command
+### 2. Install dependencies
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+```bash
+npm install
+```
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+### 3. Setup environment variables
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+Create a `.env.local` file in the root of the project:
 
-3. Use `cd` to change into the app's directory
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-   ```bash
-   cd with-supabase-app
-   ```
+### 4. Run the development server
 
-4. Rename `.env.example` to `.env.local` and update the following:
+```bash
+npm run dev
+```
 
-  ```env
-  NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
-  ```
-  > [!NOTE]
-  > This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-  > Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-  > See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-  Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+---
 
-5. You can now run the Next.js local development server:
+## Development
 
-   ```bash
-   npm run dev
-   ```
+This project uses:
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+- Step-based booking components for a guided user experience
+- Modular React components for reusability and maintainability
+- Supabase for data storage and real-time APIs
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+## Commit Convention
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+This project is adopting this convention going forward.
+Older commits may not follow this format.
 
-## Feedback and issues
+```
+feat: (describe what was added)
+fix: (describe the problem that was fixed)
+refactor: (describe the refactor)
+chore: (describe the chore)
+doc: (documentation)
+perf: (describe what was optimized)
+```
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+---
 
-## More Supabase examples
+## Roadmap
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+- [ ] Payment integration (Vipps / card)
+- [ ] Admin dashboard
+- [ ] Booking confirmation emails
+- [ ] Calendar availability system
+- [ ] Full PWA support
+
+---
+
+## License
+
+Private project for **Mathopen Kattepensjonat**. All rights reserved.
