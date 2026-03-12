@@ -83,3 +83,9 @@ export interface OnboardingStatus {
   hasCats: boolean;
   isComplete: boolean;
 }
+
+export interface BookingState {
+  selectedCats: string[];
+  selectedCage: string | null;
+  dateRange: Date | null;
+}

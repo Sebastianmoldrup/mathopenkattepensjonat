@@ -1,13 +1,6 @@
-{
-  /* 
-  1. Check if the user is authenticated. If not, render redirect UI /login.
-  2. Check if the user has added atleast 1 cat to their profile. If not, render redirect UI /minside/minekatter.
-  3. If the user is authenticated and has added atleast 1 cat, render the children components (booking wizard).
-*/
-}
-
 import { createClient } from "@/lib/supabase/server";
 import { getBookedCounts } from "@/actions/rpc/getBookedCounts";
+// import { getUserCats } from "@/actions/cats/getUserCats";
 import { getUserCats } from "@/actions/cat/getUserCats";
 import LoginGate from "./steps/LoginGate";
 import NoCatsGate from "./steps/NoCatsGate";
@@ -23,9 +16,6 @@ export default async function BookingGate() {
 
   const cats = await getUserCats(user.id);
   const bookedCounts = await getBookedCounts();
-
-  // console.log("User cats:", cats);
-  // console.log("Booked counts:", bookedCounts);
 
   if (!cats || cats.length === 0) return <NoCatsGate />;
 
