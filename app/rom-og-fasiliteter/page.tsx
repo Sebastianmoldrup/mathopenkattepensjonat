@@ -21,9 +21,6 @@ const CAGE_TYPES = [
     lowSeasonPrice: 220,
     highSeasonPrice: 250,
     img: 'hd-standard',
-    // prices: ['1 katt: 220 kr', '2 katter: 320 kr', '3 katter: 400 kr'],
-    // lowSeasonPrices: ['1 katt: 220 kr', '2 katter: 320 kr'],
-    // highSeasonPrices: ['1 katt: 250 kr', '2 katter: 350 kr'],
     lowSeasonPrices: [
       {
         amount: '1',
@@ -55,9 +52,6 @@ const CAGE_TYPES = [
     lowSeasonPrice: 220,
     highSeasonPrice: 250,
     img: 'senior-&-comfort',
-    // prices: ['1 katt: 220 kr', '2 katter: 320 kr', '3 katter: 400 kr'],
-    // lowSeasonPrices: ['1 katt: 220 kr', '2 katter: 320 kr'],
-    // highSeasonPrices: ['1 katt: 250 kr', '2 katter: 350 kr'],
     lowSeasonPrices: [
       {
         amount: '1',
@@ -91,9 +85,6 @@ const CAGE_TYPES = [
     lowSeasonPrice: 350,
     highSeasonPrice: 450,
     img: 'suite',
-    // prices: ['1–2 katter: 350 kr', '3 katter: 400 kr'],
-    // lowSeasonPrices: ['1-2 katter: 350 kr', '3 katter: 400 kr'],
-    // highSeasonPrices: ['Standard pris på 450 kr'],
     lowSeasonPrices: [
       {
         amount: '1-2',
