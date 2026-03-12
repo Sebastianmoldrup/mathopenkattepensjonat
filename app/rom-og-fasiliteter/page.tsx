@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Check } from 'lucide-react'
+import { Check, Cat } from 'lucide-react'
 import {
   Dialog,
   DialogTrigger,
@@ -21,7 +21,29 @@ const CAGE_TYPES = [
     lowSeasonPrice: 220,
     highSeasonPrice: 250,
     img: 'hd-standard',
-    prices: ['1 katt: 220 kr', '2 katter: 320 kr', '3 katter: 400 kr'],
+    // prices: ['1 katt: 220 kr', '2 katter: 320 kr', '3 katter: 400 kr'],
+    // lowSeasonPrices: ['1 katt: 220 kr', '2 katter: 320 kr'],
+    // highSeasonPrices: ['1 katt: 250 kr', '2 katter: 350 kr'],
+    lowSeasonPrices: [
+      {
+        amount: '1',
+        price: 220,
+      },
+      {
+        amount: '2',
+        price: 320,
+      },
+    ],
+    highSeasonPrices: [
+      {
+        amount: '1',
+        price: 250,
+      },
+      {
+        amount: '2',
+        price: 350,
+      },
+    ],
     list: [
       'Eget rom på L85, D90, H100',
       'Seng, dokasse, mat- og vannskål',
@@ -33,7 +55,29 @@ const CAGE_TYPES = [
     lowSeasonPrice: 220,
     highSeasonPrice: 250,
     img: 'senior-&-comfort',
-    prices: ['1 katt: 220 kr', '2 katter: 320 kr', '3 katter: 400 kr'],
+    // prices: ['1 katt: 220 kr', '2 katter: 320 kr', '3 katter: 400 kr'],
+    // lowSeasonPrices: ['1 katt: 220 kr', '2 katter: 320 kr'],
+    // highSeasonPrices: ['1 katt: 250 kr', '2 katter: 350 kr'],
+    lowSeasonPrices: [
+      {
+        amount: '1',
+        price: 220,
+      },
+      {
+        amount: '2',
+        price: 220,
+      },
+    ],
+    highSeasonPrices: [
+      {
+        amount: '1',
+        price: 250,
+      },
+      {
+        amount: '2',
+        price: 350,
+      },
+    ],
     list: [
       'Eget rom på L90, D100, H80',
       'Seng, dokasse, mat- og vannskål',
@@ -47,7 +91,25 @@ const CAGE_TYPES = [
     lowSeasonPrice: 350,
     highSeasonPrice: 450,
     img: 'suite',
-    prices: ['1–2 katter: 350 kr', '3 katter: 400 kr'],
+    // prices: ['1–2 katter: 350 kr', '3 katter: 400 kr'],
+    // lowSeasonPrices: ['1-2 katter: 350 kr', '3 katter: 400 kr'],
+    // highSeasonPrices: ['Standard pris på 450 kr'],
+    lowSeasonPrices: [
+      {
+        amount: '1-2',
+        price: 350,
+      },
+      {
+        amount: '3',
+        price: 400,
+      },
+    ],
+    highSeasonPrices: [
+      {
+        amount: 'Standard pris per døgn',
+        price: 400,
+      },
+    ],
     list: [
       'Eget rom på L85, D100, H240',
       'Seng, dokasse, mat- og vannskål',
@@ -55,10 +117,6 @@ const CAGE_TYPES = [
       'Ekstra stor plass og privat område',
     ],
     premium: true,
-    extra: {
-      info: 'Suiten kan bookes for 1–2 katter til fast døgnpris. Ved 3 katter gjelder ordinær pris for antall katter:',
-      prices: ['400 kr per døgn i lavsesong', '450 kr per døgn i høysesong'],
-    },
   },
 ]
 
@@ -156,10 +214,66 @@ const Page = () => {
 
                     <AccordionContent className="space-y-4 text-sm text-muted-foreground">
                       {/* Pricing */}
-                      <div className="space-y-1">
-                        {cage.prices?.map((price, index) => (
-                          <p key={index}>{price}</p>
-                        ))}
+                      <div className="space-y-3">
+                        <div className="space-y-1">
+                          <span className="text-xs font-medium uppercase tracking-wider opacity-80">
+                            Lav sesong priser
+                          </span>
+                          {cage.lowSeasonPrices?.map((price, index) => (
+                            <p
+                              key={index}
+                              className="flex items-center gap-2 text-base font-semibold"
+                            >
+                              <span className="flex items-center gap-0.5">
+                                {Array.from({
+                                  length:
+                                    price.amount === '1-2'
+                                      ? 2
+                                      : Number(price.amount),
+                                }).map((_, i) => (
+                                  <Cat key={i} className="h-3.5 w-3.5" />
+                                ))}
+                                {price.amount === '1-2' && (
+                                  <span className="ml-0.5 text-xs font-normal opacity-60">
+                                    1-2
+                                  </span>
+                                )}
+                              </span>
+                              <span className="opacity-30">·</span>
+                              {price.price} kr
+                            </p>
+                          ))}
+                        </div>
+
+                        <div className="space-y-1">
+                          <span className="text-xs font-medium uppercase tracking-wider opacity-80">
+                            Høy sesong priser
+                          </span>
+                          {cage.highSeasonPrices?.map((price, index) => (
+                            <p
+                              key={index}
+                              className="flex items-center gap-2 text-base font-semibold"
+                            >
+                              {/^\d+$/.test(price.amount) ? (
+                                <>
+                                  <span className="flex items-center gap-0.5">
+                                    {Array.from({
+                                      length: Number(price.amount),
+                                    }).map((_, i) => (
+                                      <Cat key={i} className="h-3.5 w-3.5" />
+                                    ))}
+                                  </span>
+                                  <span className="opacity-50">·</span>
+                                </>
+                              ) : (
+                                <span className="text-xs font-normal opacity-80">
+                                  {price.amount}
+                                </span>
+                              )}
+                              {price.price} kr
+                            </p>
+                          ))}
+                        </div>
                       </div>
 
                       {/* Remaining features */}
