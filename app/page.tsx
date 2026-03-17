@@ -399,10 +399,14 @@ export default function Home() {
                   <p className="mb-4 text-slate-700">
                     <strong>Mandag–fredag og søndag:</strong>
                     <br />
-                    Kl. 17:00–20:00
+                    Kl. 17:30–19:30
                   </p>
                   <p className="mb-4 text-slate-700">
                     <strong>Lørdag:</strong> Stengt
+                  </p>
+                  <p className="mb-4 text-slate-700">
+                    <strong>Sommersesong:</strong> åpent for levering og henting
+                    på lørdager.
                   </p>
                   <p className="text-sm text-slate-600">
                     Andre tidspunkt kun etter avtale
