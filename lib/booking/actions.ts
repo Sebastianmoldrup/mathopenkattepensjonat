@@ -1,0 +1,199 @@
+import { createClient } from '@/lib/supabase/client' // adjust to your supabase client path
+import { Booking, BookingWithCats, Cat } from './types'
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+export async function getUser() {
+  const supabase = createClient()
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data.user) return null
+  return data.user
+}
+
+// ─── Cats ─────────────────────────────────────────────────────────────────────
+
+export async function getUserCats(userId: string): Promise<Cat[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('cats')
+    .select('id, name, breed, gender, age, image_url, owner_id')
+    .eq('owner_id', userId)
+    .order('name', { ascending: true })
+
+  if (error) {
+    console.error('[getUserCats]', error.message)
+    return []
+  }
+
+  return data ?? []
+}
+
+// ─── Bookings ─────────────────────────────────────────────────────────────────
+
+/**
+ * Fetches all bookings (with their cat IDs) that overlap the next 12 months.
+ * Uses a security definer RPC function to bypass RLS for availability checks —
+ * users can only see their own bookings directly, but availability requires
+ * reading all bookings to count cage usage.
+ */
+export async function getUpcomingYearBookings(): Promise<BookingWithCats[]> {
+  const supabase = createClient()
+
+  const today = new Date()
+  const oneYearAhead = new Date(today)
+  oneYearAhead.setFullYear(today.getFullYear() + 1)
+
+  const fromStr = today.toISOString().split('T')[0]
+  const toStr = oneYearAhead.toISOString().split('T')[0]
+
+  // Step 1: fetch all bookings via security definer function (bypasses RLS)
+  const { data: bookingRows, error: bookingError } = await supabase.rpc(
+    'get_bookings_for_availability',
+    {
+      from_date: fromStr,
+      to_date: toStr,
+    }
+  )
+
+  if (bookingError) {
+    console.error('[getUpcomingYearBookings] rpc error:', bookingError.message)
+    return []
+  }
+
+  if (!bookingRows || bookingRows.length === 0) return []
+
+  // Step 2: fetch booking_cats for these bookings to get cat IDs
+  // (only needed for cat conflict checks — uses current user's RLS context)
+  const bookingIds = bookingRows.map((r: any) => r.id)
+
+  const { data: catRows, error: catError } = await supabase
+    .from('booking_cats')
+    .select('booking_id, cat_id')
+    .in('booking_id', bookingIds)
+
+  if (catError) {
+    console.error(
+      '[getUpcomingYearBookings] booking_cats error:',
+      catError.message
+    )
+    // Still return bookings without cat data — cage availability still works
+  }
+
+  // Build a map of booking_id → cat_ids
+  const catMap = new Map<string, string[]>()
+  for (const row of catRows ?? []) {
+    if (!catMap.has(row.booking_id)) catMap.set(row.booking_id, [])
+    catMap.get(row.booking_id)!.push(row.cat_id)
+  }
+
+  return bookingRows.map((row: any) => ({
+    id: row.id,
+    user_id: row.user_id,
+    date_from: row.date_from,
+    date_to: row.date_to,
+    cage_type: row.cage_type,
+    cage_count: row.cage_count,
+    num_cats: row.num_cats,
+    price: row.price,
+    special_instructions: row.special_instructions,
+    created_at: row.created_at,
+    cat_ids: catMap.get(row.id) ?? [],
+  }))
+}
+
+/**
+ * Fetches all bookings for the current user.
+ */
+export async function getUserBookings(userId: string): Promise<Booking[]> {
+  const supabase = createClient()
+
+  const { data, error } = await supabase
+    .from('bookings')
+    .select(
+      'id, user_id, date_from, date_to, cage_type, cage_count, num_cats, price, special_instructions, created_at'
+    )
+    .eq('user_id', userId)
+    .order('date_from', { ascending: false })
+
+  if (error) {
+    console.error('[getUserBookings]', error.message)
+    return []
+  }
+
+  return data ?? []
+}
+
+// ─── Create Booking ───────────────────────────────────────────────────────────
+
+export interface CreateBookingPayload {
+  userId: string
+  catIds: string[]
+  dateFrom: Date
+  dateTo: Date
+  cageType: import('./types').CageType
+  cageCount: number
+  numCats: number
+  price: number
+  specialInstructions?: string
+}
+
+export async function createBooking(
+  payload: CreateBookingPayload
+): Promise<{ id: string } | { error: string }> {
+  const supabase = createClient()
+
+  const fromStr = payload.dateFrom.toISOString().split('T')[0]
+  const toStr = payload.dateTo.toISOString().split('T')[0]
+
+  // ── Step 1: Insert booking row ──────────────────────────────────────────────
+  const { data: booking, error: bookingError } = await supabase
+    .from('bookings')
+    .insert({
+      user_id: payload.userId,
+      date_from: fromStr,
+      date_to: toStr,
+      cage_type: payload.cageType,
+      cage_count: payload.cageCount,
+      num_cats: payload.numCats,
+      price: payload.price,
+      special_instructions: payload.specialInstructions ?? null,
+    })
+    .select('id')
+    .single()
+
+  if (bookingError || !booking) {
+    console.error(
+      '[createBooking] bookings insert failed:',
+      bookingError?.message
+    )
+    return { error: bookingError?.message ?? 'Kunne ikke opprette booking.' }
+  }
+
+  // ── Step 2: Insert booking_cats join rows ───────────────────────────────────
+  const bookingCatsRows = payload.catIds.map((catId) => ({
+    booking_id: booking.id,
+    cat_id: catId,
+  }))
+
+  const { error: catsError } = await supabase
+    .from('booking_cats')
+    .insert(bookingCatsRows)
+
+  if (catsError) {
+    console.error(
+      '[createBooking] booking_cats insert failed:',
+      catsError.message
+    )
+
+    // Roll back the booking row so the DB stays consistent
+    await supabase.from('bookings').delete().eq('id', booking.id)
+
+    return {
+      error:
+        'Bookingen ble ikke lagret fullstendig. Vennligst prøv igjen. ' +
+        `(Detalj: ${catsError.message})`,
+    }
+  }
+
+  return { id: booking.id }
+}
