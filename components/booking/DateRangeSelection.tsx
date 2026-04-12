@@ -351,6 +351,10 @@ export function DateRangeSelection({
   const blockedSet = useMemo<Set<string>>(() => {
     const merged = new Set(fullyBookedSet)
     catBlockedSet.forEach((k) => merged.add(k))
+    console.log('[availability] bookings received:', bookings.length)
+    console.log('[availability] selectedCatIds:', selectedCatIds)
+    console.log('[availability] catBlockedSet:', [...catBlockedSet])
+    console.log('[availability] fullyBookedSet:', [...fullyBookedSet])
     return merged
   }, [fullyBookedSet, catBlockedSet])
 
@@ -440,7 +444,7 @@ export function DateRangeSelection({
     ? 'Velg innsjekkdato'
     : !dateTo
       ? 'Velg nå utsjekkdato'
-      : `${nights} natt${nights !== 1 ? 'er' : ''} valgt — ser bra ut!`
+      : `${nights} natt${nights !== 1 ? 'er' : ''} valgt`
 
   const sharedGridProps = {
     minDate,
