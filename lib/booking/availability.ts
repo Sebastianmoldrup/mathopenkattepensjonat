@@ -19,8 +19,8 @@ export function getCageUsageOnDate(
   const d = dateOnly(date)
 
   for (const booking of bookings) {
-    const from = dateOnly(new Date(booking.date_from))
-    const to = dateOnly(new Date(booking.date_to))
+    const from = dateOnly(booking.date_from)
+    const to = dateOnly(booking.date_to)
 
     // The booking occupies nights from date_from to date_to - 1
     if (d >= from && d < to) {
@@ -95,7 +95,7 @@ export function getFullyBookedDates(
     })
 
     if (allFull) {
-      fullyBooked.add(current.toISOString().split('T')[0])
+      fullyBooked.add(localKey(current))
     }
 
     current.setDate(current.getDate() + 1)
@@ -165,8 +165,23 @@ export function getAvailableCageOptions(
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function dateOnly(d: Date): Date {
+function dateOnly(d: Date | string): Date {
+  if (typeof d === 'string') {
+    // Parse YYYY-MM-DD directly — avoids UTC timezone shift
+    const [y, m, day] = d.split('-').map(Number)
+    return new Date(y, m - 1, day)
+  }
+  // Use local time components — toISOString() outputs UTC which shifts the date
+  // in timezones like CEST (UTC+2) where local midnight is UTC-2h the previous day
   return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
+/** Returns YYYY-MM-DD using local time — avoids UTC timezone shift from toISOString() */
+function localKey(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 // ─── Cat conflict checks ───────────────────────────────────────────────────────
@@ -192,8 +207,8 @@ export function getCatBlockedDates(
     const hasConflictingCat = booking.cat_ids.some((id) => catIdSet.has(id))
     if (!hasConflictingCat) continue
 
-    const bookingFrom = dateOnly(new Date(booking.date_from))
-    const bookingTo = dateOnly(new Date(booking.date_to))
+    const bookingFrom = dateOnly(booking.date_from)
+    const bookingTo = dateOnly(booking.date_to)
     const windowStart = dateOnly(rangeStart)
     const windowEnd = dateOnly(rangeEnd)
 
@@ -201,7 +216,7 @@ export function getCatBlockedDates(
     const current = new Date(bookingFrom)
     while (current < bookingTo) {
       if (current >= windowStart && current < windowEnd) {
-        blocked.add(current.toISOString().split('T')[0])
+        blocked.add(localKey(current))
       }
       current.setDate(current.getDate() + 1)
     }
@@ -226,8 +241,8 @@ export function hasCatConflict(
     const hasConflictingCat = booking.cat_ids.some((id) => catIdSet.has(id))
     if (!hasConflictingCat) continue
 
-    const bookingFrom = dateOnly(new Date(booking.date_from))
-    const bookingTo = dateOnly(new Date(booking.date_to))
+    const bookingFrom = dateOnly(booking.date_from)
+    const bookingTo = dateOnly(booking.date_to)
     const from = dateOnly(dateFrom)
     const to = dateOnly(dateTo)
 

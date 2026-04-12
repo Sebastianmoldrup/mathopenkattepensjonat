@@ -1,10 +1,5 @@
 import { createClient } from '@/lib/supabase/client' // adjust to your supabase client path
 import { Booking, BookingWithCats, Cat } from './types'
-import { calculatePriceBreakdown } from './pricing'
-
-function localStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 
@@ -48,8 +43,10 @@ export async function getUpcomingYearBookings(): Promise<BookingWithCats[]> {
   const oneYearAhead = new Date(today)
   oneYearAhead.setFullYear(today.getFullYear() + 1)
 
-  const fromStr = localStr(today)
-  const toStr = localStr(oneYearAhead)
+  const fromStr = today.toISOString().split('T')[0]
+  const toStr = oneYearAhead.toISOString().split('T')[0]
+
+  console.log('[createBooking] fromStr:', fromStr, 'toStr:', toStr)
 
   // Step 1: fetch all bookings via security definer function (bypasses RLS)
   const { data: bookingRows, error: bookingError } = await supabase.rpc(
@@ -138,6 +135,7 @@ export interface CreateBookingPayload {
   cageType: import('./types').CageType
   cageCount: number
   numCats: number
+  price: number
   specialInstructions?: string
 }
 
@@ -146,82 +144,59 @@ export async function createBooking(
 ): Promise<{ id: string } | { error: string }> {
   const supabase = createClient()
 
-  const fromStr = localStr(payload.dateFrom)
-  const toStr = localStr(payload.dateTo)
+  const fromStr = payload.dateFrom.toISOString().split('T')[0]
+  const toStr = payload.dateTo.toISOString().split('T')[0]
+  // console.log('[createBooking] fromStr:', fromStr, 'toStr:', toStr)
 
-  // Server side price calculation
-  const breakdown = calculatePriceBreakdown(
-    payload.cageType,
-    payload.cageCount,
-    payload.numCats,
-    payload.dateFrom,
-    payload.dateTo
-  )
-  const price = breakdown.totalPrice
+  // ── Step 1: Insert booking row ──────────────────────────────────────────────
+  const { data: booking, error: bookingError } = await supabase
+    .from('bookings')
+    .insert({
+      user_id: payload.userId,
+      date_from: fromStr,
+      date_to: toStr,
+      cage_type: payload.cageType,
+      cage_count: payload.cageCount,
+      num_cats: payload.numCats,
+      price: payload.price,
+      special_instructions: payload.specialInstructions ?? null,
+    })
+    .select('id')
+    .single()
 
-  // Check for cat booking dates conflict
-  const { data: hasConflict, error: conflictError } = await supabase.rpc(
-    'check_cat_conflict',
-    {
-      cat_ids: payload.catIds,
-      from_date: fromStr,
-      to_date: toStr,
-    }
-  )
-
-  if (conflictError) {
-    return { error: 'Kunne ikke verifisere tilgjengelighet. Prøv igjen.' }
+  if (bookingError || !booking) {
+    console.error(
+      '[createBooking] bookings insert failed:',
+      bookingError?.message
+    )
+    return { error: bookingError?.message ?? 'Kunne ikke opprette booking.' }
   }
 
-  if (hasConflict) {
+  // ── Step 2: Insert booking_cats join rows ───────────────────────────────────
+  const bookingCatsRows = payload.catIds.map((catId) => ({
+    booking_id: booking.id,
+    cat_id: catId,
+  }))
+
+  const { error: catsError } = await supabase
+    .from('booking_cats')
+    .insert(bookingCatsRows)
+
+  if (catsError) {
+    console.error(
+      '[createBooking] booking_cats insert failed:',
+      catsError.message
+    )
+
+    // Roll back the booking row so the DB stays consistent
+    await supabase.from('bookings').delete().eq('id', booking.id)
+
     return {
       error:
-        'En eller flere av kattene er allerede booket i denne perioden. Velg andre datoer.',
+        'Bookingen ble ikke lagret fullstendig. Vennligst prøv igjen. ' +
+        `(Detalj: ${catsError.message})`,
     }
   }
 
-  // Check for cage availability
-  const { data: cageAvailable, error: cageError } = await supabase.rpc(
-    'check_cage_availability',
-    {
-      p_cage_type: payload.cageType,
-      p_cage_count: payload.cageCount,
-      p_date_from: fromStr,
-      p_date_to: toStr,
-    }
-  )
-
-  if (cageError) {
-    return { error: 'Kunne ikke verifisere burstilgjengelighet. Prøv igjen.' }
-  }
-
-  if (!cageAvailable) {
-    return {
-      error:
-        'Beklager, dette buret er ikke lenger tilgjengelig. Velg en annen periode.',
-    }
-  }
-
-  // Atomic insert via transaction RPC
-  const { data: bookingId, error: insertError } = await supabase.rpc(
-    'create_booking_with_cats',
-    {
-      p_user_id: payload.userId,
-      p_date_from: fromStr,
-      p_date_to: toStr,
-      p_cage_type: payload.cageType,
-      p_cage_count: payload.cageCount,
-      p_num_cats: payload.numCats,
-      p_price: price,
-      p_cat_ids: payload.catIds,
-      p_special_instructions: payload.specialInstructions ?? null,
-    }
-  )
-
-  if (insertError || !bookingId) {
-    console.error('[createBooking] insert failed:', insertError?.message)
-    return { error: 'Kunne ikke opprette booking. Prøv igjen.' }
-  }
-
-  return { id: bookingId }
+  return { id: booking.id }
 }

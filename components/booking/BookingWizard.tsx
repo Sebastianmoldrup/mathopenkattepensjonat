@@ -43,7 +43,6 @@ export function BookingWizard() {
     setUserId(uid)
     setCats(userCats)
     const upcoming = await getUpcomingYearBookings()
-    console.log('bookings fetched:', upcoming.length, upcoming)
     setBookings(upcoming)
   }, [])
 
@@ -52,6 +51,7 @@ export function BookingWizard() {
   }
 
   function goTo(step: BookingStep) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
     updateState({ step })
   }
 
@@ -59,6 +59,8 @@ export function BookingWizard() {
   function handleConfirmed() {
     setState(INITIAL_BOOKING_STATE)
     setCageCount(1)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    router.refresh()
     router.push('/minside')
   }
 

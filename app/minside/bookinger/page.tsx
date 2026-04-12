@@ -40,7 +40,7 @@ export default async function userBookingsPage() {
           Mine bookinger
         </h1>
         <p className="text-sm text-muted-foreground">
-          Oversikt over dine userBookings hos oss.
+          Oversikt over dine bookinger hos oss.
         </p>
       </div>
 

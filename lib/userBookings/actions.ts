@@ -67,46 +67,17 @@ export async function cancelBooking(
   bookingId: string
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Ikke innlogget.' }
 
-  // Verify ownership before updating
-  const { data: booking, error: fetchError } = await supabase
-    .from('bookings')
-    .select('id, user_id, status, date_from')
-    .eq('id', bookingId)
-    .single()
+  const { error } = await supabase.rpc('cancel_own_booking', {
+    booking_id: bookingId,
+  })
 
-  if (fetchError || !booking) {
-    return { success: false, error: 'Booking ikke funnet.' }
-  }
-
-  if (booking.user_id !== user.id) {
-    return { success: false, error: 'Ingen tilgang.' }
-  }
-
-  if (booking.status === 'cancelled') {
-    return { success: false, error: 'Bookingen er allerede avbestilt.' }
-  }
-
-  if (booking.status === 'completed') {
-    return {
-      success: false,
-      error: 'Fullførte bookinger kan ikke avbestilles.',
-    }
-  }
-
-  const { error: updateError } = await supabase
-    .from('bookings')
-    .update({ status: 'cancelled' })
-    .eq('id', bookingId)
-    .eq('user_id', user.id) // double-check via RLS
-
-  if (updateError) {
-    console.error('[cancelBooking]', updateError.message)
+  if (error) {
+    console.error('[cancelBooking]', error.message)
     return {
       success: false,
       error: 'Kunne ikke avbestille bookingen. Prøv igjen.',
@@ -115,6 +86,5 @@ export async function cancelBooking(
 
   revalidatePath('/minside/bookinger')
   revalidatePath('/minside')
-
   return { success: true }
 }
