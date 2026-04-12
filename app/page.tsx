@@ -163,6 +163,29 @@ export default function Home() {
             height={150}
             className=""
           />
+          <Image
+            src="/partners/monster.webp"
+            alt="buddy"
+            width={150}
+            height={150}
+            className=""
+          />
+          <div className="flex flex-wrap items-center justify-center gap-12">
+            <Image
+              src="/partners/orijen.jpeg"
+              alt="buddy"
+              width={135}
+              height={150}
+              className=""
+            />
+            <Image
+              src="/partners/acana.jpeg"
+              alt="buddy"
+              width={135}
+              height={150}
+              className=""
+            />
+          </div>
         </div>
       </section>
 
