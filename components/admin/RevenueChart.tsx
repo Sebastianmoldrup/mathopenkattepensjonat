@@ -144,10 +144,14 @@ export function RevenueChart({ data }: RevenueChartProps) {
           />
           <Tooltip
             cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }}
-            formatter={(value: number, name: string) => {
+            formatter={(value, name) => {
+              const num = Number(value ?? 0)
               if (name === 'Inntekt')
-                return [`${value.toLocaleString('nb-NO')} kr`, name]
-              return [value, name]
+                return [`${num.toLocaleString('nb-NO')} kr`, name] as [
+                  string,
+                  string,
+                ]
+              return [String(num), name] as [string, string]
             }}
             contentStyle={{
               borderRadius: '8px',
