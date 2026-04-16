@@ -9,9 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from 'recharts'
-import { RevenueStats, formatMonthNO } from '@/lib/admin/utils'
+import { RevenueStats } from '@/lib/admin/utils'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -65,11 +64,6 @@ export function RevenueChart({ data }: RevenueChartProps) {
   }, [data, selectedYear])
 
   const yearRevenue = chartData.reduce((sum, d) => sum + d.Inntekt, 0)
-  const yearBookings = chartData.reduce((sum, d) => sum + d.Bookinger, 0)
-  const yearCancellations = chartData.reduce(
-    (sum, d) => sum + d.Avbestillinger,
-    0
-  )
 
   return (
     <div className="space-y-5 rounded-xl border bg-card p-6">
@@ -132,9 +126,12 @@ export function RevenueChart({ data }: RevenueChartProps) {
           />
           <Tooltip
             cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }}
-            formatter={(value: number | string | undefined) => {
+            formatter={(value) => {
               const num = Number(value ?? 0)
-              return [`${num.toLocaleString('nb-NO')} kr`, 'Inntekt']
+              return [`${num.toLocaleString('nb-NO')} kr`, 'Inntekt'] as [
+                string,
+                string,
+              ]
             }}
             contentStyle={{
               borderRadius: '8px',
