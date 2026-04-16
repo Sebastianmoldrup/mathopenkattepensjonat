@@ -43,7 +43,7 @@ export async function adminGetAllBookings(): Promise<AdminBooking[]> {
 
   // Fetch cats for each booking
   const bookingIds = (data ?? []).map((b: any) => b.id)
-  const { data: catRows } = await supabase
+  const { data: catRows, error: catError } = await supabase
     .from('booking_cats')
     .select(
       'booking_id, cats(id, name, breed, image_url, medical_notes, diet, behavior_notes)'
