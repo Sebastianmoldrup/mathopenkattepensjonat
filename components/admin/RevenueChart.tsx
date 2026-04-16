@@ -76,10 +76,9 @@ export function RevenueChart({ data }: RevenueChartProps) {
       {/* Header with year selector */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold">Statistikk</h2>
+          <h2 className="text-base font-semibold">Inntekt</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {yearRevenue.toLocaleString('nb-NO')} kr · {yearBookings} bookinger
-            · {yearCancellations} avbestillinger
+            {yearRevenue.toLocaleString('nb-NO')} kr totalt i {selectedYear}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -107,11 +106,11 @@ export function RevenueChart({ data }: RevenueChartProps) {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={280}>
         <BarChart
           data={chartData}
-          margin={{ top: 16, right: 16, bottom: 4, left: 16 }}
-          barCategoryGap="25%"
+          margin={{ top: 16, right: 8, bottom: 4, left: 8 }}
+          barCategoryGap="30%"
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -125,33 +124,17 @@ export function RevenueChart({ data }: RevenueChartProps) {
             axisLine={false}
           />
           <YAxis
-            yAxisId="revenue"
-            orientation="left"
             tick={{ fontSize: 10 }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => (v === 0 ? '0' : `${(v / 1000).toFixed(0)}k`)}
             width={36}
           />
-          <YAxis
-            yAxisId="count"
-            orientation="right"
-            tick={{ fontSize: 10 }}
-            tickLine={false}
-            axisLine={false}
-            allowDecimals={false}
-            width={24}
-          />
           <Tooltip
             cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }}
-            formatter={(value, name) => {
+            formatter={(value: number | string | undefined) => {
               const num = Number(value ?? 0)
-              if (name === 'Inntekt')
-                return [`${num.toLocaleString('nb-NO')} kr`, name] as [
-                  string,
-                  string,
-                ]
-              return [String(num), name] as [string, string]
+              return [`${num.toLocaleString('nb-NO')} kr`, 'Inntekt']
             }}
             contentStyle={{
               borderRadius: '8px',
@@ -160,25 +143,10 @@ export function RevenueChart({ data }: RevenueChartProps) {
               backgroundColor: 'hsl(var(--card))',
             }}
           />
-          <Legend wrapperStyle={{ fontSize: 12, paddingTop: 12 }} />
           <Bar
-            yAxisId="revenue"
             dataKey="Inntekt"
             fill="hsl(var(--primary))"
-            radius={[3, 3, 0, 0]}
-          />
-          <Bar
-            yAxisId="count"
-            dataKey="Bookinger"
-            fill="hsl(var(--chart-2))"
-            radius={[3, 3, 0, 0]}
-          />
-          <Bar
-            yAxisId="count"
-            dataKey="Avbestillinger"
-            fill="hsl(var(--destructive))"
-            radius={[3, 3, 0, 0]}
-            opacity={0.75}
+            radius={[4, 4, 0, 0]}
           />
         </BarChart>
       </ResponsiveContainer>

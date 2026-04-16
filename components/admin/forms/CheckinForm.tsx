@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { DatePicker } from '@/components/admin/DatePicker'
 import { Loader2, CheckCircle2, LogIn, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDateNO } from '@/lib/admin/utils'
@@ -209,14 +210,11 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs">Dato og klokkeslett</Label>
-              <Input
-                value={text('inn_dato_klokkeslett')}
-                onChange={(e) =>
-                  setText('inn_dato_klokkeslett', e.target.value)
-                }
-                placeholder="DD.MM.ÅÅÅÅ TT:MM"
-                className="h-8 text-sm"
+              <Label className="text-xs">Dato for innsjekk</Label>
+              <DatePicker
+                value={text('inn_dato_klokkeslett') || null}
+                onChange={(val) => setText('inn_dato_klokkeslett', val ?? '')}
+                className="w-full"
               />
             </div>
             <div className="space-y-1">
@@ -225,7 +223,7 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
                 value={text('inn_signatur')}
                 onChange={(e) => setText('inn_signatur', e.target.value)}
                 placeholder="Navn"
-                className="h-8 text-sm"
+                className="h-9 text-sm"
               />
             </div>
           </div>
@@ -254,26 +252,6 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
 
         {/* ── UTSJEKK ──────────────────────────────────────────────────────── */}
         <TabsContent value="utsjekk" className="space-y-5 pt-4">
-          <Section title="🧹 Rengjøring etter katt">
-            {[
-              ['ut_rom_tomt', 'Katten hentet / rommet tomt'],
-              ['ut_kattedo_tømt', 'Kattedo tømt'],
-              ['ut_kattedo_rengjort', 'Kattedo rengjort og desinfisert'],
-              ['ut_skåler_vasket', 'Mat- og vannskåler vasket'],
-              ['ut_tepper_vask', 'Tepper / liggeunderlag sendt til vask'],
-              ['ut_bur_rengjort', 'Bur / rom rengjort'],
-              ['ut_overflater_desinfisert', 'Overflater desinfisert'],
-              ['ut_utstyr_klart', 'Utstyr klart for ny katt'],
-            ].map(([key, label]) => (
-              <CheckRow
-                key={key}
-                checked={bool(key)}
-                label={label}
-                onChange={() => toggle(key)}
-              />
-            ))}
-          </Section>
-
           <Section title="🐾 Kattens status ved utsjekk">
             {[
               ['ut_frisk', 'Katten fremstår frisk'],
@@ -327,12 +305,11 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs">Dato og klokkeslett</Label>
-              <Input
-                value={text('ut_dato_klokkeslett')}
-                onChange={(e) => setText('ut_dato_klokkeslett', e.target.value)}
-                placeholder="DD.MM.ÅÅÅÅ TT:MM"
-                className="h-8 text-sm"
+              <Label className="text-xs">Dato for utsjekk</Label>
+              <DatePicker
+                value={text('ut_dato_klokkeslett') || null}
+                onChange={(val) => setText('ut_dato_klokkeslett', val ?? '')}
+                className="w-full"
               />
             </div>
             <div className="space-y-1">
@@ -341,7 +318,7 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
                 value={text('ut_signatur')}
                 onChange={(e) => setText('ut_signatur', e.target.value)}
                 placeholder="Navn"
-                className="h-8 text-sm"
+                className="h-9 text-sm"
               />
             </div>
           </div>

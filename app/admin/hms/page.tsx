@@ -1,24 +1,14 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { HMSForm } from '@/components/admin/forms/HMSForm'
-import { PrintButton } from '@/components/admin/PrintButton'
+import { HMSContent } from '@/components/admin/HMSContent'
 import { Loader2 } from 'lucide-react'
 
-async function HMSContent() {
+async function HMSData() {
   const supabase = await createClient()
 
-  const { data: latestData } = await supabase.rpc('admin_get_latest_hms_log')
-  const latest = latestData?.[0] ?? null
+  const { data: historyData } = await supabase.rpc('admin_get_all_hms_logs')
 
-  const { data: historyData } = await supabase
-    .from('hms_logs')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  const history = (historyData ?? []).slice(1) // exclude latest from history
-
-  return <HMSForm existing={latest} history={history} />
+  return <HMSContent history={historyData ?? []} />
 }
 
 export default function HMSPage() {
@@ -30,13 +20,10 @@ export default function HMSPage() {
             HMS & Beredskap
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Digital registrering av HMS- og beredskapsrutiner. Lagres med dato
-            og signatur.
+            Opprett nye HMS-registreringer og se tidligere lagrede.
           </p>
         </div>
-        <PrintButton />
       </div>
-
       <Suspense
         fallback={
           <div className="flex h-64 items-center justify-center rounded-xl border bg-card">
@@ -44,7 +31,7 @@ export default function HMSPage() {
           </div>
         }
       >
-        <HMSContent />
+        <HMSData />
       </Suspense>
     </div>
   )

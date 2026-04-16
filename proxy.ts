@@ -29,7 +29,7 @@ export async function proxy(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      return NextResponse.redirect(new URL('/login', request.url))
     }
 
     const { data: isAdmin } = await supabase.rpc('is_admin')

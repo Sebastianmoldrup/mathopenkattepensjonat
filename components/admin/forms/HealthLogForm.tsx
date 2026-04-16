@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/admin/DatePicker'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, CheckCircle2, Plus, AlertTriangle } from 'lucide-react'
@@ -395,10 +396,10 @@ export function HealthLogForm({
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Dato</Label>
-                <Input
-                  value={text('vet_dato')}
-                  onChange={(e) => setText('vet_dato', e.target.value)}
-                  className="h-8 text-sm"
+                <DatePicker
+                  value={text('vet_dato') || null}
+                  onChange={(val) => setText('vet_dato', val ?? '')}
+                  className="w-full"
                 />
               </div>
             </div>
@@ -455,10 +456,10 @@ export function HealthLogForm({
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Dato</Label>
-                <Input
-                  value={text('signatur_dato')}
-                  onChange={(e) => setText('signatur_dato', e.target.value)}
-                  className="h-8 text-sm"
+                <DatePicker
+                  value={text('signatur_dato') || null}
+                  onChange={(val) => setText('signatur_dato', val ?? '')}
+                  className="w-full"
                 />
               </div>
             </div>

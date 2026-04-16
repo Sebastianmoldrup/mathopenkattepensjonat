@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/admin/DatePicker'
 import { Loader2, CheckCircle2, ShieldCheck, History } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -164,9 +165,10 @@ function FormSection({
 interface HMSFormProps {
   existing: HmsLog | null
   history: HmsLog[]
+  onSaved?: (newLog: HmsLog) => void
 }
 
-export function HMSForm({ existing, history }: HMSFormProps) {
+export function HMSForm({ existing, history, onSaved }: HMSFormProps) {
   const [fields, setFields] = useState<Fields>(
     existing ? fromExisting(existing) : emptyFields()
   )
@@ -248,16 +250,34 @@ export function HMSForm({ existing, history }: HMSFormProps) {
   function handleSave() {
     setError(null)
     setSaved(false)
+
+    if (!text('godkjent_navn').trim()) {
+      setError('Navn er påkrevd for å lagre.')
+      return
+    }
+    if (!text('godkjent_dato').trim()) {
+      setError('Dato er påkrevd for å lagre.')
+      return
+    }
+
     startTransition(async () => {
       const supabase = createClient()
-      const { error: err } = await supabase.rpc('admin_upsert_hms_log', {
-        p_data: fields,
-      })
+      const { data: newId, error: err } = await supabase.rpc(
+        'admin_upsert_hms_log',
+        { p_data: fields }
+      )
       if (err) {
         setError('Kunne ikke lagre HMS-skjema. Prøv igjen.')
-      } else {
-        setSaved(true)
+        return
       }
+      const newLog = {
+        id: newId ?? crypto.randomUUID(),
+        created_at: new Date().toISOString(),
+        ...fields,
+      } as any
+      setSaved(true)
+      setFields(emptyFields())
+      if (onSaved) onSaved(newLog)
     })
   }
 
@@ -393,11 +413,10 @@ export function HMSForm({ existing, history }: HMSFormProps) {
           <Label className="text-xs text-muted-foreground">
             Dato for kontroll
           </Label>
-          <Input
-            value={text('slokkeutstyr_dato')}
-            onChange={(e) => setText('slokkeutstyr_dato', e.target.value)}
-            placeholder="DD.MM.ÅÅÅÅ"
-            className="mt-1 h-8 max-w-[160px] text-sm"
+          <DatePicker
+            value={text('slokkeutstyr_dato') || null}
+            onChange={(val) => setText('slokkeutstyr_dato', val ?? '')}
+            className="mt-1"
           />
         </div>
         <CheckRow
@@ -470,11 +489,10 @@ export function HMSForm({ existing, history }: HMSFormProps) {
           <Label className="text-xs text-muted-foreground">
             Dato for kontroll
           </Label>
-          <Input
-            value={text('førstehjelpsutstyr_dato')}
-            onChange={(e) => setText('førstehjelpsutstyr_dato', e.target.value)}
-            placeholder="DD.MM.ÅÅÅÅ"
-            className="mt-1 h-8 max-w-[160px] text-sm"
+          <DatePicker
+            value={text('førstehjelpsutstyr_dato') || null}
+            onChange={(val) => setText('førstehjelpsutstyr_dato', val ?? '')}
+            className="mt-1"
           />
         </div>
       </FormSection>
@@ -574,10 +592,19 @@ export function HMSForm({ existing, history }: HMSFormProps) {
       </FormSection>
 
       {/* Godkjenning */}
-      <div className="space-y-4 rounded-xl border bg-card p-5">
+      <div
+        className={cn(
+          'space-y-4 rounded-xl border bg-card p-5',
+          (!text('godkjent_navn') || !text('godkjent_dato')) &&
+            'border-amber-300'
+        )}
+      >
         <div className="flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-primary" />
           <p className="text-sm font-semibold">✍️ Godkjenning</p>
+          <span className="ml-1 text-xs font-medium text-amber-600">
+            — påkrevd
+          </span>
         </div>
         <p className="text-sm text-muted-foreground">
           Jeg bekrefter at HMS- og beredskapsrutinene er kjent og tilgjengelige
@@ -585,21 +612,27 @@ export function HMSForm({ existing, history }: HMSFormProps) {
         </p>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <Label className="text-xs">Navn</Label>
+            <Label className="text-xs">
+              Navn <span className="text-destructive">*</span>
+            </Label>
             <Input
               value={text('godkjent_navn')}
               onChange={(e) => setText('godkjent_navn', e.target.value)}
               placeholder="Fullt navn"
-              className="h-9 text-sm"
+              className={cn(
+                'h-9 text-sm',
+                !text('godkjent_navn') && 'border-amber-300'
+              )}
             />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs">Dato</Label>
-            <Input
-              value={text('godkjent_dato')}
-              onChange={(e) => setText('godkjent_dato', e.target.value)}
-              placeholder="DD.MM.ÅÅÅÅ"
-              className="h-9 text-sm"
+            <Label className="text-xs">
+              Dato <span className="text-destructive">*</span>
+            </Label>
+            <DatePicker
+              value={text('godkjent_dato') || null}
+              onChange={(val) => setText('godkjent_dato', val ?? '')}
+              className="w-full"
             />
           </div>
         </div>

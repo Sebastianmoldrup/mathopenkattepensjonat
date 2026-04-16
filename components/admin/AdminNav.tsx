@@ -9,14 +9,20 @@ import {
   BookOpen,
   PawPrint,
   ShieldCheck,
+  FileText,
+  BookMarked,
+  XCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Oversikt', icon: LayoutDashboard, exact: true },
   { href: '/admin/bookinger', label: 'Bookinger', icon: BookOpen },
+  { href: '/admin/avbestillinger', label: 'Avbestillinger', icon: XCircle },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarDays },
   { href: '/admin/sjekkliste', label: 'Daglige rutiner', icon: ClipboardCheck },
+  { href: '/admin/guide', label: 'Guide', icon: BookMarked },
+  { href: '/admin/dokumentasjon', label: 'Dokumentasjon', icon: FileText },
   { href: '/admin/hms', label: 'HMS & Beredskap', icon: ShieldCheck },
 ]
 

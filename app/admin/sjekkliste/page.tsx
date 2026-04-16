@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { connection } from 'next/server'
 import { adminGetDailyRoutines } from '@/lib/admin/formActions'
 import { DailyRoutineForm } from '@/components/admin/forms/DailyRoutineForm'
 import { DailyRoutine } from '@/lib/admin/formTypes'
@@ -22,6 +23,7 @@ function isRoutineComplete(r: DailyRoutine): boolean {
 }
 
 async function SjekklisteContent() {
+  await connection()
   const today = localDateStr(new Date())
   const thirtyDaysAgo = localDateStr(
     new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)

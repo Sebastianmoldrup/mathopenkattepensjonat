@@ -51,7 +51,6 @@ export function BookingWizard() {
   }
 
   function goTo(step: BookingStep) {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
     updateState({ step })
   }
 
@@ -59,8 +58,6 @@ export function BookingWizard() {
   function handleConfirmed() {
     setState(INITIAL_BOOKING_STATE)
     setCageCount(1)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    router.refresh()
     router.push('/minside')
   }
 
@@ -150,6 +147,7 @@ export function BookingWizard() {
               <DateRangeSelection
                 numCats={state.selectedCatIds.length}
                 selectedCatIds={state.selectedCatIds}
+                selectedCats={selectedCats}
                 bookings={bookings}
                 dateFrom={state.dateFrom}
                 dateTo={state.dateTo}

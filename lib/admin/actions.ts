@@ -11,7 +11,8 @@ import {
 } from './utils'
 import {
   sendBookingConfirmedEmail,
-  sendBookingCancelledEmail,
+  sendBookingCancelledByAdminEmail,
+  sendCancellationFeeReminderEmail,
 } from '@/lib/email/resend'
 
 // ─── Auth guard ────────────────────────────────────────────────────────────────
@@ -70,27 +71,107 @@ export async function adminUpdateBookingStatus(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
-  const { error } = await supabase.rpc('admin_update_booking_status', {
-    p_booking_id: bookingId,
-    p_status: status,
-  })
-
-  if (error) {
-    console.error('[adminUpdateBookingStatus]', error.message)
-    return { success: false, error: 'Kunne ikke oppdatere status.' }
-  }
-
-  // Send email on confirm or cancel
-  if (status === 'confirmed') {
-    await sendBookingConfirmedEmail({ ...booking, status })
-  } else if (status === 'cancelled') {
-    await sendBookingCancelledEmail({ ...booking, status })
+  if (status === 'cancelled') {
+    // Admin cancels — use dedicated RPC (no fee by default)
+    const { error } = await supabase.rpc('admin_cancel_booking', {
+      p_booking_id: bookingId,
+      p_cancellation_fee: null,
+      p_note: null,
+    })
+    if (error) {
+      console.error('[adminUpdateBookingStatus cancel]', error.message)
+      return { success: false, error: 'Kunne ikke avbestille booking.' }
+    }
+    await sendBookingCancelledByAdminEmail({ ...booking, status })
+  } else {
+    const { error } = await supabase.rpc('admin_update_booking_status', {
+      p_booking_id: bookingId,
+      p_status: status,
+    })
+    if (error) {
+      console.error('[adminUpdateBookingStatus]', error.message)
+      return { success: false, error: 'Kunne ikke oppdatere status.' }
+    }
+    if (status === 'confirmed') {
+      await sendBookingConfirmedEmail({ ...booking, status })
+    }
   }
 
   revalidatePath('/admin/bookinger')
   revalidatePath('/admin')
+  revalidatePath('/admin/avbestillinger')
 
   return { success: true }
+}
+
+// ─── Update fee status ─────────────────────────────────────────────────────────
+
+export async function adminUpdateFeeStatus(
+  bookingId: string,
+  feePaid: boolean,
+  cancellationFee?: number,
+  note?: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('admin_update_fee_status', {
+    p_booking_id: bookingId,
+    p_fee_paid: feePaid,
+    p_cancellation_fee: cancellationFee ?? null,
+    p_note: note ?? null,
+  })
+
+  if (error) {
+    console.error('[adminUpdateFeeStatus]', error.message)
+    return { success: false, error: 'Kunne ikke oppdatere gebyrstatus.' }
+  }
+
+  revalidatePath('/admin/avbestillinger')
+  return { success: true }
+}
+
+// ─── Get cancellations ─────────────────────────────────────────────────────────
+
+export interface CancellationEntry {
+  id: string
+  date_from: string
+  date_to: string
+  price: number
+  cancelled_by: string | null
+  cancellation_fee: number | null
+  fee_paid: boolean
+  cancellation_note: string | null
+  created_at: string
+  user_email: string
+  user_first_name: string | null
+  user_last_name: string | null
+  user_phone: string | null
+  cat_names: string | null
+}
+
+export async function adminGetCancellations(): Promise<CancellationEntry[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_cancellations')
+  if (error) {
+    console.error('[adminGetCancellations]', error.message)
+    return []
+  }
+  return data ?? []
+}
+
+// ─── Send fee reminder ─────────────────────────────────────────────────────────
+
+export async function adminSendFeeReminder(
+  booking: AdminBooking,
+  feeAmount: number
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    await sendCancellationFeeReminderEmail(booking, feeAmount)
+    return { success: true }
+  } catch (e) {
+    console.error('[adminSendFeeReminder]', e)
+    return { success: false, error: 'Kunne ikke sende påminnelse.' }
+  }
 }
 
 // ─── Update admin notes ────────────────────────────────────────────────────────

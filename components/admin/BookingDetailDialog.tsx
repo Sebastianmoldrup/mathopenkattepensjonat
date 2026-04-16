@@ -30,6 +30,7 @@ import { adminGetCheckinLog, adminGetHealthLogs } from '@/lib/admin/formActions'
 import { CheckinLog, HealthLog } from '@/lib/admin/formTypes'
 import { CheckinForm } from './forms/CheckinForm'
 import { HealthLogForm } from './forms/HealthLogForm'
+import { BookingPDFButton } from './BookingPDFButton'
 import {
   CheckCircle2,
   XCircle,
@@ -136,7 +137,7 @@ export function BookingDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto p-6">
         <DialogHeader className="pb-2">
-          <DialogTitle className="flex items-center gap-3">
+          <DialogTitle className="flex flex-wrap items-center gap-3">
             Booking
             <Badge
               variant="outline"
@@ -144,6 +145,16 @@ export function BookingDetailDialog({
             >
               {STATUS_LABELS[booking.status]}
             </Badge>
+            <div className="ml-auto">
+              <BookingPDFButton
+                bookingId={booking.id}
+                ownerName={
+                  `${booking.user_first_name ?? ''} ${booking.user_last_name ?? ''}`.trim() ||
+                  booking.user_email
+                }
+                dateFrom={booking.date_from}
+              />
+            </div>
           </DialogTitle>
         </DialogHeader>
 

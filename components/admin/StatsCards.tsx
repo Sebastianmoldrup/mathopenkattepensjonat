@@ -1,16 +1,9 @@
-import {
-  Clock,
-  CheckCircle2,
-  Banknote,
-  XCircle,
-  CalendarDays,
-} from 'lucide-react'
+import { Clock, CheckCircle2, Banknote, CalendarDays } from 'lucide-react'
 
 interface StatsCardsProps {
   pending: number
   confirmed: number
   totalRevenue: number
-  cancellationRate: number
   totalBookings: number
 }
 
@@ -18,7 +11,6 @@ export function StatsCards({
   pending,
   confirmed,
   totalRevenue,
-  cancellationRate,
   totalBookings,
 }: StatsCardsProps) {
   const stats = [
@@ -50,17 +42,10 @@ export function StatsCards({
       color: 'text-primary',
       bg: 'bg-primary/10',
     },
-    {
-      label: 'Avbestillingsrate',
-      value: `${cancellationRate}%`,
-      icon: XCircle,
-      color: 'text-red-600',
-      bg: 'bg-red-50',
-    },
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {stats.map((stat) => (
         <div
           key={stat.label}

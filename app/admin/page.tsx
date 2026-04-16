@@ -1,7 +1,10 @@
 import { Suspense } from 'react'
+import { connection } from 'next/server'
 import { adminGetAllBookings, adminGetRevenueStats } from '@/lib/admin/actions'
 import { StatsCards } from '@/components/admin/StatsCards'
 import { RevenueChart } from '@/components/admin/RevenueChart'
+import { DashboardAlerts } from '@/components/admin/DashboardAlerts'
+import { createClient } from '@/lib/supabase/server'
 import { Loader2 } from 'lucide-react'
 
 function LoadingCard() {
@@ -12,10 +15,28 @@ function LoadingCard() {
   )
 }
 
+function localDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 async function AdminStats() {
-  const [bookings, revenueStats] = await Promise.all([
+  await connection()
+
+  const today = localDateStr(new Date())
+  const supabase = await createClient()
+
+  const [bookings, revenueStats, hmsData, routineData] = await Promise.all([
     adminGetAllBookings(),
     adminGetRevenueStats(),
+    // Latest HMS log
+    supabase.rpc('admin_get_latest_hms_log').then((r) => r.data?.[0] ?? null),
+    // Today's daily routines
+    supabase
+      .rpc('admin_get_daily_routines', {
+        p_from: today,
+        p_to: today,
+      })
+      .then((r) => r.data ?? []),
   ])
 
   const pending = bookings.filter((b) => b.status === 'pending').length
@@ -23,14 +44,13 @@ async function AdminStats() {
   const totalRevenue = bookings
     .filter((b) => b.status !== 'cancelled')
     .reduce((sum, b) => sum + b.price, 0)
-  const cancellationRate =
-    bookings.length > 0
-      ? Math.round(
-          (bookings.filter((b) => b.status === 'cancelled').length /
-            bookings.length) *
-            100
-        )
-      : 0
+
+  const todayMorgen = (routineData as any[]).find(
+    (r: any) => r.period === 'morgen'
+  )
+  const todayDagKveld = (routineData as any[]).find(
+    (r: any) => r.period === 'dag_kveld'
+  )
 
   return (
     <>
@@ -38,8 +58,13 @@ async function AdminStats() {
         pending={pending}
         confirmed={confirmed}
         totalRevenue={totalRevenue}
-        cancellationRate={cancellationRate}
         totalBookings={bookings.length}
+      />
+      <DashboardAlerts
+        lastHms={hmsData ? (hmsData as any).created_at : null}
+        todayMorgen={!!todayMorgen}
+        todayDagKveld={!!todayDagKveld}
+        pendingCount={pending}
       />
       <RevenueChart data={revenueStats} />
     </>
@@ -48,7 +73,7 @@ async function AdminStats() {
 
 export default function AdminPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Oversikt</h1>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -59,11 +84,12 @@ export default function AdminPage() {
       <Suspense
         fallback={
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-              {Array.from({ length: 5 }).map((_, i) => (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
                 <LoadingCard key={i} />
               ))}
             </div>
+            <LoadingCard />
             <LoadingCard />
           </div>
         }
