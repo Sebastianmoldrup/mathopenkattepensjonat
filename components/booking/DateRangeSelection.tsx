@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 interface DateRangeSelectionProps {
   numCats: number
   selectedCatIds: string[]
+  selectedCats: { id: string; name: string }[]
   bookings: BookingWithCats[]
   dateFrom: Date | null
   dateTo: Date | null
@@ -88,7 +89,6 @@ function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate()
 }
 
-/** Monday-based offset (0 = Monday … 6 = Sunday) */
 function getMonthStartOffset(year: number, month: number): number {
   const day = new Date(year, month, 1).getDay()
   return day === 0 ? 6 : day - 1
@@ -147,7 +147,6 @@ function MonthGrid({
   const offset = getMonthStartOffset(year, month)
   const daysInMonth = getDaysInMonth(year, month)
 
-  // Normalise range so lo ≤ hi
   const lo =
     rangeStart && rangeEnd
       ? rangeStart <= rangeEnd
@@ -165,7 +164,6 @@ function MonthGrid({
 
   return (
     <div onMouseLeave={onMouseLeave}>
-      {/* Month header */}
       <div className="mb-3 flex items-center justify-between">
         <button
           onClick={onPrev}
@@ -192,7 +190,6 @@ function MonthGrid({
         </button>
       </div>
 
-      {/* Weekday labels */}
       <div className="mb-1 grid grid-cols-7">
         {WEEKDAYS_SHORT.map((d) => (
           <div
@@ -204,13 +201,10 @@ function MonthGrid({
         ))}
       </div>
 
-      {/* Day cells */}
       <div className="grid grid-cols-7 gap-px">
-        {/* Leading empty cells */}
         {Array.from({ length: offset }).map((_, i) => (
           <div key={`e${i}`} />
         ))}
-
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
           const date = new Date(year, month, d)
           const key = toKey(date)
@@ -218,14 +212,12 @@ function MonthGrid({
           const isBlocked = blockedSet.has(key)
           const isHigh = getSeason(date) === 'high'
           const isToday = sameDay(date, today)
-
           const isStart = sameDay(date, lo)
           const isEnd = !!hi && sameDay(date, hi)
           const inRange = !!lo && !!hi && date > lo && date < hi
           const isHoverEnd = !!effHover && sameDay(date, effHover)
           const inHoverRange =
             !!lo && !hi && !!effHover && date > lo && date < effHover
-
           const disabled = isPast || isBlocked
 
           return (
@@ -243,22 +235,14 @@ function MonthGrid({
               className={cn(
                 'relative flex h-9 select-none items-center justify-center text-[13px]',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-
-                // Base state
                 !disabled &&
                   !isStart &&
                   !isEnd &&
                   !inRange &&
                   'cursor-pointer rounded-lg',
-
-                // Disabled
                 isPast && 'cursor-not-allowed text-muted-foreground opacity-35',
-
-                // Blocked
                 isBlocked &&
                   'cursor-not-allowed rounded-lg bg-red-100 text-red-400 line-through opacity-70',
-
-                // High season (only when not selected/in-range)
                 !disabled &&
                   isHigh &&
                   !isStart &&
@@ -267,8 +251,6 @@ function MonthGrid({
                   !inHoverRange &&
                   !isHoverEnd &&
                   'rounded-lg border-2 border-amber-400 bg-amber-100 font-medium text-amber-900',
-
-                // Hover on non-special days
                 !disabled &&
                   !isBlocked &&
                   !isStart &&
@@ -278,8 +260,6 @@ function MonthGrid({
                   !inHoverRange &&
                   !isHoverEnd &&
                   'hover:bg-accent',
-
-                // Range selection
                 isStart &&
                   !isEnd &&
                   'z-10 rounded-l-lg rounded-r-none bg-primary font-medium text-primary-foreground',
@@ -291,13 +271,9 @@ function MonthGrid({
                   'z-10 rounded-lg bg-primary font-medium text-primary-foreground',
                 inRange &&
                   'rounded-none bg-primary/15 font-medium text-primary',
-
-                // Hover preview
                 inHoverRange && 'rounded-none bg-primary/10',
                 isHoverEnd &&
                   'rounded-l-none rounded-r-lg bg-primary/30 text-primary',
-
-                // Today indicator handled via ::after below — add class
                 isToday && 'day-today font-semibold'
               )}
             >
@@ -316,6 +292,7 @@ function MonthGrid({
 export function DateRangeSelection({
   numCats,
   selectedCatIds,
+  selectedCats,
   bookings,
   dateFrom,
   dateTo,
@@ -331,13 +308,12 @@ export function DateRangeSelection({
     return d
   }, [])
 
-  const minDate = useMemo(() => {
-    return today >= OPENING_DATE ? today : OPENING_DATE
-  }, [today])
-
+  const minDate = useMemo(
+    () => (today >= OPENING_DATE ? today : OPENING_DATE),
+    [today]
+  )
   const maxDate = useMemo(() => addDays(minDate, 365), [minDate])
 
-  // ── Blocked date sets ──────────────────────────────────────────────────────
   const fullyBookedSet = useMemo(
     () => getFullyBookedDates(bookings, numCats, minDate, maxDate),
     [bookings, numCats, minDate, maxDate]
@@ -359,7 +335,6 @@ export function DateRangeSelection({
   const [focus, setFocus] = useState<FocusField>('start')
   const [hoverDate, setHoverDate] = useState<Date | null>(null)
 
-  // Sync initial month to minDate whenever it changes
   useEffect(() => {
     setLeftYear(minDate.getFullYear())
     setLeftMonth(minDate.getMonth())
@@ -381,15 +356,12 @@ export function DateRangeSelection({
         setFocus('end')
         setHoverDate(null)
       } else {
-        // Selecting end
         let from = dateFrom!
         let to = date
         if (to < from) {
           ;[from, to] = [to, from]
         }
-
         if (hasBlockedInRange(from, to)) {
-          // Reset — treat click as new start
           onChange(date, null)
           setFocus('end')
           setHoverDate(null)
@@ -430,12 +402,6 @@ export function DateRangeSelection({
   const focusStart = () => setFocus('start')
   const focusEnd = () => setFocus('end')
 
-  function clearAll() {
-    onChange(null, null)
-    setFocus('start')
-    setHoverDate(null)
-  }
-
   const hintText = !dateFrom
     ? 'Velg innsjekkdato'
     : !dateTo
@@ -455,6 +421,9 @@ export function DateRangeSelection({
     onMouseLeave: handleMouseLeave,
   }
 
+  // Check if any selected cat has blocked dates
+  const hasCatConflict = selectedCats.length > 0 && catBlockedSet.size > 0
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -466,6 +435,23 @@ export function DateRangeSelection({
           Velg innsjekk- og utsjekkdato.
         </p>
       </div>
+
+      {/* Cat conflict notice */}
+      {hasCatConflict && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+          <span className="font-medium">
+            {selectedCats.length === 1
+              ? `${selectedCats[0].name} er allerede booket`
+              : `${selectedCats
+                  .slice(0, -1)
+                  .map((c) => c.name)
+                  .join(
+                    ', '
+                  )} og ${selectedCats[selectedCats.length - 1].name} er allerede booket`}
+          </span>{' '}
+          i perioder markert med rødt. Velg datoer utenom disse.
+        </div>
+      )}
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
@@ -489,7 +475,6 @@ export function DateRangeSelection({
 
       {/* Calendar card */}
       <div className="w-full overflow-hidden rounded-xl border bg-card">
-        {/* Check-in / Check-out fields */}
         <div className="grid grid-cols-2 border-b border-border">
           <button
             onClick={focusStart}
@@ -532,7 +517,6 @@ export function DateRangeSelection({
           </button>
         </div>
 
-        {/* Month grids */}
         <div
           className={cn(
             'p-4 sm:p-5',
@@ -561,7 +545,6 @@ export function DateRangeSelection({
           )}
         </div>
 
-        {/* Hint */}
         <div className="border-t border-border px-5 pb-3 pt-3 text-xs text-muted-foreground">
           {hintText}
         </div>
@@ -594,24 +577,14 @@ export function DateRangeSelection({
         </div>
       )}
 
-      {/* Navigation buttons */}
+      {/* Navigation */}
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
           Tilbake
         </Button>
-        <div className="flex items-center gap-3">
-          {/* {(dateFrom || dateTo) && ( */}
-          {/*   <button */}
-          {/*     onClick={clearAll} */}
-          {/*     className="text-sm text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground" */}
-          {/*   > */}
-          {/*     Tøm */}
-          {/*   </button> */}
-          {/* )} */}
-          <Button onClick={onNext} disabled={!canProceed} size="lg">
-            Neste
-          </Button>
-        </div>
+        <Button onClick={onNext} disabled={!canProceed} size="lg">
+          Neste
+        </Button>
       </div>
     </div>
   )
