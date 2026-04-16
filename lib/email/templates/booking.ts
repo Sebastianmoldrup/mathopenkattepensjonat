@@ -136,7 +136,7 @@ export function bookingConfirmedTemplate(booking: AdminBooking): string {
 
       <div style="padding:16px 20px;font-size:14px;line-height:1.7;">
 
-        <p style="margin:0 0 8px;"><strong>💉 Vaksinasjon</strong></p>
+        <p style="margin:0 0 8px;"><strong>💉 Helsekrav</strong></p>
         <ul style="margin:0 0 16px;padding-left:20px;color:#444;">
           <li>Vaksinasjon må være gjennomført innen de siste 12 månedene og minst 14 dager før innsjekk</li>
           <li>Vaksinasjonskort medbringes og oppbevares hos oss i hele oppholdet</li>
@@ -192,13 +192,23 @@ export function bookingCancelledTemplate(
         ? `
       <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px 20px;border-radius:4px;font-size:14px;margin:24px 0;line-height:1.7;">
         <p style="margin:0 0 8px;font-weight:bold;color:#991b1b;">⚠️ Avbestillingsgebyr gjelder</p>
-        <p style="margin:0 0 6px;color:#444;">
+        <p style="margin:0 0 12px;color:#444;">
           Avbestillingen ble gjort etter fristen for gebyrfri avbestilling.
           I henhold til våre betingelser belastes <strong>${feeAmount.toLocaleString('nb-NO')} kr</strong>
           (50 % av oppholdets pris).
         </p>
+        <div style="background:#fff;border:1px solid #fca5a5;border-radius:6px;padding:12px 16px;margin-bottom:8px;">
+          <p style="margin:0 0 6px;font-weight:bold;color:#333;font-size:14px;">💸 Betaling via Vipps</p>
+          <p style="margin:0 0 4px;color:#444;font-size:14px;">Vipps bedriftsnummer: <strong style="font-size:16px;">46867</strong></p>
+          <p style="margin:0 0 10px;color:#666;font-size:13px;">Merk betalingen med ditt navn og «avbestillingsgebyr».</p>
+          <a href="vipps://payment?phone=46867"
+             style="display:inline-block;background:#ff5b24;color:#ffffff;font-weight:bold;font-size:14px;padding:10px 24px;border-radius:8px;text-decoration:none;">
+            Betal med Vipps
+          </a>
+          <p style="margin:8px 0 0;font-weight:bold;color:#991b1b;font-size:13px;">Betalingsfrist: 14 dager fra denne e-posten.</p>
+        </div>
         <p style="margin:0;color:#666;font-size:13px;">
-          Vi vil ta kontakt med deg angående betaling. Har du spørsmål, ta kontakt på
+          Har du spørsmål, ta kontakt på
           <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
         </p>
       </div>
@@ -271,9 +281,20 @@ export function cancellationFeeReminderTemplate(
     </p>
 
     <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px 20px;border-radius:4px;font-size:14px;margin:24px 0;line-height:1.7;">
-      <p style="margin:0 0 6px;font-weight:bold;color:#991b1b;">Utestående beløp: ${feeAmount.toLocaleString('nb-NO')} kr</p>
+      <p style="margin:0 0 8px;font-weight:bold;color:#991b1b;">Utestående beløp: ${feeAmount.toLocaleString('nb-NO')} kr</p>
+      <div style="background:#fff;border:1px solid #fca5a5;border-radius:6px;padding:12px 16px;margin-bottom:8px;">
+        <p style="margin:0 0 6px;font-weight:bold;color:#333;font-size:14px;">💸 Betaling via Vipps</p>
+        <p style="margin:0 0 4px;color:#444;font-size:14px;">Vipps bedriftsnummer: <strong style="font-size:16px;">46867</strong></p>
+        <p style="margin:0 0 10px;color:#666;font-size:13px;">Merk betalingen med ditt navn og «avbestillingsgebyr».</p>
+        <a href="vipps://payment?phone=46867"
+           style="display:inline-block;background:#ff5b24;color:#ffffff;font-weight:bold;font-size:14px;padding:10px 24px;border-radius:8px;text-decoration:none;">
+          Betal med Vipps
+        </a>
+        <p style="margin:8px 0 0;font-weight:bold;color:#991b1b;font-size:13px;">Betalingsfrist: 14 dager fra opprinnelig avbestillingsbekreftelse.</p>
+      </div>
       <p style="margin:0;color:#666;font-size:13px;">
-        Vennligst ta kontakt med oss for å ordne betaling.
+        Vennligst betal så snart som mulig. Har du spørsmål, ta kontakt på
+        <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
       </p>
     </div>
 
