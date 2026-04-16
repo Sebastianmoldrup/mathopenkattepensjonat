@@ -59,7 +59,6 @@ export function BookingDetailDialog({
   open,
   onOpenChange,
 }: BookingDetailDialogProps) {
-  console.log(booking.cats)
   const [notes, setNotes] = useState(booking?.admin_notes ?? '')
   const [isPending, startTransition] = useTransition()
   const [activeAction, setActiveAction] = useState<string | null>(null)
