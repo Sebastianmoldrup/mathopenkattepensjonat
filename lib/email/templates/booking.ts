@@ -136,7 +136,7 @@ export function bookingConfirmedTemplate(booking: AdminBooking): string {
 
       <div style="padding:16px 20px;font-size:14px;line-height:1.7;">
 
-        <p style="margin:0 0 8px;"><strong>💉 Helsekrav</strong></p>
+        <p style="margin:0 0 8px;"><strong>🐾 Helsekrav</strong></p>
         <ul style="margin:0 0 16px;padding-left:20px;color:#444;">
           <li>Vaksinasjon må være gjennomført innen de siste 12 månedene og minst 14 dager før innsjekk</li>
           <li>Vaksinasjonskort medbringes og oppbevares hos oss i hele oppholdet</li>
@@ -190,32 +190,36 @@ export function bookingCancelledTemplate(
     ${
       hasFee
         ? `
-      <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px 20px;border-radius:4px;font-size:14px;margin:24px 0;line-height:1.7;">
-        <p style="margin:0 0 8px;font-weight:bold;color:#991b1b;">⚠️ Avbestillingsgebyr gjelder</p>
-        <p style="margin:0 0 12px;color:#444;">
+      <div style="background:#f9f6f2;border:1px solid #e8e0d8;border-radius:8px;padding:20px;font-size:14px;margin:24px 0;line-height:1.7;">
+        <p style="margin:0 0 6px;font-weight:bold;color:#2C3E50;">Avbestillingsgebyr</p>
+        <p style="margin:0 0 14px;color:#555;font-size:13px;">
           Avbestillingen ble gjort etter fristen for gebyrfri avbestilling.
-          I henhold til våre betingelser belastes <strong>${feeAmount.toLocaleString('nb-NO')} kr</strong>
-          (50 % av oppholdets pris).
+          I henhold til våre betingelser gjelder et gebyr på 50 % av oppholdets pris.
         </p>
-        <div style="background:#fff;border:1px solid #fca5a5;border-radius:6px;padding:12px 16px;margin-bottom:8px;">
-          <p style="margin:0 0 6px;font-weight:bold;color:#333;font-size:14px;">💸 Betaling via Vipps</p>
-          <p style="margin:0 0 4px;color:#444;font-size:14px;">Vipps bedriftsnummer: <strong style="font-size:16px;">46867</strong></p>
-          <p style="margin:0 0 10px;color:#666;font-size:13px;">Merk betalingen med ditt navn og «avbestillingsgebyr».</p>
-          <a href="vipps://payment?phone=46867"
-             style="display:inline-block;background:#ff5b24;color:#ffffff;font-weight:bold;font-size:14px;padding:10px 24px;border-radius:8px;text-decoration:none;">
-            Betal med Vipps
-          </a>
-          <p style="margin:8px 0 0;font-weight:bold;color:#991b1b;font-size:13px;">Betalingsfrist: 14 dager fra denne e-posten.</p>
+        <div style="background:#2C3E50;border-radius:8px;padding:14px 20px;margin:0 0 16px;text-align:center;">
+          <p style="margin:0;color:rgba(255,255,255,0.7);font-size:12px;">Beløp å betale</p>
+          <p style="margin:4px 0 0;color:#fff;font-size:28px;font-weight:bold;">${feeAmount.toLocaleString('nb-NO')} kr</p>
+          <p style="margin:2px 0 0;color:rgba(255,255,255,0.6);font-size:12px;">50 % av oppholdets pris</p>
         </div>
-        <p style="margin:0;color:#666;font-size:13px;">
-          Har du spørsmål, ta kontakt på
+        <div style="background:#fff;border:1px solid #e8e0d8;border-radius:6px;padding:16px;text-align:center;">
+          <p style="margin:0 0 4px;font-weight:bold;color:#333;font-size:14px;">💸 Betal via Vipps</p>
+          <p style="margin:0 0 12px;color:#666;font-size:13px;">Merk betalingen med ditt navn og «avbestillingsgebyr».</p>
+          <div style="background:#ff5b24;border-radius:10px;padding:12px 20px;display:inline-block;">
+            <p style="margin:0;color:#fff;font-size:11px;opacity:0.85;">Vipps bedriftsnummer</p>
+            <p style="margin:4px 0 0;color:#fff;font-size:30px;font-weight:bold;letter-spacing:2px;">46867</p>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,0.9);font-size:11px;">Søk opp nummeret i Vipps-appen</p>
+          </div>
+          <p style="margin:10px 0 0;color:#666;font-size:13px;">⏰ Betalingsfrist: 14 dager fra denne e-posten.</p>
+        </div>
+        <p style="margin:12px 0 0;color:#888;font-size:13px;">
+          Spørsmål? Ta kontakt på
           <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
         </p>
       </div>
     `
         : `
-      <div style="background:#f0fdf4;border-left:4px solid #4ade80;padding:14px 20px;border-radius:4px;font-size:14px;margin:24px 0;">
-        <p style="margin:0;color:#166534;">✅ Avbestillingen er gebyrfri. Du belastes ingenting.</p>
+      <div style="background:#f9f6f2;border:1px solid #e8e0d8;border-radius:8px;padding:14px 20px;font-size:14px;margin:24px 0;">
+        <p style="margin:0;color:#555;">✅ Avbestillingen er gebyrfri. Du belastes ingenting.</p>
       </div>
     `
     }
@@ -280,21 +284,27 @@ export function cancellationFeeReminderTemplate(
       for <strong>${catNames}</strong> (${dateFrom} – ${dateTo}).
     </p>
 
-    <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:16px 20px;border-radius:4px;font-size:14px;margin:24px 0;line-height:1.7;">
-      <p style="margin:0 0 8px;font-weight:bold;color:#991b1b;">Utestående beløp: ${feeAmount.toLocaleString('nb-NO')} kr</p>
-      <div style="background:#fff;border:1px solid #fca5a5;border-radius:6px;padding:12px 16px;margin-bottom:8px;">
-        <p style="margin:0 0 6px;font-weight:bold;color:#333;font-size:14px;">💸 Betaling via Vipps</p>
-        <p style="margin:0 0 4px;color:#444;font-size:14px;">Vipps bedriftsnummer: <strong style="font-size:16px;">46867</strong></p>
-        <p style="margin:0 0 10px;color:#666;font-size:13px;">Merk betalingen med ditt navn og «avbestillingsgebyr».</p>
-        <a href="vipps://payment?phone=46867"
-           style="display:inline-block;background:#ff5b24;color:#ffffff;font-weight:bold;font-size:14px;padding:10px 24px;border-radius:8px;text-decoration:none;">
-          Betal med Vipps
-        </a>
-        <p style="margin:8px 0 0;font-weight:bold;color:#991b1b;font-size:13px;">Betalingsfrist: 14 dager fra opprinnelig avbestillingsbekreftelse.</p>
+    <div style="background:#f9f6f2;border:1px solid #e8e0d8;border-radius:8px;padding:20px;font-size:14px;margin:24px 0;line-height:1.7;">
+      <p style="margin:0 0 6px;font-weight:bold;color:#2C3E50;">Utestående avbestillingsgebyr</p>
+      <p style="margin:0 0 14px;color:#555;font-size:13px;">Vi minner om at følgende beløp fortsatt ikke er betalt.</p>
+      <div style="background:#2C3E50;border-radius:8px;padding:14px 20px;margin:0 0 16px;text-align:center;">
+        <p style="margin:0;color:rgba(255,255,255,0.7);font-size:12px;">Beløp å betale</p>
+        <p style="margin:4px 0 0;color:#fff;font-size:28px;font-weight:bold;">${feeAmount.toLocaleString('nb-NO')} kr</p>
       </div>
-      <p style="margin:0;color:#666;font-size:13px;">
-        Vennligst betal så snart som mulig. Har du spørsmål, ta kontakt på
+      <div style="background:#fff;border:1px solid #e8e0d8;border-radius:6px;padding:16px;text-align:center;">
+        <p style="margin:0 0 4px;font-weight:bold;color:#333;font-size:14px;">💸 Betal via Vipps</p>
+        <p style="margin:0 0 12px;color:#666;font-size:13px;">Merk betalingen med ditt navn og «avbestillingsgebyr».</p>
+        <div style="background:#ff5b24;border-radius:10px;padding:12px 20px;display:inline-block;">
+          <p style="margin:0;color:#fff;font-size:11px;opacity:0.85;">Vipps bedriftsnummer</p>
+          <p style="margin:4px 0 0;color:#fff;font-size:30px;font-weight:bold;letter-spacing:2px;">46867</p>
+          <p style="margin:6px 0 0;color:rgba(255,255,255,0.9);font-size:11px;">Søk opp nummeret i Vipps-appen</p>
+        </div>
+        <p style="margin:10px 0 0;color:#666;font-size:13px;">⏰ Betalingsfrist: 14 dager fra opprinnelig avbestillingsbekreftelse.</p>
+      </div>
+      <p style="margin:12px 0 0;color:#888;font-size:13px;">
+        Spørsmål? Ta kontakt på
         <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
+        eller ring <a href="tel:+4747322279" style="color:#c8b49a;">+47 473 22 279</a>
       </p>
     </div>
 

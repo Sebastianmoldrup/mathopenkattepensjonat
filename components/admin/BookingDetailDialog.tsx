@@ -59,6 +59,7 @@ export function BookingDetailDialog({
   open,
   onOpenChange,
 }: BookingDetailDialogProps) {
+  console.log(booking.cats)
   const [notes, setNotes] = useState(booking?.admin_notes ?? '')
   const [isPending, startTransition] = useTransition()
   const [activeAction, setActiveAction] = useState<string | null>(null)
@@ -255,6 +256,37 @@ export function BookingDetailDialog({
                 )}
               </div>
             </div>
+
+            {/* Cat photos */}
+            {booking.cats && booking.cats.length > 0 && (
+              <div className="flex gap-3">
+                {booking.cats.map((cat) => (
+                  <div
+                    key={cat.id}
+                    className="flex flex-col items-center gap-1.5"
+                  >
+                    <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-muted">
+                      {cat.image_url ? (
+                        <Image
+                          src={cat.image_url}
+                          alt={cat.name}
+                          fill
+                          className="object-cover"
+                          sizes="80px"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-2xl">
+                          🐱
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-center text-xs font-medium">
+                      {cat.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <Separator />
 
