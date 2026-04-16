@@ -1,5 +1,7 @@
 'use server'
 
+import { calculateCancellationFee } from '@/lib/booking/cancellation'
+import { sendBookingCancelledEmail } from '@/lib/email/resend'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { BookingStatus, UserBooking } from './utils'
@@ -65,26 +67,83 @@ export async function getUserBookingsWithCats(): Promise<UserBooking[]> {
 
 export async function cancelBooking(
   bookingId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; feeAmount?: number }> {
   const supabase = await createClient()
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Ikke innlogget.' }
 
-  const { error } = await supabase.rpc('cancel_own_booking', {
-    booking_id: bookingId,
-  })
+  const { data: booking, error: fetchError } = await supabase
+    .from('bookings')
+    .select('id, user_id, status, date_from, date_to, price')
+    .eq('id', bookingId)
+    .single()
 
-  if (error) {
-    console.error('[cancelBooking]', error.message)
+  if (fetchError || !booking)
+    return { success: false, error: 'Booking ikke funnet.' }
+  if (booking.user_id !== user.id)
+    return { success: false, error: 'Ingen tilgang.' }
+
+  const feeResult = calculateCancellationFee(booking.date_from, booking.price)
+
+  const { error: cancelError } = await supabase.rpc(
+    'customer_cancel_booking_with_fee',
+    {
+      p_booking_id: bookingId,
+      p_cancellation_fee: feeResult.hasFee ? feeResult.feeAmount : null,
+    }
+  )
+
+  if (cancelError) {
+    console.error('[cancelBooking]', cancelError.message)
     return {
       success: false,
       error: 'Kunne ikke avbestille bookingen. Prøv igjen.',
     }
   }
 
+  const { data: catRows } = await supabase
+    .from('booking_cats')
+    .select('cats(name)')
+    .eq('booking_id', bookingId)
+
+  const catNames = (catRows ?? [])
+    .map((row: any) => row.cats?.name)
+    .filter(Boolean) as string[]
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('first_name, last_name')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const bookingForEmail = {
+    id: booking.id,
+    date_from: booking.date_from,
+    date_to: booking.date_to,
+    price: booking.price,
+    user_email: user.email!,
+    user_first_name: profile?.first_name ?? null,
+    user_last_name: profile?.last_name ?? null,
+    cats: catNames.map((name) => ({ name })),
+  } as any
+
+  const emailResult = await sendBookingCancelledEmail(
+    bookingForEmail,
+    feeResult.hasFee ? feeResult.feeAmount : 0
+  )
+
+  if (!emailResult.success) {
+    console.error('[cancelBooking] email failed:', emailResult.error)
+  }
+
   revalidatePath('/minside/bookinger')
   revalidatePath('/minside')
-  return { success: true }
+
+  return {
+    success: true,
+    feeAmount: feeResult.hasFee ? feeResult.feeAmount : 0,
+  }
 }

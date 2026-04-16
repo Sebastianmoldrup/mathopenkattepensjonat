@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-// import { cancelBooking } from '@/lib/userBookings/actions'
-import { cancelBooking } from '@/lib/booking/cancelBooking'
+import { cancelBooking } from '@/lib/userBookings/actions'
 import {
   CancellationEligibility,
   formatDeadline,
