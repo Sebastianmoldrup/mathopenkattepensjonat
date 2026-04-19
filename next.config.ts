@@ -1,21 +1,21 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/**",
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/**',
       },
     ],
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: "4.5mb",
+      bodySizeLimit: '4.5mb',
     },
+    cacheComponents: true, // ← flytt hit
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig
