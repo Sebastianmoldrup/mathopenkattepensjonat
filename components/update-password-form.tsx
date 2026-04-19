@@ -53,12 +53,7 @@ export function UpdatePasswordForm({
     setFormError(null)
     setFieldErrors({})
 
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      result.data.email,
-      {
-        redirectTo: `${window.location.origin}/endre-passord`,
-      }
-    )
+    const result = updatePasswordSchema.safeParse({ password })
 
     if (!result.success) {
       const errors: FieldErrors = {}
