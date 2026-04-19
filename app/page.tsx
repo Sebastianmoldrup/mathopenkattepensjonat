@@ -1,15 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Calendar,
-  MapPin,
-  Heart,
-  House,
-  Star,
-  Shield,
-  Camera,
-} from 'lucide-react'
+import { Calendar, MapPin, House, Shield } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import BookingUnderDevelopment from '@/features/BookingUnderDevelopment'
@@ -19,8 +11,6 @@ type CardContent = {
   title: string
   desc: string
 }
-
-const CURRENT_YEAR = new Date().getFullYear()
 
 const CARD_CONTENT: CardContent[] = [
   {
