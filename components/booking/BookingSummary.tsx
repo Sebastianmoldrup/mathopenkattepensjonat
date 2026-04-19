@@ -29,7 +29,6 @@ import {
   Loader2,
   CheckCircle2,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import Image from 'next/image'
 
 interface BookingSummaryProps {
@@ -359,7 +358,6 @@ function groupNightsBySeason(
   nights: import('@/lib/booking/types').NightBreakdown[]
 ): SeasonGroup[] {
   const groups: SeasonGroup[] = []
-  let currentGroup: SeasonGroup | null = null
 
   // Condense: group consecutive same-season nights and show price per night × count
   let i = 0

@@ -3,7 +3,7 @@ export default function robots() {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/login', '/minside'],
+      disallow: ['/login', '/minside', '/registrering', '/admin', '/booking'],
     },
     sitemap: 'https://mathopenkattepensjonat.no/sitemap.xml',
   }

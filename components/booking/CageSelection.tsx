@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { Booking, CageType, CAGE_CONFIGS } from '@/lib/booking/types'
-import { getAvailableCageOptions, CageOption } from '@/lib/booking/availability'
+import { getAvailableCageOptions } from '@/lib/booking/availability'
 import { calculatePriceBreakdown } from '@/lib/booking/pricing'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

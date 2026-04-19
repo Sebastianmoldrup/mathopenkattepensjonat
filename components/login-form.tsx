@@ -1,96 +1,88 @@
-"use client";
+'use client'
 
 // import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { redirect } from "next/navigation";
-import { Spinner } from "@/components/ui/spinner";
-import { useRouter } from "next/navigation";
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Spinner } from '@/components/ui/spinner'
+import { useRouter } from 'next/navigation'
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-  FieldLegend,
-  FieldSeparator,
   FieldSet,
-} from "@/components/ui/field";
+} from '@/components/ui/field'
 
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input'
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card'
 
-import { useState } from "react";
-import Link from "next/link";
-// import { useRouter } from "next/navigation";
+import { useState } from 'react'
+import Link from 'next/link'
 
-// import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
-import { LoginSchema, type LoginInput } from "@/lib/validation/login";
+import { createClient } from '@/lib/supabase/client'
+import { LoginSchema, type LoginInput } from '@/lib/validation/login'
 
 const LoginForm = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
-  });
+  })
 
   const onSubmit = async (values: LoginInput) => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
     try {
-      const supabase = createClient();
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
-      });
+      })
 
-      if (error?.message === "Email not confirmed") {
+      if (error?.message === 'Email not confirmed') {
         setError(
-          "E-posten er ikke bekreftet. Sjekk innboksen din for bekreftelseslenke.",
-        );
-        setLoading(false);
-        return;
+          'E-posten er ikke bekreftet. Sjekk innboksen din for bekreftelseslenke.'
+        )
+        setLoading(false)
+        return
       }
 
       if (error) {
-        setError("Feil e-post eller passord. Prøv igjen.");
-        setLoading(false);
-        return;
+        setError('Feil e-post eller passord. Prøv igjen.')
+        setLoading(false)
+        return
       }
 
-      router.push("/minside");
+      router.push('/minside')
     } catch (err) {
-      console.error(err);
-      setError("Noe gikk galt ved innlogging. Prøv igjen.");
-      setLoading(false);
+      console.error(err)
+      setError('Noe gikk galt ved innlogging. Prøv igjen.')
+      setLoading(false)
     }
-  };
+  }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center">
         <Spinner />
       </div>
-    );
+    )
   }
 
   return (
@@ -113,7 +105,7 @@ const LoginForm = () => {
                     <Input
                       id="email"
                       type="email"
-                      {...form.register("email")}
+                      {...form.register('email')}
                     />
                     <FieldError errors={[form.formState.errors.email]} />
                   </Field>
@@ -131,7 +123,7 @@ const LoginForm = () => {
                     <Input
                       id="password"
                       type="password"
-                      {...form.register("password")}
+                      {...form.register('password')}
                     />
                     <FieldError errors={[form.formState.errors.password]} />
                   </Field>
@@ -153,7 +145,7 @@ const LoginForm = () => {
           {error && <p className="text-sm text-red-500">{error}</p>}
 
           <div className="mt-4 text-center text-sm">
-            Har du ikke en konto?{" "}
+            Har du ikke en konto?{' '}
             <Link href="/registrering" className="underline underline-offset-4">
               Opprett konto
             </Link>
@@ -161,10 +153,10 @@ const LoginForm = () => {
         </CardFooter>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default LoginForm;
+export default LoginForm
 
 // export function LoginForm({
 //   className,

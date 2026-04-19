@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { pdf } from '@react-pdf/renderer'
 import { Button } from '@/components/ui/button'
 import { FileDown, Loader2 } from 'lucide-react'
-import { BookingDocumentation } from '@/lib/admin/docTypes'
 import { BookingPDFDocument } from './BookingPDFDocument'
 import { adminGetBookingDocumentation } from '@/lib/admin/docActions'
 

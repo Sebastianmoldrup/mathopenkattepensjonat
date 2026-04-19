@@ -10,13 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  FileDown,
-  Loader2,
-  BookOpen,
-  CalendarDays,
-  Banknote,
-} from 'lucide-react'
+import { FileDown, Loader2 } from 'lucide-react'
 import { BulkBookingPDFDocument } from '@/components/admin/BulkBookingPDFDocument'
 import { adminGetBookingsForYear } from '@/lib/admin/docActions'
 

@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Cat,
-  CageType,
   BookingState,
   BookingStep,
   INITIAL_BOOKING_STATE,

@@ -1,5 +1,4 @@
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 
 const Page = () => {
   return (

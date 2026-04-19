@@ -70,7 +70,6 @@ export function DatePicker({
           selected={selected ?? undefined}
           onSelect={handleSelect}
           locale={nb}
-          initialFocus
           classNames={{
             months: 'space-y-3',
             caption: 'flex justify-center relative items-center h-10 px-8',

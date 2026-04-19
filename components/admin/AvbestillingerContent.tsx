@@ -9,7 +9,6 @@ import {
 import { AdminBooking } from '@/lib/admin/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import {
   Loader2,
   CheckCircle2,
@@ -18,7 +17,6 @@ import {
   Edit2,
   ChevronDown,
   ChevronUp,
-  Filter,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

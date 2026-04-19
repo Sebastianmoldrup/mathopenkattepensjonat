@@ -20,8 +20,6 @@ interface CheckinFormProps {
   existing: CheckinLog | null
 }
 
-type FieldKey = keyof CheckinLog
-
 function CheckRow({
   checked,
   label,
@@ -60,7 +58,7 @@ function Section({
 }) {
   return (
     <div className="space-y-2">
-      <p className="text-sm text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </p>
       <div className="space-y-1.5">{children}</div>

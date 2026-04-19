@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { DatePicker } from '@/components/admin/DatePicker'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, CheckCircle2, Plus, AlertTriangle } from 'lucide-react'
+import { Loader2, Plus, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 

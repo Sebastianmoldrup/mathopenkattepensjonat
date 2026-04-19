@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import { Loader2, CheckCircle2, Circle } from 'lucide-react'
+import { Loader2, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface DailyChecklistFormProps {

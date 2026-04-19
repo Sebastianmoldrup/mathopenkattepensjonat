@@ -1,45 +1,43 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Cat } from '@/lib/booking/types';
-import { getUser, getUserCats } from '@/lib/booking/actions';
-import { PawPrint, LogIn, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { useEffect, useState } from 'react'
+import { Cat } from '@/lib/booking/types'
+import { getUser, getUserCats } from '@/lib/booking/actions'
+import { PawPrint, LogIn, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 interface BookingGateProps {
-  onReady: (userId: string, cats: Cat[]) => void;
+  onReady: (userId: string, cats: Cat[]) => void
 }
 
-type GateState = 'loading' | 'unauthenticated' | 'no_cats' | 'ready';
+type GateState = 'loading' | 'unauthenticated' | 'no_cats' | 'ready'
 
 export function BookingGate({ onReady }: BookingGateProps) {
-  const router = useRouter();
-  const [state, setState] = useState<GateState>('loading');
+  const [state, setState] = useState<GateState>('loading')
 
   useEffect(() => {
     async function check() {
-      const user = await getUser();
+      const user = await getUser()
 
       if (!user) {
-        setState('unauthenticated');
-        return;
+        setState('unauthenticated')
+        return
       }
 
-      const cats = await getUserCats(user.id);
+      const cats = await getUserCats(user.id)
 
       if (cats.length === 0) {
-        setState('no_cats');
-        return;
+        setState('no_cats')
+        return
       }
 
-      setState('ready');
-      onReady(user.id, cats);
+      setState('ready')
+      onReady(user.id, cats)
     }
 
-    check();
-  }, [onReady]);
+    check()
+  }, [onReady])
 
   if (state === 'loading') {
     return (
@@ -47,7 +45,7 @@ export function BookingGate({ onReady }: BookingGateProps) {
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         <p className="text-sm text-muted-foreground">Laster...</p>
       </div>
-    );
+    )
   }
 
   if (state === 'unauthenticated') {
@@ -58,7 +56,7 @@ export function BookingGate({ onReady }: BookingGateProps) {
         </div>
         <div className="space-y-2">
           <h2 className="text-xl font-semibold">Logg inn for å booke</h2>
-          <p className="text-sm text-muted-foreground max-w-sm">
+          <p className="max-w-sm text-sm text-muted-foreground">
             Du må være innlogget for å gjøre en booking.
           </p>
         </div>
@@ -66,7 +64,7 @@ export function BookingGate({ onReady }: BookingGateProps) {
           <Link href="/login">Logg inn</Link>
         </Button>
       </div>
-    );
+    )
   }
 
   if (state === 'no_cats') {
@@ -77,17 +75,18 @@ export function BookingGate({ onReady }: BookingGateProps) {
         </div>
         <div className="space-y-2">
           <h2 className="text-xl font-semibold">Ingen katter registrert</h2>
-          <p className="text-sm text-muted-foreground max-w-sm">
-            Du må legge til minst én katt på profilen din før du kan gjøre en booking.
+          <p className="max-w-sm text-sm text-muted-foreground">
+            Du må legge til minst én katt på profilen din før du kan gjøre en
+            booking.
           </p>
         </div>
         <Button asChild>
           <Link href="/minside/minekatter">Legg til katt</Link>
         </Button>
       </div>
-    );
+    )
   }
 
   // state === 'ready' — render nothing, parent takes over
-  return null;
+  return null
 }
