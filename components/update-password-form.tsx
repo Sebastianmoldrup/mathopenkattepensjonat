@@ -30,13 +30,21 @@ export function UpdatePasswordForm({
 
   useEffect(() => {
     const supabase = createClient()
+
+    // Already logged in → enable immediately
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setIsReady(true)
+    })
+
+    // Coming from email link
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
         setIsReady(true)
       }
     })
+
     return () => subscription.unsubscribe()
   }, [])
 
@@ -82,7 +90,9 @@ export function UpdatePasswordForm({
       return
     }
 
-    router.push('/auth/login')
+    await supabase.auth.signOut()
+    setIsLoading(false)
+    window.location.href = '/login'
   }
 
   return (

@@ -1,19 +1,19 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { readUser } from "@/actions/user/readUser";
-import { createClient } from "@/lib/supabase/server";
-import { User, Cat, Calendar, Lock, Mail } from "lucide-react";
-import { AlertTriangle } from "lucide-react";
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { readUser } from '@/actions/user/readUser'
+import { createClient } from '@/lib/supabase/server'
+import { User, Cat, Calendar, Lock, Mail } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 
 export default async function Page() {
-  const supabase = await createClient();
+  const supabase = await createClient()
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
-  if (!user) return null;
+  if (!user) return null
 
-  const profile = await readUser(user.id);
+  const profile = await readUser(user.id)
 
   return (
     <div className="space-y-10">
@@ -69,10 +69,9 @@ export default async function Page() {
 
           <section>
             <h3 className="mb-4 text-lg font-medium">Konto</h3>
-
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border bg-muted/40 p-5">
-                <div className="flex items-center gap-4 opacity-70">
+              <div className="rounded-2xl border bg-muted/40 p-5 opacity-70">
+                <div className="flex items-center gap-4">
                   <Mail className="h-6 w-6" />
                   <div>
                     <p className="font-medium">Endre e-post</p>
@@ -82,22 +81,24 @@ export default async function Page() {
                   </div>
                 </div>
               </div>
-
-              <div className="rounded-2xl border bg-muted/40 p-5">
-                <div className="flex items-center gap-4 opacity-70">
+              <Link
+                href="/endre-passord"
+                className="block rounded-2xl border bg-muted/40 p-5 transition-colors hover:bg-muted/60"
+              >
+                <div className="flex items-center gap-4">
                   <Lock className="h-6 w-6" />
                   <div>
                     <p className="font-medium">Endre passord</p>
                     <p className="text-sm text-muted-foreground">
-                      Kommer snart
+                      Oppdater passordet ditt
                     </p>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </section>
 
-          <div className="flex items-start gap-3 rounded-lg border border-yellow-300 bg-yellow-50 p-2 text-yellow-900 mb-4">
+          <div className="mb-4 flex items-start gap-3 rounded-lg border border-yellow-300 bg-yellow-50 p-2 text-yellow-900">
             <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0" />
             <div>
               <p className="text-sm font-medium">
@@ -127,5 +128,5 @@ export default async function Page() {
         </div>
       )}
     </div>
-  );
+  )
 }
