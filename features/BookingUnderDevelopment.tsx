@@ -1,41 +1,49 @@
 import Image from 'next/image'
-const BookingUnderDevelopment = () => {
+
+export default function BookingUnderDevelopment() {
   return (
-    <div className="mx-auto max-w-xl items-center justify-center gap-12 px-4 py-16 text-center lg:flex">
-      <Image
-        src="/illustration/reserve-spots.webp"
-        alt="Under development"
-        width={200}
-        height={200}
-        className="mx-auto mb-6 rounded-md"
-      />
+    <div className="mx-auto max-w-4xl px-4 py-16">
+      <div className="flex flex-col items-center gap-8 rounded-2xl border bg-white p-8 shadow-sm lg:flex-row lg:items-center">
+        <div className="flex-shrink-0">
+          <Image
+            src="/illustration/reserve-spots.webp"
+            alt="Reservér plass"
+            width={180}
+            height={180}
+            className="mx-auto rounded-md"
+          />
+        </div>
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Bookingen er nå åpen</h2>
+        <div className="space-y-5 text-center lg:text-left">
+          <h2 className="text-2xl font-bold text-slate-900">Booking er åpen</h2>
 
-        <p className="text-lg text-gray-600">
-          Vi opplever stor pågang for juli og er allerede nær fullbooket. Dersom
-          ønskelig, kan vi sette deg på venteliste.
-        </p>
+          <div className="space-y-2 text-slate-700">
+            <p className="text-lg font-medium">🐾 Åpner 1. juli</p>
 
-        <p className="text-lg text-gray-600">
-          Erfaringsmessig skjer det en del endringer frem mot sommeren, så det
-          er gode muligheter for at vi kan tilby plass til flere etter hvert.
-        </p>
+            <p>Forhåndsbestillinger blir prioritert ved oppstart.</p>
 
-        <p className="text-lg text-gray-600">
-          Ta gjerne kontakt på e-post hvis du ønsker å stå på venteliste eller
-          har spørsmål!
-        </p>
-        <a
-          href="mailto:post@mathopenkattepensjonat.no"
-          className="mb-4 mt-1 block font-medium text-blue-600 hover:underline"
-        >
-          post@mathopenkattepensjonat.no
-        </a>
+            <p>
+              Venteliste er under arbeid og vil bli brukt dersom vi blir
+              fullbooket.
+            </p>
+          </div>
+
+          <div className="mx-auto h-px w-16 bg-slate-200 lg:mx-0" />
+
+          <div className="space-y-2">
+            <p className="text-slate-600">
+              Ta kontakt for plass eller venteliste:
+            </p>
+
+            <a
+              href="mailto:post@mathopenkattepensjonat.no"
+              className="inline-block font-medium text-blue-600 hover:underline"
+            >
+              post@mathopenkattepensjonat.no
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
-
-export default BookingUnderDevelopment

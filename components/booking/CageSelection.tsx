@@ -40,11 +40,7 @@ const CAGE_DESCRIPTIONS: Record<
 > = {
   standard: {
     title: 'Standard',
-    bullets: [
-      'Romslig og komfortabelt bur',
-      'Passer for 1–2 katter',
-      'Daglig stell og mating inkludert',
-    ],
+    bullets: ['Romslig og komfortabelt bur', 'Passer for 1–2 katter'],
   },
   senior_comfort: {
     title: 'Senior & Komfort',

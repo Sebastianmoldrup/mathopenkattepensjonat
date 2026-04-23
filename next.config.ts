@@ -14,8 +14,8 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '4.5mb',
     },
-    cacheComponents: true, // ← flytt hit
   },
+  cacheComponents: true,
 }
 
 export default nextConfig
