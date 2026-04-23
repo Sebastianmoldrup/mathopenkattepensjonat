@@ -134,7 +134,6 @@ export interface CreateBookingPayload {
   cageType: import('./types').CageType
   cageCount: number
   numCats: number
-  price: number
   specialInstructions?: string
 }
 
