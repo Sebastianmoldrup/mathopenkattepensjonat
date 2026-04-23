@@ -23,6 +23,7 @@ export interface AdminBooking {
   user_phone: string | null
   user_address: string | null
   user_emergency_contact: string | null
+  wants_outdoor_cage: boolean
   cats?: AdminCat[]
 }
 
@@ -34,6 +35,7 @@ export interface AdminCat {
   medical_notes: string | null
   diet: string | null
   behavior_notes: string | null
+  age: string | null
 }
 
 export interface DailyChecklist {

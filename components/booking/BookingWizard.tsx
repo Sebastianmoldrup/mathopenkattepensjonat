@@ -10,20 +10,25 @@ import {
   BookingWithCats,
 } from '@/lib/booking/types'
 import { getUpcomingYearBookings } from '@/lib/booking/actions'
+import { CatBehaviorData } from '@/lib/booking/behaviorActions'
 import { BookingGate } from './BookingGate'
 import { CatSelection } from './CatSelection'
 import { DateRangeSelection } from './DateRangeSelection'
 import { CageSelection } from './CageSelection'
+import { CatBehaviorStep } from './CatBehaviorStep'
 import { BookingSummary } from './BookingSummary'
 import { cn } from '@/lib/utils'
 import { CheckCircle2 } from 'lucide-react'
 
 // ─── Step metadata ─────────────────────────────────────────────────────────────
 
-const STEPS: { key: BookingStep; label: string }[] = [
+type ExtendedBookingStep = BookingStep | 'behavior'
+
+const STEPS: { key: ExtendedBookingStep; label: string }[] = [
   { key: 'cats', label: 'Katter' },
   { key: 'dates', label: 'Datoer' },
   { key: 'cage', label: 'Bur' },
+  { key: 'behavior', label: 'Atferd' },
   { key: 'summary', label: 'Oppsummering' },
 ]
 
@@ -34,8 +39,12 @@ export function BookingWizard() {
   const [userId, setUserId] = useState<string | null>(null)
   const [cats, setCats] = useState<Cat[]>([])
   const [bookings, setBookings] = useState<BookingWithCats[]>([])
-  const [state, setState] = useState<BookingState>(INITIAL_BOOKING_STATE)
+  const [state, setState] = useState<
+    BookingState & { step: ExtendedBookingStep }
+  >({ ...INITIAL_BOOKING_STATE, step: 'cats' })
   const [cageCount, setCageCount] = useState<number>(1)
+  const [behaviorData, setBehaviorData] = useState<CatBehaviorData[]>([])
+  const [wantsOutdoorCage, setWantsOutdoorCage] = useState(false)
 
   // Called by BookingGate once user + cats are confirmed
   const handleReady = useCallback(async (uid: string, userCats: Cat[]) => {
@@ -45,18 +54,20 @@ export function BookingWizard() {
     setBookings(upcoming)
   }, [])
 
-  function updateState(partial: Partial<BookingState>) {
+  function updateState(partial: Partial<typeof state>) {
     setState((prev) => ({ ...prev, ...partial }))
   }
 
-  function goTo(step: BookingStep) {
+  function goTo(step: ExtendedBookingStep) {
     updateState({ step })
   }
 
   // Reset all wizard state then redirect — clean slate if user navigates back
   function handleConfirmed() {
-    setState(INITIAL_BOOKING_STATE)
+    setState({ ...INITIAL_BOOKING_STATE, step: 'cats' })
     setCageCount(1)
+    setBehaviorData([])
+    setWantsOutdoorCage(false)
     router.push('/minside')
   }
 
@@ -169,8 +180,20 @@ export function BookingWizard() {
                   updateState({ cageType: type })
                   setCageCount(count)
                 }}
-                onNext={() => goTo('summary')}
+                onNext={() => goTo('behavior')}
                 onBack={() => goTo('dates')}
+              />
+            )}
+
+            {state.step === 'behavior' && (
+              <CatBehaviorStep
+                cats={selectedCats}
+                behaviorData={behaviorData}
+                onChange={setBehaviorData}
+                wantsOutdoorCage={wantsOutdoorCage}
+                onOutdoorCageChange={setWantsOutdoorCage}
+                onNext={() => goTo('summary')}
+                onBack={() => goTo('cage')}
               />
             )}
 
@@ -187,10 +210,12 @@ export function BookingWizard() {
                   cageCount={cageCount}
                   specialInstructions={state.specialInstructions}
                   bookings={bookings}
+                  behaviorData={behaviorData}
+                  wantsOutdoorCage={wantsOutdoorCage}
                   onInstructionsChange={(v) =>
                     updateState({ specialInstructions: v })
                   }
-                  onBack={() => goTo('cage')}
+                  onBack={() => goTo('behavior')}
                   onConfirmed={handleConfirmed}
                 />
               )}

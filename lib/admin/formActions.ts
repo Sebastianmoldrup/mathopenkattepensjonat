@@ -104,3 +104,33 @@ export async function adminInsertHealthLog(
   revalidatePath('/admin/bookinger')
   return { success: true }
 }
+
+// ─── Cat Behavior Notes ────────────────────────────────────────────────────────
+
+export interface CatBehaviorNote {
+  id: string
+  cat_id: string
+  cat_name: string
+  gets_medication: boolean
+  medication_details: string | null
+  has_cat_experience: boolean
+  gets_along_with_cats: string
+  has_stress_issues: boolean
+  stress_details: string | null
+  aggression_risk: string
+  aggression_details: string | null
+}
+
+export async function adminGetCatBehaviorNotes(
+  bookingId: string
+): Promise<CatBehaviorNote[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_cat_behavior_notes', {
+    p_booking_id: bookingId,
+  })
+  if (error) {
+    console.error('[adminGetCatBehaviorNotes]', error.message)
+    return []
+  }
+  return data ?? []
+}

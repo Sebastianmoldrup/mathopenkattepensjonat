@@ -46,16 +46,9 @@ export async function adminGetAllBookings(): Promise<AdminBooking[]> {
   const { data: catRows, error: catError } = await supabase
     .from('booking_cats')
     .select(
-      'booking_id, cats(id, name, breed, image_url, medical_notes, diet, behavior_notes)'
+      'booking_id, cats(id, name, breed, image_url, medical_notes, diet, behavior_notes, age)'
     )
     .in('booking_id', bookingIds)
-
-  console.log('[adminGetAllBookings] bookingIds count:', bookingIds.length)
-  console.log(
-    '[adminGetAllBookings] catRows:',
-    JSON.stringify(catRows?.slice(0, 2))
-  )
-  console.log('[adminGetAllBookings] catError:', catError?.message)
 
   const catMap = new Map<string, any[]>()
   for (const row of catRows ?? []) {
@@ -271,4 +264,51 @@ export async function adminGetRevenueStats(): Promise<RevenueStats[]> {
 
 export async function adminGetOccupancyData(): Promise<AdminBooking[]> {
   return adminGetAllBookings()
+}
+
+// ─── Update cage ───────────────────────────────────────────────────────────────
+
+export async function adminUpdateBookingCage(
+  bookingId: string,
+  cageType: string,
+  cageCount: number,
+  price: number
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('admin_update_booking_cage', {
+    p_booking_id: bookingId,
+    p_cage_type: cageType,
+    p_cage_count: cageCount,
+    p_price: price,
+  })
+
+  if (error) {
+    console.error('[adminUpdateBookingCage]', error.message)
+    return { success: false, error: 'Kunne ikke oppdatere bur.' }
+  }
+
+  revalidatePath('/admin/bookinger')
+  return { success: true }
+}
+
+// ─── Delete booking ────────────────────────────────────────────────────────────
+
+export async function adminDeleteBooking(
+  bookingId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('admin_delete_booking', {
+    p_booking_id: bookingId,
+  })
+
+  if (error) {
+    console.error('[adminDeleteBooking]', error.message)
+    return { success: false, error: 'Kunne ikke slette booking.' }
+  }
+
+  revalidatePath('/admin/bookinger')
+  revalidatePath('/admin')
+  return { success: true }
 }
