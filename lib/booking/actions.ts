@@ -191,6 +191,20 @@ export async function createBooking(
     }
   )
 
+  // console.log(
+  //   '[createBooking] cageAvailable:',
+  //   cageAvailable,
+  //   'cageError:',
+  //   cageError
+  // )
+
+  console.log('[createBooking] cage check params:', {
+    p_cage_type: payload.cageType,
+    p_cage_count: payload.cageCount,
+    p_date_from: fromStr,
+    p_date_to: toStr,
+  })
+
   if (cageError) {
     return { error: 'Kunne ikke verifisere burstilgjengelighet. Prøv igjen.' }
   }

@@ -16,7 +16,7 @@ export const CAGE_CONFIGS: Record<CageType, CageConfig> = {
     label: 'Standard',
     description: 'Romslig og komfortabelt bur for 1–2 katter',
     maxCats: 2,
-    totalCount: 14,
+    totalCount: 19,
   },
   senior_comfort: {
     type: 'senior_comfort',
