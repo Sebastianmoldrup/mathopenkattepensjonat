@@ -98,7 +98,7 @@ const CAGE_TYPES = [
     highSeasonPrices: [
       {
         amount: 'Standard pris per døgn',
-        price: 400,
+        price: 450,
       },
     ],
     list: [
