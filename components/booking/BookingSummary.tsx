@@ -13,6 +13,10 @@ import {
   diffInDays,
 } from '@/lib/booking/pricing'
 import { createBooking } from '@/lib/booking/actions'
+import {
+  saveCatBehaviorNotes,
+  CatBehaviorData,
+} from '@/lib/booking/behaviorActions'
 import { hasCatConflict } from '@/lib/booking/availability'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -40,6 +44,8 @@ interface BookingSummaryProps {
   cageCount: number
   specialInstructions: string
   bookings: BookingWithCats[]
+  behaviorData: CatBehaviorData[]
+  wantsOutdoorCage: boolean
   onInstructionsChange: (value: string) => void
   onBack: () => void
   onConfirmed: () => void
@@ -60,6 +66,8 @@ export function BookingSummary({
   cageCount,
   specialInstructions,
   bookings,
+  behaviorData,
+  wantsOutdoorCage,
   onInstructionsChange,
   onBack,
   onConfirmed,
@@ -104,13 +112,20 @@ export function BookingSummary({
       cageType,
       cageCount,
       numCats,
+      price: breakdown.totalPrice,
       specialInstructions: specialInstructions || undefined,
+      wantsOutdoorCage,
     })
 
     if ('error' in result) {
       setError(result.error)
       setIsSubmitting(false)
       return
+    }
+
+    // Save behavior notes after booking is created
+    if (behaviorData.length > 0) {
+      await saveCatBehaviorNotes(result.id, behaviorData)
     }
 
     setConfirmed(true)
@@ -120,7 +135,9 @@ export function BookingSummary({
   if (confirmed) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-        <CheckCircle2 className="h-12 w-12 text-green-500" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
+          <CheckCircle2 className="h-9 w-9 text-primary" />
+        </div>
         <h2 className="text-2xl font-semibold">Booking bekreftet!</h2>
         <p className="text-sm text-muted-foreground">
           Du videresendes til Min side...
@@ -225,6 +242,14 @@ export function BookingSummary({
               className="resize-none text-sm"
             />
           </div>
+
+          {/* Outdoor cage preference */}
+          {wantsOutdoorCage && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800">
+              🌿 Ønsker utebur — vi vil tildele et utebur dersom det er
+              tilgjengelig.
+            </div>
+          )}
         </div>
 
         {/* Right column: price breakdown */}
@@ -239,13 +264,13 @@ export function BookingSummary({
                 <div key={i} className="space-y-1">
                   <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     {group.season === 'high' ? (
-                      <SunMedium className="h-3 w-3 text-amber-500" />
+                      <SunMedium className="h-3 w-3 text-primary" />
                     ) : (
-                      <Snowflake className="h-3 w-3 text-blue-400" />
+                      <Snowflake className="h-3 w-3 text-muted-foreground" />
                     )}
                     {group.season === 'high' ? 'Høysesong' : 'Lavsesong'}
                   </div>
-                  <div className="space-y-1 rounded-md bg-muted/40 px-3 py-2">
+                  <div className="space-y-1 rounded-md bg-secondary/60 px-3 py-2">
                     {group.lines.map((line, j) => (
                       <div key={j} className="flex justify-between text-sm">
                         <span className="text-muted-foreground">
@@ -265,12 +290,15 @@ export function BookingSummary({
                 breakdown.highSeasonNights > 0 && (
                   <div className="flex flex-wrap gap-2 pt-1">
                     <Badge variant="outline" className="gap-1 text-xs">
-                      <Snowflake className="h-2.5 w-2.5 text-blue-400" />
+                      <Snowflake className="h-2.5 w-2.5 text-muted-foreground" />
                       {breakdown.lowSeasonNights} lavsesong-
                       {breakdown.lowSeasonNights === 1 ? 'natt' : 'netter'}
                     </Badge>
-                    <Badge variant="outline" className="gap-1 text-xs">
-                      <SunMedium className="h-2.5 w-2.5 text-amber-500" />
+                    <Badge
+                      variant="outline"
+                      className="gap-1 border-primary/30 text-xs text-primary"
+                    >
+                      <SunMedium className="h-2.5 w-2.5" />
                       {breakdown.highSeasonNights} høysesong-
                       {breakdown.highSeasonNights === 1 ? 'natt' : 'netter'}
                     </Badge>
@@ -358,6 +386,7 @@ function groupNightsBySeason(
   nights: import('@/lib/booking/types').NightBreakdown[]
 ): SeasonGroup[] {
   const groups: SeasonGroup[] = []
+  let currentGroup: SeasonGroup | null = null
 
   // Condense: group consecutive same-season nights and show price per night × count
   let i = 0

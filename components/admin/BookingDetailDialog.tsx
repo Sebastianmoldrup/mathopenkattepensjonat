@@ -13,6 +13,15 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   AdminBooking,
   AdminBookingStatus,
@@ -25,8 +34,14 @@ import {
 import {
   adminUpdateBookingStatus,
   adminUpdateBookingNotes,
+  adminUpdateBookingCage,
+  adminDeleteBooking,
 } from '@/lib/admin/actions'
-import { adminGetCheckinLog, adminGetHealthLogs } from '@/lib/admin/formActions'
+import {
+  adminGetCheckinLog,
+  adminGetHealthLogs,
+  adminGetCatBehaviorNotes,
+} from '@/lib/admin/formActions'
 import { CheckinLog, HealthLog } from '@/lib/admin/formTypes'
 import { CheckinForm } from './forms/CheckinForm'
 import { HealthLogForm } from './forms/HealthLogForm'
@@ -45,19 +60,50 @@ import {
   AlertCircle,
   LogIn,
   Heart,
+  Edit2,
+  Trash2,
+  ClipboardList,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+export interface CatBehaviorNote {
+  id: string
+  cat_id: string
+  cat_name: string
+  gets_medication: boolean
+  medication_details: string | null
+  has_cat_experience: boolean
+  gets_along_with_cats: string
+  has_stress_issues: boolean
+  stress_details: string | null
+  aggression_risk: string
+  aggression_details: string | null
+}
 
 interface BookingDetailDialogProps {
   booking: AdminBooking | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  onDeleted?: () => void
+}
+
+const ALONG_LABELS: Record<string, string> = {
+  yes: 'Ja',
+  no: 'Nei',
+  unknown: 'Vet ikke',
+}
+
+const RISK_LABELS: Record<string, string> = {
+  yes: 'Ja',
+  no: 'Nei',
+  unknown: 'Vet ikke',
 }
 
 export function BookingDetailDialog({
   booking,
   open,
   onOpenChange,
+  onDeleted,
 }: BookingDetailDialogProps) {
   const [notes, setNotes] = useState(booking?.admin_notes ?? '')
   const [isPending, startTransition] = useTransition()
@@ -68,7 +114,17 @@ export function BookingDetailDialog({
   } | null>(null)
   const [checkinLog, setCheckinLog] = useState<CheckinLog | null>(null)
   const [healthLogs, setHealthLogs] = useState<HealthLog[]>([])
+  const [behaviorNotes, setBehaviorNotes] = useState<CatBehaviorNote[]>([])
   const [logsLoaded, setLogsLoaded] = useState(false)
+
+  // Cage editing state
+  const [editingCage, setEditingCage] = useState(false)
+  const [cageType, setCageType] = useState(booking?.cage_type ?? 'standard')
+  const [cageCount, setCageCount] = useState(booking?.cage_count ?? 1)
+  const [cagePrice, setCagePrice] = useState(booking?.price ?? 0)
+
+  // Delete confirmation
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   useEffect(() => {
     if (booking && open && !logsLoaded) {
@@ -76,9 +132,11 @@ export function BookingDetailDialog({
       Promise.all([
         adminGetCheckinLog(booking.id),
         adminGetHealthLogs(booking.id),
-      ]).then(([checkin, health]) => {
+        adminGetCatBehaviorNotes(booking.id),
+      ]).then(([checkin, health, behavior]) => {
         setCheckinLog(checkin)
         setHealthLogs(health)
+        setBehaviorNotes(behavior)
         setLogsLoaded(true)
       })
     }
@@ -86,7 +144,10 @@ export function BookingDetailDialog({
       setLogsLoaded(false)
       setCheckinLog(null)
       setHealthLogs([])
+      setBehaviorNotes([])
       setMessage(null)
+      setEditingCage(false)
+      setConfirmDelete(false)
     }
   }, [booking, open, logsLoaded])
 
@@ -133,9 +194,44 @@ export function BookingDetailDialog({
     })
   }
 
+  function handleSaveCage() {
+    setActiveAction('cage')
+    setMessage(null)
+    startTransition(async () => {
+      const result = await adminUpdateBookingCage(
+        booking!.id,
+        cageType,
+        cageCount,
+        cagePrice
+      )
+      setMessage(
+        result.success
+          ? { type: 'success', text: 'Bur oppdatert.' }
+          : { type: 'error', text: result.error ?? 'Noe gikk galt.' }
+      )
+      setActiveAction(null)
+      if (result.success) setEditingCage(false)
+    })
+  }
+
+  function handleDelete() {
+    setActiveAction('delete')
+    startTransition(async () => {
+      const result = await adminDeleteBooking(booking!.id)
+      if (result.success) {
+        onOpenChange(false)
+        onDeleted?.()
+      } else {
+        setMessage({ type: 'error', text: result.error ?? 'Noe gikk galt.' })
+        setConfirmDelete(false)
+      }
+      setActiveAction(null)
+    })
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto p-6">
+      <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto p-6">
         <DialogHeader className="pb-2">
           <DialogTitle className="flex flex-wrap items-center gap-3">
             Booking
@@ -175,6 +271,18 @@ export function BookingDetailDialog({
           <TabsList className="w-full">
             <TabsTrigger value="detaljer" className="flex-1">
               Detaljer
+            </TabsTrigger>
+            <TabsTrigger value="atferd" className="flex-1 gap-1.5">
+              <ClipboardList className="h-3.5 w-3.5" />
+              Atferd
+              {behaviorNotes.length > 0 && (
+                <Badge
+                  variant="outline"
+                  className="h-4 border-blue-300 px-1 text-[10px] text-blue-700"
+                >
+                  {behaviorNotes.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="innsjekk" className="flex-1 gap-1.5">
               <LogIn className="h-3.5 w-3.5" />
@@ -253,8 +361,91 @@ export function BookingDetailDialog({
                     Avbestill
                   </Button>
                 )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setEditingCage(!editingCage)
+                    setCageType(booking.cage_type)
+                    setCageCount(booking.cage_count)
+                    setCagePrice(booking.price)
+                  }}
+                  disabled={isPending}
+                  className="ml-auto gap-1.5"
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                  Endre bur
+                </Button>
               </div>
             </div>
+
+            {/* Cage editor */}
+            {editingCage && (
+              <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+                <p className="text-sm font-medium">Endre bur manuelt</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">Burtype</Label>
+                    <Select value={cageType} onValueChange={setCageType}>
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="standard">Standard</SelectItem>
+                        <SelectItem value="senior_comfort">
+                          Senior & Komfort
+                        </SelectItem>
+                        <SelectItem value="suite">Suite</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Antall bur</Label>
+                    <Select
+                      value={String(cageCount)}
+                      onValueChange={(v) => setCageCount(Number(v))}
+                    >
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Pris (kr)</Label>
+                    <Input
+                      type="number"
+                      className="h-8 text-sm"
+                      value={cagePrice}
+                      onChange={(e) => setCagePrice(Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={handleSaveCage}
+                    disabled={isPending}
+                    className="gap-1.5"
+                  >
+                    {activeAction === 'cage' && (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    )}
+                    Lagre endringer
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setEditingCage(false)}
+                  >
+                    Avbryt
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Cat photos */}
             {booking.cats && booking.cats.length > 0 && (
@@ -279,9 +470,14 @@ export function BookingDetailDialog({
                         </span>
                       )}
                     </div>
-                    <p className="text-center text-xs font-medium">
-                      {cat.name}
-                    </p>
+                    <div className="flex gap-2">
+                      <p className="text-center text-xs font-medium">
+                        {cat.name}
+                      </p>
+                      <p className="text-center text-xs text-muted-foreground">
+                        {cat.age} år
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -289,7 +485,7 @@ export function BookingDetailDialog({
 
             <Separator />
 
-            {/* Two column layout for details */}
+            {/* Two column layout */}
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-3">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -323,7 +519,6 @@ export function BookingDetailDialog({
                   />
                 </div>
               </div>
-
               <div className="space-y-3">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Kunde
@@ -368,7 +563,13 @@ export function BookingDetailDialog({
               </div>
             )}
 
-            {/* Cats */}
+            {booking.wants_outdoor_cage && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800">
+                🌿 Ønsker utebur
+              </div>
+            )}
+
+            {/* Cats detail */}
             {booking.cats && booking.cats.length > 0 && (
               <>
                 <Separator />
@@ -460,6 +661,128 @@ export function BookingDetailDialog({
                 )}
               </Button>
             </div>
+
+            <Separator />
+
+            {/* Delete */}
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Faresone
+              </p>
+              {!confirmDelete ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setConfirmDelete(true)}
+                  disabled={isPending}
+                  className="gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Slett booking permanent
+                </Button>
+              ) : (
+                <div className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+                  <p className="text-sm font-medium text-destructive">
+                    Er du sikker?
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Bookingen og all tilhørende data slettes permanent og kan
+                    ikke gjenopprettes.
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={handleDelete}
+                      disabled={isPending}
+                      className="gap-1.5"
+                    >
+                      {activeAction === 'delete' ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-3.5 w-3.5" />
+                      )}
+                      Ja, slett permanent
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setConfirmDelete(false)}
+                      disabled={isPending}
+                    >
+                      Avbryt
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* ── ATFERD ───────────────────────────────────────────────────── */}
+          <TabsContent value="atferd" className="pt-2">
+            {!logsLoaded ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : behaviorNotes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
+                <ClipboardList className="h-8 w-8 opacity-30" />
+                Ingen atferdsopplysninger registrert for denne bookingen
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {behaviorNotes.map((note) => (
+                  <div key={note.cat_id} className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-sm">
+                        🐱
+                      </div>
+                      <h3 className="font-semibold">{note.cat_name}</h3>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 pl-9">
+                      <BehaviorItem
+                        label="Medisinering"
+                        value={note.gets_medication ? 'Ja' : 'Nei'}
+                        detail={note.medication_details}
+                        highlight={note.gets_medication}
+                      />
+                      <BehaviorItem
+                        label="Erfaring med katter"
+                        value={note.has_cat_experience ? 'Ja' : 'Nei'}
+                      />
+                      <BehaviorItem
+                        label="Går godt med andre katter"
+                        value={
+                          ALONG_LABELS[note.gets_along_with_cats] ??
+                          note.gets_along_with_cats
+                        }
+                        highlight={note.gets_along_with_cats === 'no'}
+                      />
+                      <BehaviorItem
+                        label="Stressutfordringer"
+                        value={note.has_stress_issues ? 'Ja' : 'Nei'}
+                        detail={note.stress_details}
+                        highlight={note.has_stress_issues}
+                      />
+                      <BehaviorItem
+                        label="Aggresjonsrisiko"
+                        value={
+                          RISK_LABELS[note.aggression_risk] ??
+                          note.aggression_risk
+                        }
+                        detail={note.aggression_details}
+                        highlight={
+                          note.aggression_risk === 'yes' ||
+                          note.aggression_risk === 'unknown'
+                        }
+                        className="col-span-2"
+                      />
+                    </div>
+                    <Separator />
+                  </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* ── INNSJEKK/UTSJEKK ─────────────────────────────────────────── */}
@@ -511,6 +834,36 @@ function Row({
         {label}
       </span>
       <span className="break-all text-xs font-medium">{value}</span>
+    </div>
+  )
+}
+
+function BehaviorItem({
+  label,
+  value,
+  detail,
+  highlight,
+  className,
+}: {
+  label: string
+  value: string
+  detail?: string | null
+  highlight?: boolean
+  className?: string
+}) {
+  return (
+    <div
+      className={cn(
+        'space-y-1 rounded-lg border bg-card p-3',
+        highlight && 'border-amber-200 bg-amber-50',
+        className
+      )}
+    >
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className={cn('text-sm font-medium', highlight && 'text-amber-800')}>
+        {value}
+      </p>
+      {detail && <p className="mt-1 text-xs text-muted-foreground">{detail}</p>}
     </div>
   )
 }

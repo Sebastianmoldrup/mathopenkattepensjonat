@@ -139,6 +139,7 @@ export interface CreateBookingPayload {
   cageCount: number
   numCats: number
   specialInstructions?: string
+  wantsOutdoorCage?: boolean
 }
 
 export async function createBooking(
@@ -191,20 +192,6 @@ export async function createBooking(
     }
   )
 
-  // console.log(
-  //   '[createBooking] cageAvailable:',
-  //   cageAvailable,
-  //   'cageError:',
-  //   cageError
-  // )
-
-  console.log('[createBooking] cage check params:', {
-    p_cage_type: payload.cageType,
-    p_cage_count: payload.cageCount,
-    p_date_from: fromStr,
-    p_date_to: toStr,
-  })
-
   if (cageError) {
     return { error: 'Kunne ikke verifisere burstilgjengelighet. Prøv igjen.' }
   }
@@ -229,6 +216,7 @@ export async function createBooking(
       p_price: price,
       p_cat_ids: payload.catIds,
       p_special_instructions: payload.specialInstructions ?? null,
+      p_wants_outdoor_cage: payload.wantsOutdoorCage ?? false,
     }
   )
 
