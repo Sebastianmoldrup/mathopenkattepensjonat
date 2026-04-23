@@ -1,11 +1,19 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Booking, CageType, CAGE_CONFIGS } from '@/lib/booking/types'
 import { getAvailableCageOptions } from '@/lib/booking/availability'
 import { calculatePriceBreakdown } from '@/lib/booking/pricing'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { CheckCircle2, XCircle, Cat, Crown, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -41,9 +49,9 @@ const CAGE_DESCRIPTIONS: Record<
   senior_comfort: {
     title: 'Senior & Komfort',
     bullets: [
-      'Tilpasset eldre eller sensitive katter',
-      'Ekstra myk innredning',
-      'Nær tilsyn av personalet',
+      'Tilrettelagt for eldre katter med helseutfordringer, eks artrose',
+      'Litt mindre enn standardbur, med liten trapp mellom etasjene',
+      'Anbefales for katter over 10 år eller med helseutfordringer',
     ],
   },
   suite: {
@@ -66,6 +74,12 @@ export function CageSelection({
   onNext,
   onBack,
 }: CageSelectionProps) {
+  const [showSeniorWarning, setShowSeniorWarning] = useState(false)
+  const [pendingSelection, setPendingSelection] = useState<{
+    cageType: CageType
+    cageCount: number
+  } | null>(null)
+
   const availableOptions = useMemo(
     () => getAvailableCageOptions(bookings, numCats, dateFrom, dateTo),
     [bookings, numCats, dateFrom, dateTo]
@@ -117,6 +131,30 @@ export function CageSelection({
     return `${min}–${max} kr/natt`
   }
 
+  function handleCageClick(cageType: CageType, cageCount: number) {
+    if (!isAvailable(cageType, cageCount)) return
+    if (cageType === 'senior_comfort') {
+      setPendingSelection({ cageType, cageCount })
+      setShowSeniorWarning(true)
+    } else {
+      onSelect(cageType, cageCount)
+    }
+  }
+
+  function confirmSeniorSelection() {
+    if (pendingSelection) {
+      onSelect(pendingSelection.cageType, pendingSelection.cageCount)
+    }
+    setShowSeniorWarning(false)
+    setPendingSelection(null)
+  }
+
+  function selectStandardInstead() {
+    onSelect('standard', 1)
+    setShowSeniorWarning(false)
+    setPendingSelection(null)
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -138,7 +176,7 @@ export function CageSelection({
           return (
             <button
               key={`${cageType}-${cageCount}`}
-              onClick={() => available && onSelect(cageType, cageCount)}
+              onClick={() => handleCageClick(cageType, cageCount)}
               disabled={!available}
               className={cn(
                 'relative flex flex-col gap-4 rounded-xl border-2 p-5 text-left transition-all duration-200',
@@ -150,7 +188,6 @@ export function CageSelection({
                     : 'cursor-not-allowed border-border bg-muted/40 opacity-50'
               )}
             >
-              {/* Not available badge */}
               {!available && (
                 <span className="absolute right-3 top-3">
                   <Badge variant="destructive" className="gap-1 text-xs">
@@ -160,14 +197,12 @@ export function CageSelection({
                 </span>
               )}
 
-              {/* Selected indicator */}
               {isSelected && available && (
                 <span className="absolute right-3 top-3 text-primary">
                   <CheckCircle2 className="h-5 w-5" />
                 </span>
               )}
 
-              {/* Icon + title */}
               <div className="flex items-center gap-3">
                 <span
                   className={cn(
@@ -188,7 +223,6 @@ export function CageSelection({
                 </div>
               </div>
 
-              {/* Bullets */}
               <ul className="space-y-1">
                 {desc.bullets.map((b) => (
                   <li
@@ -206,7 +240,6 @@ export function CageSelection({
                 ))}
               </ul>
 
-              {/* Pricing */}
               {available && (
                 <div className="mt-auto space-y-0.5 border-t border-border pt-3">
                   <p className="text-lg font-bold">
@@ -230,6 +263,34 @@ export function CageSelection({
           Neste
         </Button>
       </div>
+
+      {/* Senior & Komfort warning dialog */}
+      <Dialog open={showSeniorWarning} onOpenChange={setShowSeniorWarning}>
+        <DialogContent className="max-w-md" aria-describedby={undefined}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              Senior & Komfort bur
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm text-muted-foreground">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700">
+              Dersom katten din ikke er over 10 år eller har helseutfordringer,
+              anbefaler vi å velge standardbur. Katter i Senior & Komfort-bur
+              kan bli flyttet til standardbur dersom behovet er større hos andre
+              katter.
+            </div>
+            <p>Ønsker du likevel å velge Senior & Komfort?</p>
+          </div>
+          <DialogFooter className="flex gap-2 sm:flex-row">
+            <Button variant="outline" onClick={selectStandardInstead}>
+              Velg standardbur istedet
+            </Button>
+            <Button onClick={confirmSeniorSelection}>
+              Ja, velg Senior & Komfort
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
