@@ -46,7 +46,6 @@ export async function getUpcomingYearBookings(): Promise<BookingWithCats[]> {
   const fromStr = today.toISOString().split('T')[0]
   const toStr = oneYearAhead.toISOString().split('T')[0]
 
-  console.log('[createBooking] fromStr:', fromStr, 'toStr:', toStr)
 
   // Step 1: fetch all bookings via security definer function (bypasses RLS)
   const { data: bookingRows, error: bookingError } = await supabase.rpc(
@@ -146,7 +145,6 @@ export async function createBooking(
 
   const fromStr = payload.dateFrom.toISOString().split('T')[0]
   const toStr = payload.dateTo.toISOString().split('T')[0]
-  // console.log('[createBooking] fromStr:', fromStr, 'toStr:', toStr)
 
   // ── Step 1: Insert booking row ──────────────────────────────────────────────
   const { data: booking, error: bookingError } = await supabase

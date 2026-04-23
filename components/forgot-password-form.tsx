@@ -61,8 +61,6 @@ export function ForgotPasswordForm({
       result.data.email
     )
 
-    console.log('Forgot password error:', error)
-
     if (error) {
       setFormError('Kunne ikke sende e-post. Prøv igjen senere.')
       setIsLoading(false)

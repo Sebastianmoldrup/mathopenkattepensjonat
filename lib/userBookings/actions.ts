@@ -68,7 +68,6 @@ export async function getUserBookingsWithCats(): Promise<UserBooking[]> {
 export async function cancelBooking(
   bookingId: string
 ): Promise<{ success: boolean; error?: string; feeAmount?: number }> {
-  console.log('[cancelBooking] called with bookingId:', bookingId) // ← legg til denne
   const supabase = await createClient()
 
   const {

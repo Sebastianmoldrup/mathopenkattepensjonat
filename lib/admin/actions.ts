@@ -50,13 +50,6 @@ export async function adminGetAllBookings(): Promise<AdminBooking[]> {
     )
     .in('booking_id', bookingIds)
 
-  console.log('[adminGetAllBookings] bookingIds count:', bookingIds.length)
-  console.log(
-    '[adminGetAllBookings] catRows:',
-    JSON.stringify(catRows?.slice(0, 2))
-  )
-  console.log('[adminGetAllBookings] catError:', catError?.message)
-
   const catMap = new Map<string, any[]>()
   for (const row of catRows ?? []) {
     if (!catMap.has(row.booking_id)) catMap.set(row.booking_id, [])
