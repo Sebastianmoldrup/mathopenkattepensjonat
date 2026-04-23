@@ -20,11 +20,7 @@ import { BookingSummary } from './BookingSummary'
 import { cn } from '@/lib/utils'
 import { CheckCircle2 } from 'lucide-react'
 
-// ─── Step metadata ─────────────────────────────────────────────────────────────
-
-type ExtendedBookingStep = BookingStep | 'behavior'
-
-const STEPS: { key: ExtendedBookingStep; label: string }[] = [
+const STEPS: { key: BookingStep; label: string }[] = [
   { key: 'cats', label: 'Katter' },
   { key: 'dates', label: 'Datoer' },
   { key: 'cage', label: 'Bur' },
@@ -39,9 +35,10 @@ export function BookingWizard() {
   const [userId, setUserId] = useState<string | null>(null)
   const [cats, setCats] = useState<Cat[]>([])
   const [bookings, setBookings] = useState<BookingWithCats[]>([])
-  const [state, setState] = useState<
-    BookingState & { step: ExtendedBookingStep }
-  >({ ...INITIAL_BOOKING_STATE, step: 'cats' })
+  const [state, setState] = useState<BookingState & { step: BookingStep }>({
+    ...INITIAL_BOOKING_STATE,
+    step: 'cats',
+  })
   const [cageCount, setCageCount] = useState<number>(1)
   const [behaviorData, setBehaviorData] = useState<CatBehaviorData[]>([])
   const [wantsOutdoorCage, setWantsOutdoorCage] = useState(false)
@@ -58,7 +55,7 @@ export function BookingWizard() {
     setState((prev) => ({ ...prev, ...partial }))
   }
 
-  function goTo(step: ExtendedBookingStep) {
+  function goTo(step: BookingStep) {
     updateState({ step })
   }
 

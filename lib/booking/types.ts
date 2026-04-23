@@ -110,7 +110,7 @@ export interface BookingWithCats extends Booking {
 
 // ─── Wizard State ─────────────────────────────────────────────────────────────
 
-export type BookingStep = 'cats' | 'dates' | 'cage' | 'summary'
+export type BookingStep = 'cats' | 'dates' | 'cage' | 'behavior' | 'summary'
 
 export interface BookingState {
   step: BookingStep
