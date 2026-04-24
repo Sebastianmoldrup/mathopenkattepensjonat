@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { UserBooking, UserWaitlistEntry } from '@/lib/userBookings/actions'
+import { UserWaitlistEntry } from '@/lib/userBookings/actions'
+import { UserBooking } from '@/lib/userBookings/utils'
 import { BookingCard } from './BookingCard'
 import { WaitlistCard } from './WaitlistCard'
 import { CalendarClock, History, Clock } from 'lucide-react'
