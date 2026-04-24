@@ -11,10 +11,17 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { CheckCircle2, XCircle, Cat, Crown, Star } from 'lucide-react'
+import {
+  CheckCircle2,
+  XCircle,
+  Cat,
+  Crown,
+  Star,
+  AlertTriangle,
+  Clock,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface CageSelectionProps {
@@ -26,6 +33,7 @@ interface CageSelectionProps {
   onSelect: (cageType: CageType, cageCount: number) => void
   onNext: () => void
   onBack: () => void
+  onWaitlist?: () => void
   ignoreCapacity?: boolean
 }
 
@@ -41,7 +49,11 @@ const CAGE_DESCRIPTIONS: Record<
 > = {
   standard: {
     title: 'Standard',
-    bullets: ['Romslig og komfortabelt bur', 'Passer for 1–2 katter'],
+    bullets: [
+      'Romslig og komfortabelt bur',
+      'Passer for 1–2 katter',
+      'Daglig stell og mating inkludert',
+    ],
   },
   senior_comfort: {
     title: 'Senior & Komfort',
@@ -70,6 +82,7 @@ export function CageSelection({
   onSelect,
   onNext,
   onBack,
+  onWaitlist,
   ignoreCapacity = false,
 }: CageSelectionProps) {
   const [showSeniorWarning, setShowSeniorWarning] = useState(false)
@@ -254,24 +267,43 @@ export function CageSelection({
         })}
       </div>
 
-      <div className="flex justify-between pt-2">
+      <div className="flex items-center justify-between pt-2">
         <Button variant="outline" onClick={onBack}>
           Tilbake
         </Button>
-        <Button onClick={onNext} disabled={!selectedCageType} size="lg">
-          Neste
-        </Button>
+        <div className="flex flex-col items-end gap-2">
+          <Button onClick={onNext} disabled={!selectedCageType} size="lg">
+            Neste
+          </Button>
+          {onWaitlist && !ignoreCapacity && (
+            <button
+              onClick={onWaitlist}
+              className="flex items-center gap-1.5 rounded-md bg-amber-100 px-3 py-1.5 text-xs font-medium text-amber-800 transition-colors hover:bg-amber-200"
+            >
+              <Clock className="h-3.5 w-3.5" />
+              Er det full booket? Meld deg på ventelisten
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Senior & Komfort warning dialog */}
       <Dialog open={showSeniorWarning} onOpenChange={setShowSeniorWarning}>
-        <DialogContent className="max-w-md" aria-describedby={undefined}>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
               Senior & Komfort bur
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm text-muted-foreground">
+            <p>
+              Senior & Komfort-buret er tilrettelagt for{' '}
+              <strong className="text-foreground">
+                eldre katter med helseutfordringer
+              </strong>
+              , som artrose eller nedsatt bevegelighet. Buret er litt mindre enn
+              standardburene, men har en liten trapp mellom etasjene.
+            </p>
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700">
               Dersom katten din ikke er over 10 år eller har helseutfordringer,
               anbefaler vi å velge standardbur. Katter i Senior & Komfort-bur

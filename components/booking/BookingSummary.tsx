@@ -33,6 +33,7 @@ import {
   Loader2,
   CheckCircle2,
 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import Image from 'next/image'
 
 interface BookingSummaryProps {
@@ -75,6 +76,7 @@ export function BookingSummary({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
+  const [acceptsWaitlist, setAcceptsWaitlist] = useState(false)
 
   const numCats = selectedCats.length
   const nights = diffInDays(dateFrom, dateTo)
@@ -112,6 +114,7 @@ export function BookingSummary({
       cageType,
       cageCount,
       numCats,
+      price: breakdown.totalPrice,
       specialInstructions: specialInstructions || undefined,
       wantsOutdoorCage,
     })
@@ -326,23 +329,43 @@ export function BookingSummary({
         </p>
       )}
 
+      {/* Waitlist acknowledgement */}
+      <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+        <p className="text-sm text-amber-800">
+          <strong>Merk:</strong> Bookinger behandles fortløpende. Dersom vi blir
+          fullbooket, ønsker du å stå på venteliste?
+        </p>
+        <label className="flex cursor-pointer items-start gap-2.5">
+          <input
+            type="checkbox"
+            checked={acceptsWaitlist}
+            onChange={(e) => setAcceptsWaitlist(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-amber-400 accent-amber-600"
+          />
+          <span className="text-sm text-amber-800">
+            Ja, jeg forstår at bookingen behandles fortløpende og aksepterer at
+            jeg kan bli satt på venteliste dersom perioden er fullbooket.
+          </span>
+        </label>
+      </div>
+
       <div className="flex justify-between pt-2">
         <Button variant="outline" onClick={onBack} disabled={isSubmitting}>
           Tilbake
         </Button>
         <Button
           onClick={handleConfirm}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !acceptsWaitlist}
           size="lg"
           className="min-w-40"
         >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Bekrefter...
+              Sender...
             </>
           ) : (
-            'Bekreft booking'
+            'Send bookingforespørsel'
           )}
         </Button>
       </div>

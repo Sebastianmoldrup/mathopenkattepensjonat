@@ -302,7 +302,7 @@ export function DateRangeSelection({
   onNext,
   onBack,
   onWaitlist,
-  isWaitlist = false,
+  isWaitlist,
 }: DateRangeSelectionProps) {
   const isDesktop = useIsDesktop()
 
@@ -429,20 +429,12 @@ export function DateRangeSelection({
 
   return (
     <div className="space-y-5">
-      {isWaitlist && (
-        <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800">
-          <Clock className="h-4 w-4 shrink-0" />
-          Du er nå i gang med å melde deg på ventelisten.
-        </div>
-      )}
       <div>
         <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          {isWaitlist ? 'Velg ønsket periode' : 'Velg datoer'}
+          Velg datoer
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {isWaitlist
-            ? 'Velg hvilken periode du ønsker. Alle datoer er tilgjengelige siden dette er venteliste.'
-            : 'Velg innsjekk- og utsjekkdato.'}
+          Velg innsjekk- og utsjekkdato.
         </p>
       </div>
 
@@ -583,25 +575,24 @@ export function DateRangeSelection({
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={onBack}>
-          Tilbake
-        </Button>
-        <div className="flex flex-col items-end gap-2">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Button variant="outline" onClick={onBack}>
+            Tilbake
+          </Button>
           <Button onClick={onNext} disabled={!canProceed} size="lg">
             Neste
           </Button>
-          {!isWaitlist && (
-            <Button
-              onClick={onWaitlist}
-              className="flex items-center gap-1.5 rounded-md px-4 py-2 text-xs transition-colors hover:text-foreground"
-              variant={'outline'}
-            >
-              <Clock className="h-3.5 w-3.5" />
-              Er det full booket? Meld deg på ventelisten
-            </Button>
-          )}
         </div>
+        {!isWaitlist && (
+          <button
+            onClick={onWaitlist}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100"
+          >
+            <Clock className="h-4 w-4 shrink-0" />
+            Er det fullt booket? Meld deg på ventelisten
+          </button>
+        )}
       </div>
     </div>
   )

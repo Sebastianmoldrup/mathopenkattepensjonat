@@ -97,6 +97,16 @@ export function BookingWizard() {
     goTo('waitlist-dates')
   }
 
+  function handleWaitlistFromCage() {
+    // Transfer dates from normal flow to waitlist
+    setWaitlistDateFrom(state.dateFrom)
+    setWaitlistDateTo(state.dateTo)
+    setWaitlistCageType(null)
+    setWaitlistCageCount(1)
+    setIsWaitlist(true)
+    goTo('waitlist-cage')
+  }
+
   const STEPS = isWaitlist ? WAITLIST_STEPS : BOOKING_STEPS
   const currentStepIndex = STEPS.findIndex((s) => s.key === state.step)
   const selectedCats = cats.filter((c) => state.selectedCatIds.includes(c.id))
@@ -218,6 +228,7 @@ export function BookingWizard() {
                 }}
                 onNext={() => goTo('summary')}
                 onBack={() => goTo('dates')}
+                onWaitlist={handleWaitlistFromCage}
               />
             )}
 
@@ -297,8 +308,6 @@ export function BookingWizard() {
                   cageType={waitlistCageType}
                   cageCount={waitlistCageCount}
                   specialInstructions={state.specialInstructions}
-                  behaviorData={behaviorData}
-                  wantsOutdoorCage={wantsOutdoorCage}
                   onInstructionsChange={(v) =>
                     updateState({ specialInstructions: v })
                   }
