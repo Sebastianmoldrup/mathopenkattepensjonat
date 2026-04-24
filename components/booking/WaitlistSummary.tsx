@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Cat, CageType } from '@/lib/booking/types'
+import { CatBehaviorData } from '@/lib/booking/behaviorActions'
 import { addToWaitlist } from '@/lib/booking/waitlist'
 import { calculatePriceBreakdown } from '@/lib/booking/pricing'
 import { Button } from '@/components/ui/button'
@@ -53,6 +54,8 @@ interface WaitlistSummaryProps {
   cageType: CageType
   cageCount: number
   specialInstructions: string
+  behaviorData: CatBehaviorData[]
+  wantsOutdoorCage: boolean
   onInstructionsChange: (value: string) => void
   onBack: () => void
   onConfirmed: () => void
@@ -65,6 +68,8 @@ export function WaitlistSummary({
   cageType,
   cageCount,
   specialInstructions,
+  behaviorData,
+  wantsOutdoorCage = false,
   onInstructionsChange,
   onBack,
   onConfirmed,
@@ -72,6 +77,7 @@ export function WaitlistSummary({
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [confirmed, setConfirmed] = useState(false)
+  console.log({ behaviorData }, wantsOutdoorCage)
 
   const nights = Math.round((dateTo.getTime() - dateFrom.getTime()) / 864e5)
   const breakdown = calculatePriceBreakdown(
@@ -92,6 +98,7 @@ export function WaitlistSummary({
         cageType,
         cageCount,
         specialInstructions: specialInstructions || undefined,
+        behaviorNotes: behaviorData.length > 0 ? behaviorData : undefined,
       })
       if (result.success) {
         setConfirmed(true)
@@ -207,6 +214,14 @@ export function WaitlistSummary({
               {cageCount === 2 ? '2× Standard (split)' : CAGE_LABELS[cageType]}
             </p>
           </div>
+
+          {/* Outdoor cage note */}
+          {wantsOutdoorCage && (
+            <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800">
+              🌿 Ønsker utebur — vi vil tildele et utebur dersom det er
+              tilgjengelig.
+            </div>
+          )}
 
           {/* Special instructions */}
           <div className="space-y-2">

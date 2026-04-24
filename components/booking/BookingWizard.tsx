@@ -297,6 +297,8 @@ export function BookingWizard() {
                   cageType={waitlistCageType}
                   cageCount={waitlistCageCount}
                   specialInstructions={state.specialInstructions}
+                  behaviorData={behaviorData}
+                  wantsOutdoorCage={wantsOutdoorCage}
                   onInstructionsChange={(v) =>
                     updateState({ specialInstructions: v })
                   }

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { CatBehaviorData } from './behaviorActions'
 
 export async function addToWaitlist(payload: {
   dateFrom: string
@@ -10,6 +11,8 @@ export async function addToWaitlist(payload: {
   cageType?: string
   cageCount?: number
   specialInstructions?: string
+  behaviorNotes?: CatBehaviorData[]
+  wantsOutdoorCage?: boolean
 }): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
@@ -25,6 +28,8 @@ export async function addToWaitlist(payload: {
     p_cage_type: payload.cageType ?? null,
     p_cage_count: payload.cageCount ?? 1,
     p_special_instructions: payload.specialInstructions ?? null,
+    p_behavior_notes: payload.behaviorNotes ? payload.behaviorNotes : null,
+    p_wants_outdoor_cage: payload.wantsOutdoorCage ?? false,
   })
 
   if (error) {

@@ -592,13 +592,14 @@ export function DateRangeSelection({
             Neste
           </Button>
           {!isWaitlist && (
-            <button
+            <Button
               onClick={onWaitlist}
-              className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-xs transition-colors hover:text-foreground"
+              className="flex items-center gap-1.5 rounded-md px-4 py-2 text-xs transition-colors hover:text-foreground"
+              variant={'outline'}
             >
               <Clock className="h-3.5 w-3.5" />
-              Er det fullt booket? Meld deg på ventelisten
-            </button>
+              Er det full booket? Meld deg på ventelisten
+            </Button>
           )}
         </div>
       </div>
