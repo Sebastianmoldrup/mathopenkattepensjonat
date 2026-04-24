@@ -114,7 +114,6 @@ export function BookingSummary({
       cageType,
       cageCount,
       numCats,
-      price: breakdown.totalPrice,
       specialInstructions: specialInstructions || undefined,
       wantsOutdoorCage,
     })
