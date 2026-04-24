@@ -7,7 +7,7 @@ import {
   getCatBlockedDates,
 } from '@/lib/booking/availability'
 import { getSeason, addDays } from '@/lib/booking/pricing'
-import { InfoIcon } from 'lucide-react'
+import { InfoIcon, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -21,6 +21,8 @@ interface DateRangeSelectionProps {
   onChange: (from: Date | null, to: Date | null) => void
   onNext: () => void
   onBack: () => void
+  onWaitlist: () => void
+  isWaitlist?: boolean
 }
 
 type FocusField = 'start' | 'end'
@@ -299,6 +301,8 @@ export function DateRangeSelection({
   onChange,
   onNext,
   onBack,
+  onWaitlist,
+  isWaitlist = false,
 }: DateRangeSelectionProps) {
   const isDesktop = useIsDesktop()
 
@@ -421,22 +425,27 @@ export function DateRangeSelection({
     onMouseLeave: handleMouseLeave,
   }
 
-  // Check if any selected cat has blocked dates
   const hasCatConflict = selectedCats.length > 0 && catBlockedSet.size > 0
 
   return (
     <div className="space-y-5">
-      {/* Header */}
+      {isWaitlist && (
+        <div className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 text-sm text-blue-800">
+          <Clock className="h-4 w-4 shrink-0" />
+          Du er nå i gang med å melde deg på ventelisten.
+        </div>
+      )}
       <div>
         <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          Velg datoer
+          {isWaitlist ? 'Velg ønsket periode' : 'Velg datoer'}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Velg innsjekk- og utsjekkdato.
+          {isWaitlist
+            ? 'Velg hvilken periode du ønsker. Alle datoer er tilgjengelige siden dette er venteliste.'
+            : 'Velg innsjekk- og utsjekkdato.'}
         </p>
       </div>
 
-      {/* Cat conflict notice */}
       {hasCatConflict && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
           <span className="font-medium">
@@ -453,7 +462,6 @@ export function DateRangeSelection({
         </div>
       )}
 
-      {/* Legend */}
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span className="h-4 w-4 shrink-0 rounded border-2 border-amber-400 bg-amber-100" />
@@ -473,7 +481,6 @@ export function DateRangeSelection({
         </span>
       </div>
 
-      {/* Calendar card */}
       <div className="w-full overflow-hidden rounded-xl border bg-card">
         <div className="grid grid-cols-2 border-b border-border">
           <button
@@ -495,7 +502,6 @@ export function DateRangeSelection({
               {dateFrom ? fmtShort(dateFrom) : 'Legg til dato'}
             </div>
           </button>
-
           <button
             onClick={focusEnd}
             className={cn(
@@ -550,7 +556,6 @@ export function DateRangeSelection({
         </div>
       </div>
 
-      {/* Selection summary */}
       {dateFrom && (
         <div className="rounded-xl border bg-card p-4">
           {dateTo ? (
@@ -578,13 +583,24 @@ export function DateRangeSelection({
       )}
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <div className="flex items-center justify-between">
         <Button variant="outline" onClick={onBack}>
           Tilbake
         </Button>
-        <Button onClick={onNext} disabled={!canProceed} size="lg">
-          Neste
-        </Button>
+        <div className="flex flex-col items-end gap-2">
+          <Button onClick={onNext} disabled={!canProceed} size="lg">
+            Neste
+          </Button>
+          {!isWaitlist && (
+            <button
+              onClick={onWaitlist}
+              className="flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-xs transition-colors hover:text-foreground"
+            >
+              <Clock className="h-3.5 w-3.5" />
+              Er det fullt booket? Meld deg på ventelisten
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

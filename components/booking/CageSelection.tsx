@@ -26,6 +26,7 @@ interface CageSelectionProps {
   onSelect: (cageType: CageType, cageCount: number) => void
   onNext: () => void
   onBack: () => void
+  ignoreCapacity?: boolean
 }
 
 const CAGE_ICONS: Record<CageType, React.ReactNode> = {
@@ -69,6 +70,7 @@ export function CageSelection({
   onSelect,
   onNext,
   onBack,
+  ignoreCapacity = false,
 }: CageSelectionProps) {
   const [showSeniorWarning, setShowSeniorWarning] = useState(false)
   const [pendingSelection, setPendingSelection] = useState<{
@@ -96,6 +98,7 @@ export function CageSelection({
   }, [numCats])
 
   function isAvailable(cageType: CageType, cageCount: number) {
+    if (ignoreCapacity) return true
     return availableOptions.some(
       (o) => o.cageType === cageType && o.cageCount === cageCount
     )

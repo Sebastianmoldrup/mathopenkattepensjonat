@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Cat,
+  CageType,
   BookingState,
   BookingStep,
   INITIAL_BOOKING_STATE,
@@ -17,15 +18,27 @@ import { DateRangeSelection } from './DateRangeSelection'
 import { CageSelection } from './CageSelection'
 import { CatBehaviorStep } from './CatBehaviorStep'
 import { BookingSummary } from './BookingSummary'
+import { WaitlistSummary } from './WaitlistSummary'
 import { cn } from '@/lib/utils'
 import { CheckCircle2 } from 'lucide-react'
 
-const STEPS: { key: BookingStep; label: string }[] = [
+// ─── Step metadata ─────────────────────────────────────────────────────────────
+
+const BOOKING_STEPS: { key: BookingStep; label: string }[] = [
   { key: 'cats', label: 'Katter' },
+  { key: 'behavior', label: 'Atferd' },
   { key: 'dates', label: 'Datoer' },
   { key: 'cage', label: 'Bur' },
-  { key: 'behavior', label: 'Atferd' },
   { key: 'summary', label: 'Oppsummering' },
+]
+
+const WAITLIST_STEPS: { key: BookingStep; label: string }[] = [
+  { key: 'cats', label: 'Katter' },
+  { key: 'behavior', label: 'Atferd' },
+  { key: 'dates', label: 'Datoer' },
+  { key: 'waitlist-dates', label: 'Ønsket periode' },
+  { key: 'waitlist-cage', label: 'Bur' },
+  { key: 'waitlist-summary', label: 'Oppsummering' },
 ]
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -35,15 +48,22 @@ export function BookingWizard() {
   const [userId, setUserId] = useState<string | null>(null)
   const [cats, setCats] = useState<Cat[]>([])
   const [bookings, setBookings] = useState<BookingWithCats[]>([])
-  const [state, setState] = useState<BookingState & { step: BookingStep }>({
+  const [state, setState] = useState<BookingState>({
     ...INITIAL_BOOKING_STATE,
     step: 'cats',
   })
   const [cageCount, setCageCount] = useState<number>(1)
   const [behaviorData, setBehaviorData] = useState<CatBehaviorData[]>([])
   const [wantsOutdoorCage, setWantsOutdoorCage] = useState(false)
+  const [isWaitlist, setIsWaitlist] = useState(false)
 
-  // Called by BookingGate once user + cats are confirmed
+  const [waitlistDateFrom, setWaitlistDateFrom] = useState<Date | null>(null)
+  const [waitlistDateTo, setWaitlistDateTo] = useState<Date | null>(null)
+  const [waitlistCageType, setWaitlistCageType] = useState<CageType | null>(
+    null
+  )
+  const [waitlistCageCount, setWaitlistCageCount] = useState<number>(1)
+
   const handleReady = useCallback(async (uid: string, userCats: Cat[]) => {
     setUserId(uid)
     setCats(userCats)
@@ -51,7 +71,7 @@ export function BookingWizard() {
     setBookings(upcoming)
   }, [])
 
-  function updateState(partial: Partial<typeof state>) {
+  function updateState(partial: Partial<BookingState>) {
     setState((prev) => ({ ...prev, ...partial }))
   }
 
@@ -59,24 +79,32 @@ export function BookingWizard() {
     updateState({ step })
   }
 
-  // Reset all wizard state then redirect — clean slate if user navigates back
   function handleConfirmed() {
-    setState({ ...INITIAL_BOOKING_STATE, step: 'cats' })
+    setState(INITIAL_BOOKING_STATE)
     setCageCount(1)
     setBehaviorData([])
     setWantsOutdoorCage(false)
+    setIsWaitlist(false)
     router.push('/minside')
   }
 
+  function handleWaitlist() {
+    setWaitlistDateFrom(null)
+    setWaitlistDateTo(null)
+    setWaitlistCageType(null)
+    setWaitlistCageCount(1)
+    setIsWaitlist(true)
+    goTo('waitlist-dates')
+  }
+
+  const STEPS = isWaitlist ? WAITLIST_STEPS : BOOKING_STEPS
   const currentStepIndex = STEPS.findIndex((s) => s.key === state.step)
   const selectedCats = cats.filter((c) => state.selectedCatIds.includes(c.id))
 
   return (
     <div className="mx-auto w-full min-w-[300px] max-w-4xl space-y-6 px-0 py-6 sm:space-y-8 sm:px-4 sm:py-8">
-      {/* Gate always renders; once ready it becomes invisible and wizard shows */}
       <BookingGate onReady={handleReady} />
 
-      {/* Only render wizard content once userId is set (gate passed) */}
       {userId && (
         <>
           {/* Step indicator */}
@@ -91,7 +119,6 @@ export function BookingWizard() {
                     key={step.key}
                     className="flex min-w-0 flex-1 items-center last:flex-none"
                   >
-                    {/* Circle + label */}
                     <div className="flex shrink-0 flex-col items-center gap-1">
                       <span
                         className={cn(
@@ -119,8 +146,6 @@ export function BookingWizard() {
                         {step.label}
                       </span>
                     </div>
-
-                    {/* Connector line */}
                     {i < STEPS.length - 1 && (
                       <div
                         className={cn(
@@ -146,12 +171,25 @@ export function BookingWizard() {
                 onChange={(ids) =>
                   updateState({ selectedCatIds: ids, cageType: null })
                 }
+                onNext={() => goTo('behavior')}
+              />
+            )}
+
+            {state.step === 'behavior' && (
+              <CatBehaviorStep
+                cats={selectedCats}
+                behaviorData={behaviorData}
+                onChange={setBehaviorData}
+                wantsOutdoorCage={wantsOutdoorCage}
+                onOutdoorCageChange={setWantsOutdoorCage}
                 onNext={() => goTo('dates')}
+                onBack={() => goTo('cats')}
               />
             )}
 
             {state.step === 'dates' && (
               <DateRangeSelection
+                key="dates"
                 numCats={state.selectedCatIds.length}
                 selectedCatIds={state.selectedCatIds}
                 selectedCats={selectedCats}
@@ -162,7 +200,8 @@ export function BookingWizard() {
                   updateState({ dateFrom: from, dateTo: to, cageType: null })
                 }
                 onNext={() => goTo('cage')}
-                onBack={() => goTo('cats')}
+                onBack={() => goTo('behavior')}
+                onWaitlist={handleWaitlist}
               />
             )}
 
@@ -177,20 +216,8 @@ export function BookingWizard() {
                   updateState({ cageType: type })
                   setCageCount(count)
                 }}
-                onNext={() => goTo('behavior')}
-                onBack={() => goTo('dates')}
-              />
-            )}
-
-            {state.step === 'behavior' && (
-              <CatBehaviorStep
-                cats={selectedCats}
-                behaviorData={behaviorData}
-                onChange={setBehaviorData}
-                wantsOutdoorCage={wantsOutdoorCage}
-                onOutdoorCageChange={setWantsOutdoorCage}
                 onNext={() => goTo('summary')}
-                onBack={() => goTo('cage')}
+                onBack={() => goTo('dates')}
               />
             )}
 
@@ -212,7 +239,68 @@ export function BookingWizard() {
                   onInstructionsChange={(v) =>
                     updateState({ specialInstructions: v })
                   }
-                  onBack={() => goTo('behavior')}
+                  onBack={() => goTo('cage')}
+                  onConfirmed={handleConfirmed}
+                />
+              )}
+
+            {state.step === 'waitlist-dates' && (
+              <DateRangeSelection
+                key="waitlist-dates"
+                numCats={state.selectedCatIds.length}
+                selectedCatIds={[]}
+                selectedCats={[]}
+                bookings={[]}
+                dateFrom={waitlistDateFrom}
+                dateTo={waitlistDateTo}
+                isWaitlist={true}
+                onChange={(from, to) => {
+                  setWaitlistDateFrom(from)
+                  setWaitlistDateTo(to)
+                }}
+                onNext={() => goTo('waitlist-cage')}
+                onBack={() => {
+                  setIsWaitlist(false)
+                  goTo('dates')
+                }}
+                onWaitlist={() => {}}
+              />
+            )}
+
+            {state.step === 'waitlist-cage' &&
+              waitlistDateFrom &&
+              waitlistDateTo && (
+                <CageSelection
+                  numCats={state.selectedCatIds.length}
+                  dateFrom={waitlistDateFrom}
+                  dateTo={waitlistDateTo}
+                  bookings={[]}
+                  selectedCageType={waitlistCageType}
+                  ignoreCapacity={true}
+                  onSelect={(type, count) => {
+                    setWaitlistCageType(type)
+                    setWaitlistCageCount(count)
+                  }}
+                  onNext={() => goTo('waitlist-summary')}
+                  onBack={() => goTo('waitlist-dates')}
+                />
+              )}
+
+            {state.step === 'waitlist-summary' &&
+              waitlistDateFrom &&
+              waitlistDateTo &&
+              waitlistCageType && (
+                <WaitlistSummary
+                  selectedCats={selectedCats}
+                  dateFrom={waitlistDateFrom}
+                  dateTo={waitlistDateTo}
+                  cageType={waitlistCageType}
+                  cageCount={waitlistCageCount}
+                  specialInstructions={state.specialInstructions}
+                  onInstructionsChange={(v) =>
+                    updateState({ specialInstructions: v })
+                  }
+                  onBack={() => goTo('waitlist-cage')}
                   onConfirmed={handleConfirmed}
                 />
               )}

@@ -14,6 +14,8 @@ import {
   sendBookingCancelledByAdminEmail,
   sendCancellationFeeReminderEmail,
 } from '@/lib/email/resend'
+import { calculatePriceBreakdown } from '@/lib/booking/pricing'
+import { CageType } from '@/lib/booking/types'
 
 // ─── Auth guard ────────────────────────────────────────────────────────────────
 
@@ -43,7 +45,7 @@ export async function adminGetAllBookings(): Promise<AdminBooking[]> {
 
   // Fetch cats for each booking
   const bookingIds = (data ?? []).map((b: any) => b.id)
-  const { data: catRows, error: catError } = await supabase
+  const { data: catRows } = await supabase
     .from('booking_cats')
     .select(
       'booking_id, cats(id, name, breed, image_url, medical_notes, diet, behavior_notes, age)'
@@ -289,6 +291,7 @@ export async function adminUpdateBookingCage(
   }
 
   revalidatePath('/admin/bookinger')
+  revalidatePath('/admin')
   return { success: true }
 }
 
@@ -308,6 +311,137 @@ export async function adminDeleteBooking(
     return { success: false, error: 'Kunne ikke slette booking.' }
   }
 
+  revalidatePath('/admin/bookinger')
+  revalidatePath('/admin')
+  return { success: true }
+}
+
+// ─── Customers ─────────────────────────────────────────────────────────────────
+
+export interface CustomerEntry {
+  user_id: string
+  user_email: string
+  first_name: string | null
+  last_name: string | null
+  phone: string | null
+  address: string | null
+  emergency_contact: string | null
+  booking_count: number
+  last_booking: string | null
+  cat_names: string | null
+}
+
+export async function adminGetCustomers(): Promise<CustomerEntry[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_customers')
+  if (error) {
+    console.error('[adminGetCustomers]', error.message)
+    return []
+  }
+  return data ?? []
+}
+
+// ─── Waitlist ──────────────────────────────────────────────────────────────────
+
+export interface WaitlistEntry {
+  id: string
+  date_from: string
+  date_to: string
+  num_cats: number
+  special_instructions: string | null
+  priority: number
+  status: string
+  admin_notes: string | null
+  created_at: string
+  user_id: string
+  user_email: string
+  user_first_name: string | null
+  user_last_name: string | null
+  user_phone: string | null
+}
+
+export async function adminGetWaitlist(): Promise<WaitlistEntry[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_waitlist')
+  if (error) {
+    console.error('[adminGetWaitlist]', error.message)
+    return []
+  }
+  return data ?? []
+}
+
+export async function adminUpdateWaitlistStatus(
+  id: string,
+  status: string,
+  notes?: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('admin_update_waitlist_status', {
+    p_id: id,
+    p_status: status,
+    p_notes: notes ?? null,
+  })
+  if (error) {
+    console.error('[adminUpdateWaitlistStatus]', error.message)
+    return { success: false, error: 'Kunne ikke oppdatere.' }
+  }
+  revalidatePath('/admin/venteliste')
+  return { success: true }
+}
+
+export async function adminUpdateWaitlistPriority(
+  id: string,
+  priority: number
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('admin_update_waitlist_priority', {
+    p_id: id,
+    p_priority: priority,
+  })
+  if (error) {
+    console.error('[adminUpdateWaitlistPriority]', error.message)
+    return { success: false, error: 'Kunne ikke oppdatere prioritet.' }
+  }
+  revalidatePath('/admin/venteliste')
+  return { success: true }
+}
+
+// ─── Waitlist to Bookings ──────────────────────────────────────────────────────────────────
+
+export async function adminConvertWaitlistToBooking(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { data: entry, error: fetchError } = await supabase
+    .from('waitlist')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (fetchError || !entry) {
+    return { success: false, error: 'Kunne ikke hente ventelistedata.' }
+  }
+
+  const breakdown = calculatePriceBreakdown(
+    (entry.cage_type ?? 'standard') as CageType,
+    entry.cage_count ?? 1,
+    entry.num_cats,
+    new Date(entry.date_from),
+    new Date(entry.date_to)
+  )
+
+  const { error } = await supabase.rpc('admin_convert_waitlist_to_booking', {
+    p_waitlist_id: id,
+    p_price: breakdown.totalPrice,
+  })
+
+  if (error) {
+    console.error('[adminConvertWaitlistToBooking]', error.message)
+    return { success: false, error: 'Kunne ikke konvertere til booking.' }
+  }
+
+  revalidatePath('/admin/venteliste')
   revalidatePath('/admin/bookinger')
   revalidatePath('/admin')
   return { success: true }

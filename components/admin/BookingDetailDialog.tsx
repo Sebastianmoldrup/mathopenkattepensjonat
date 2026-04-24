@@ -121,7 +121,7 @@ export function BookingDetailDialog({
   const [editingCage, setEditingCage] = useState(false)
   const [cageType, setCageType] = useState(booking?.cage_type ?? 'standard')
   const [cageCount, setCageCount] = useState(booking?.cage_count ?? 1)
-  const [cagePrice, setCagePrice] = useState(booking?.price ?? 0)
+  const [cagePrice, setCagePrice] = useState(String(booking?.price ?? 0))
 
   // Delete confirmation
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -202,15 +202,21 @@ export function BookingDetailDialog({
         booking!.id,
         cageType,
         cageCount,
-        cagePrice
+        Number(cagePrice) || 0
       )
       setMessage(
         result.success
           ? { type: 'success', text: 'Bur oppdatert.' }
           : { type: 'error', text: result.error ?? 'Noe gikk galt.' }
       )
+      if (result.success) {
+        setEditingCage(false)
+        onOpenChange(false) // ← lukk dialogen
+        onDeleted?.() // ← trigger refresh i tabellen
+      } else {
+        setMessage({ type: 'error', text: result.error ?? 'Noe gikk galt.' })
+      }
       setActiveAction(null)
-      if (result.success) setEditingCage(false)
     })
   }
 
@@ -368,26 +374,26 @@ export function BookingDetailDialog({
                     setEditingCage(!editingCage)
                     setCageType(booking.cage_type)
                     setCageCount(booking.cage_count)
-                    setCagePrice(booking.price)
+                    setCagePrice(String(booking.price))
                   }}
                   disabled={isPending}
                   className="ml-auto gap-1.5"
                 >
                   <Edit2 className="h-3.5 w-3.5" />
-                  Endre bur
+                  Rediger booking
                 </Button>
               </div>
             </div>
 
             {/* Cage editor */}
             {editingCage && (
-              <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
-                <p className="text-sm font-medium">Endre bur manuelt</p>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1">
+              <div className="space-y-4 rounded-lg border bg-muted/20 p-4">
+                <p className="text-sm font-medium">Rediger bur og pris</p>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
                     <Label className="text-xs">Burtype</Label>
                     <Select value={cageType} onValueChange={setCageType}>
-                      <SelectTrigger className="h-8 text-sm">
+                      <SelectTrigger className="h-9 w-full text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -399,29 +405,32 @@ export function BookingDetailDialog({
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Antall bur</Label>
-                    <Select
-                      value={String(cageCount)}
-                      onValueChange={(v) => setCageCount(Number(v))}
-                    >
-                      <SelectTrigger className="h-8 text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1</SelectItem>
-                        <SelectItem value="2">2</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs">Pris (kr)</Label>
-                    <Input
-                      type="number"
-                      className="h-8 text-sm"
-                      value={cagePrice}
-                      onChange={(e) => setCagePrice(Number(e.target.value))}
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Antall bur</Label>
+                      <Select
+                        value={String(cageCount)}
+                        onValueChange={(v) => setCageCount(Number(v))}
+                      >
+                        <SelectTrigger className="h-9 text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1</SelectItem>
+                          <SelectItem value="2">2</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Pris (kr)</Label>
+                      <Input
+                        type="number"
+                        className="h-9 text-sm"
+                        value={cagePrice}
+                        onChange={(e) => setCagePrice(e.target.value)}
+                        placeholder="0"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2">

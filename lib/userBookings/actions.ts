@@ -1,7 +1,5 @@
 'use server'
 
-import { calculateCancellationFee } from '@/lib/booking/cancellation'
-import { sendBookingCancelledEmail } from '@/lib/email/resend'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { BookingStatus, UserBooking } from './utils'
@@ -67,7 +65,7 @@ export async function getUserBookingsWithCats(): Promise<UserBooking[]> {
 
 export async function cancelBooking(
   bookingId: string
-): Promise<{ success: boolean; error?: string; feeAmount?: number }> {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
   const {
@@ -75,75 +73,101 @@ export async function cancelBooking(
   } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Ikke innlogget.' }
 
+  // Verify ownership before updating
   const { data: booking, error: fetchError } = await supabase
     .from('bookings')
-    .select('id, user_id, status, date_from, date_to, price')
+    .select('id, user_id, status, date_from')
     .eq('id', bookingId)
     .single()
 
-  if (fetchError || !booking)
+  if (fetchError || !booking) {
     return { success: false, error: 'Booking ikke funnet.' }
-  if (booking.user_id !== user.id)
+  }
+
+  if (booking.user_id !== user.id) {
     return { success: false, error: 'Ingen tilgang.' }
+  }
 
-  const feeResult = calculateCancellationFee(booking.date_from, booking.price)
+  if (booking.status === 'cancelled') {
+    return { success: false, error: 'Bookingen er allerede avbestilt.' }
+  }
 
-  const { error: cancelError } = await supabase.rpc(
-    'customer_cancel_booking_with_fee',
-    {
-      p_booking_id: bookingId,
-      p_cancellation_fee: feeResult.hasFee ? feeResult.feeAmount : null,
+  if (booking.status === 'completed') {
+    return {
+      success: false,
+      error: 'Fullførte bookinger kan ikke avbestilles.',
     }
-  )
+  }
 
-  if (cancelError) {
-    console.error('[cancelBooking]', cancelError.message)
+  const { error: updateError } = await supabase
+    .from('bookings')
+    .update({ status: 'cancelled' })
+    .eq('id', bookingId)
+    .eq('user_id', user.id) // double-check via RLS
+
+  if (updateError) {
+    console.error('[cancelBooking]', updateError.message)
     return {
       success: false,
       error: 'Kunne ikke avbestille bookingen. Prøv igjen.',
     }
   }
 
-  const { data: catRows } = await supabase
-    .from('booking_cats')
-    .select('cats(name)')
-    .eq('booking_id', bookingId)
+  revalidatePath('/minside/bookinger')
+  revalidatePath('/minside')
 
-  const catNames = (catRows ?? [])
-    .map((row: any) => row.cats?.name)
-    .filter(Boolean) as string[]
+  return { success: true }
+}
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('first_name, last_name')
-    .eq('id', user.id)
-    .maybeSingle()
+// ─── Waitlist ─────────────────────────────────────────────────────────────────
 
-  const bookingForEmail = {
-    id: booking.id,
-    date_from: booking.date_from,
-    date_to: booking.date_to,
-    price: booking.price,
-    user_email: user.email!,
-    user_first_name: profile?.first_name ?? null,
-    user_last_name: profile?.last_name ?? null,
-    cats: catNames.map((name) => ({ name })),
-  } as any
+export interface UserWaitlistEntry {
+  id: string
+  date_from: string
+  date_to: string
+  num_cats: number
+  cage_type: string | null
+  cage_count: number
+  special_instructions: string | null
+  status: string
+  created_at: string
+}
 
-  const emailResult = await sendBookingCancelledEmail(
-    bookingForEmail,
-    feeResult.hasFee ? feeResult.feeAmount : 0
-  )
+export async function getUserWaitlistEntries(): Promise<UserWaitlistEntry[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('waitlist')
+    .select(
+      'id, date_from, date_to, num_cats, cage_type, cage_count, special_instructions, status, created_at'
+    )
+    .order('created_at', { ascending: false })
 
-  if (!emailResult.success) {
-    console.error('[cancelBooking] email failed:', emailResult.error)
+  if (error) {
+    console.error('[getUserWaitlistEntries]', error.message)
+    return []
+  }
+
+  return data ?? []
+}
+
+export async function cancelWaitlistEntry(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('waitlist')
+    .update({ status: 'cancelled' })
+    .eq('id', id)
+
+  if (error) {
+    console.error('[cancelWaitlistEntry]', error.message)
+    return {
+      success: false,
+      error: 'Kunne ikke kansellere ventelisteregistrering.',
+    }
   }
 
   revalidatePath('/minside/bookinger')
   revalidatePath('/minside')
-
-  return {
-    success: true,
-    feeAmount: feeResult.hasFee ? feeResult.feeAmount : 0,
-  }
+  return { success: true }
 }

@@ -16,7 +16,7 @@ export const CAGE_CONFIGS: Record<CageType, CageConfig> = {
     label: 'Standard',
     description: 'Romslig og komfortabelt bur for 1–2 katter',
     maxCats: 2,
-    totalCount: 19,
+    totalCount: 14,
   },
   senior_comfort: {
     type: 'senior_comfort',
@@ -72,7 +72,7 @@ export const PRICING: Record<CageType, PriceTable> = {
   },
   suite: {
     low: { 1: 350, 2: 350, 3: 400 },
-    high: { 1: 450, 2: 450, 3: 450 },
+    high: { 1: 400, 2: 400, 3: 400 },
   },
 }
 
@@ -110,7 +110,15 @@ export interface BookingWithCats extends Booking {
 
 // ─── Wizard State ─────────────────────────────────────────────────────────────
 
-export type BookingStep = 'cats' | 'dates' | 'cage' | 'behavior' | 'summary'
+export type BookingStep =
+  | 'cats'
+  | 'dates'
+  | 'cage'
+  | 'behavior'
+  | 'waitlist-dates'
+  | 'waitlist-cage'
+  | 'waitlist-summary'
+  | 'summary'
 
 export interface BookingState {
   step: BookingStep

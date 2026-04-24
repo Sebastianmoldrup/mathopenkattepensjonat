@@ -1,5 +1,4 @@
 'use client'
-
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -12,6 +11,7 @@ import {
   FileText,
   BookMarked,
   XCircle,
+  Clock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { href: '/admin', label: 'Oversikt', icon: LayoutDashboard, exact: true },
   { href: '/admin/bookinger', label: 'Bookinger', icon: BookOpen },
   { href: '/admin/avbestillinger', label: 'Avbestillinger', icon: XCircle },
+  { href: '/admin/venteliste', label: 'Venteliste', icon: Clock },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarDays },
   { href: '/admin/sjekkliste', label: 'Daglige rutiner', icon: ClipboardCheck },
   { href: '/admin/guide', label: 'Guide', icon: BookMarked },
@@ -28,7 +29,6 @@ const NAV_ITEMS = [
 
 export function AdminNav() {
   const pathname = usePathname()
-
   return (
     <aside className="flex min-h-screen w-56 shrink-0 flex-col border-r bg-card">
       <div className="flex items-center gap-2 border-b px-5 py-5">
@@ -39,13 +39,11 @@ export function AdminNav() {
           Admin
         </span>
       </div>
-
       <nav className="flex-1 space-y-1 px-3 py-4">
         {NAV_ITEMS.map((item) => {
           const isActive = item.exact
             ? pathname === item.href
             : pathname.startsWith(item.href)
-
           return (
             <Link
               key={item.href}
@@ -63,7 +61,6 @@ export function AdminNav() {
           )
         })}
       </nav>
-
       <div className="border-t px-5 py-4">
         <p className="text-xs text-muted-foreground">Admin panel</p>
       </div>

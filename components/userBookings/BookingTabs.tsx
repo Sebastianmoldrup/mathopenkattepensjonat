@@ -1,20 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { UserBooking } from '@/lib/userBookings/utils'
+import { UserBooking, UserWaitlistEntry } from '@/lib/userBookings/actions'
 import { BookingCard } from './BookingCard'
-import { CalendarClock, History } from 'lucide-react'
+import { WaitlistCard } from './WaitlistCard'
+import { CalendarClock, History, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface BookingTabsProps {
   upcoming: UserBooking[]
   history: UserBooking[]
+  waitlist: UserWaitlistEntry[]
 }
 
-type Tab = 'upcoming' | 'history'
+type Tab = 'upcoming' | 'history' | 'waitlist'
 
-export function BookingTabs({ upcoming, history }: BookingTabsProps) {
+export function BookingTabs({ upcoming, history, waitlist }: BookingTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>('upcoming')
+  const [waitlistEntries, setWaitlistEntries] = useState(waitlist)
+
+  const activeWaitlist = waitlistEntries.filter((e) => e.status === 'waiting')
 
   const tabs: {
     key: Tab
@@ -29,14 +34,18 @@ export function BookingTabs({ upcoming, history }: BookingTabsProps) {
       count: upcoming.length,
     },
     {
+      key: 'waitlist',
+      label: 'Venteliste',
+      icon: <Clock className="h-4 w-4" />,
+      count: activeWaitlist.length,
+    },
+    {
       key: 'history',
       label: 'Historikk',
       icon: <History className="h-4 w-4" />,
       count: history.length,
     },
   ]
-
-  const items = activeTab === 'upcoming' ? upcoming : history
 
   return (
     <div className="space-y-5">
@@ -73,37 +82,80 @@ export function BookingTabs({ upcoming, history }: BookingTabsProps) {
       </div>
 
       {/* Content */}
-      {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          {activeTab === 'upcoming' ? (
-            <>
+      {activeTab === 'upcoming' &&
+        (upcoming.length === 0 ? (
+          <EmptyState
+            icon={
               <CalendarClock className="h-10 w-10 text-muted-foreground/40" />
-              <p className="text-sm font-medium text-muted-foreground">
-                Ingen kommende bookinger
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Bookinger med status «venter» eller «bekreftet» vises her.
-              </p>
-            </>
-          ) : (
-            <>
-              <History className="h-10 w-10 text-muted-foreground/40" />
-              <p className="text-sm font-medium text-muted-foreground">
-                Ingen tidligere bookinger
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Gjennomførte og avbestilte bookinger vises her.
-              </p>
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {items.map((booking) => (
-            <BookingCard key={booking.id} booking={booking} />
-          ))}
-        </div>
-      )}
+            }
+            title="Ingen kommende bookinger"
+            description="Bookinger med status «venter» eller «bekreftet» vises her."
+          />
+        ) : (
+          <div className="space-y-4">
+            {upcoming.map((booking) => (
+              <BookingCard key={booking.id} booking={booking} />
+            ))}
+          </div>
+        ))}
+
+      {activeTab === 'waitlist' &&
+        (activeWaitlist.length === 0 ? (
+          <EmptyState
+            icon={<Clock className="h-10 w-10 text-muted-foreground/40" />}
+            title="Ingen aktive ventelisteregistreringer"
+            description="Registreringer der du venter på ledig plass vises her."
+          />
+        ) : (
+          <div className="space-y-4">
+            {activeWaitlist.map((entry) => (
+              <WaitlistCard
+                key={entry.id}
+                entry={entry}
+                onCancelled={() =>
+                  setWaitlistEntries((prev) =>
+                    prev.map((e) =>
+                      e.id === entry.id ? { ...e, status: 'cancelled' } : e
+                    )
+                  )
+                }
+              />
+            ))}
+          </div>
+        ))}
+
+      {activeTab === 'history' &&
+        (history.length === 0 ? (
+          <EmptyState
+            icon={<History className="h-10 w-10 text-muted-foreground/40" />}
+            title="Ingen tidligere bookinger"
+            description="Gjennomførte og avbestilte bookinger vises her."
+          />
+        ) : (
+          <div className="space-y-4">
+            {history.map((booking) => (
+              <BookingCard key={booking.id} booking={booking} />
+            ))}
+          </div>
+        ))}
+    </div>
+  )
+}
+
+function EmptyState({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode
+  title: string
+  description: string
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+      {icon}
+      <p className="text-sm font-medium text-muted-foreground">{title}</p>
+      <p className="text-xs text-muted-foreground">{description}</p>
     </div>
   )
 }
