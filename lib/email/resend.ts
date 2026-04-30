@@ -5,6 +5,7 @@ import {
   bookingCancelledTemplate,
   bookingCancelledByAdminTemplate,
   cancellationFeeReminderTemplate,
+  bookingRequestReceivedTemplate,
 } from './templates/booking'
 
 const FROM_EMAIL = 'Mathopen Kattepensjonat <post@mathopenkattepensjonat.no>'
