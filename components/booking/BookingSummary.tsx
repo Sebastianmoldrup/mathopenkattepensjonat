@@ -151,9 +151,8 @@ export function BookingSummary({
           <CheckCircle2 className="h-9 w-9 text-primary" />
         </div>
         <h2 className="text-2xl font-semibold">Forespørsel mottatt!</h2>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Vi har mottatt bookingforespørselen din og sender deg en bekreftelse
-          på e-post. Du vil bli kontaktet så snart vi har behandlet den.
+        <p className="text-sm text-muted-foreground">
+          Du videresendes til Min side...
         </p>
       </div>
     )

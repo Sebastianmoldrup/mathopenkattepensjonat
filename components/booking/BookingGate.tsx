@@ -23,9 +23,7 @@ export function BookingGate({ onReady }: BookingGateProps) {
 
   useEffect(() => {
     async function check() {
-      console.log('[BookingGate] checking...')
       const user = await getUser()
-      console.log('[BookingGate] user:', user)
 
       if (!user) {
         setState('unauthenticated')

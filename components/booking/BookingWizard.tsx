@@ -158,7 +158,22 @@ export function BookingWizard() {
                 onChange={(ids) =>
                   updateState({ selectedCatIds: ids, cageType: null })
                 }
-                onNext={() => goTo('dates')}
+                onNext={() => {
+                  setBehaviorData(
+                    selectedCats.map((cat) => ({
+                      cat_id: cat.id,
+                      gets_medication: false,
+                      medication_details: '',
+                      has_cat_experience: false,
+                      gets_along_with_cats: 'unknown' as const,
+                      has_stress_issues: false,
+                      stress_details: '',
+                      aggression_risk: 'unknown' as const,
+                      aggression_details: '',
+                    }))
+                  )
+                  goTo('dates')
+                }}
               />
             )}
 
