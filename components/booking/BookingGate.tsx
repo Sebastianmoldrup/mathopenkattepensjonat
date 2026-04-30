@@ -8,7 +8,12 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 interface BookingGateProps {
-  onReady: (userId: string, cats: Cat[]) => void
+  onReady: (
+    uid: string,
+    cats: Cat[],
+    email: string,
+    firstName: string | null
+  ) => void
 }
 
 type GateState = 'loading' | 'unauthenticated' | 'no_cats' | 'ready'
@@ -18,7 +23,9 @@ export function BookingGate({ onReady }: BookingGateProps) {
 
   useEffect(() => {
     async function check() {
+      console.log('[BookingGate] checking...')
       const user = await getUser()
+      console.log('[BookingGate] user:', user)
 
       if (!user) {
         setState('unauthenticated')
@@ -33,7 +40,12 @@ export function BookingGate({ onReady }: BookingGateProps) {
       }
 
       setState('ready')
-      onReady(user.id, cats)
+      onReady(
+        user.id,
+        cats,
+        user.email ?? '',
+        user.user_metadata?.first_name ?? null
+      )
     }
 
     check()

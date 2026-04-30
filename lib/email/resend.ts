@@ -77,3 +77,17 @@ export async function sendCancellationFeeReminderEmail(
   }
   return { success: true }
 }
+
+export async function sendBookingRequestReceivedEmail(booking: AdminBooking) {
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: booking.user_email,
+    subject: '📋 Bookingforespørsel mottatt – Mathopen Kattepensjonat',
+    html: bookingRequestReceivedTemplate(booking),
+  })
+  if (error) {
+    console.error('[sendBookingRequestReceivedEmail]', error)
+    return { success: false, error }
+  }
+  return { success: true }
+}

@@ -315,3 +315,31 @@ export function cancellationFeeReminderTemplate(
     </p>
   `)
 }
+
+export function bookingRequestReceivedTemplate(booking: AdminBooking): string {
+  const firstName = booking.user_first_name ?? 'der'
+
+  return baseTemplate(`
+    <h2 style="color:#2C3E50;margin-top:0;">Hei ${firstName}! 🐾</h2>
+
+    <p style="font-size:15px;">
+      Vi har mottatt bookingforespørselen din hos <strong>Mathopen Kattepensjonat</strong>
+      og vil behandle den så snart som mulig.
+    </p>
+
+    <div style="background:#fff8e1;border-left:4px solid #f59e0b;padding:14px 20px;border-radius:4px;font-size:14px;margin:0 0 24px;line-height:1.7;">
+      <p style="margin:0;font-weight:bold;color:#92400e;">Merk: Dette er ikke en bekreftet booking</p>
+      <p style="margin:6px 0 0;color:#78350f;">
+        Du vil motta en ny e-post fra oss når forespørselen er godkjent og bookingen er bekreftet.
+      </p>
+    </div>
+
+    ${bookingDetailsBlock(booking)}
+
+    <p style="font-size:14px;color:#555;">
+      Har du spørsmål? Ta gjerne kontakt med oss på
+      <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
+      eller ring <a href="tel:+4747322279" style="color:#c8b49a;">+47 473 22 279</a> 😊
+    </p>
+  `)
+}

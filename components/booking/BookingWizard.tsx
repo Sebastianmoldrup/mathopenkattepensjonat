@@ -33,6 +33,8 @@ const STEPS: { key: BookingStep; label: string }[] = [
 export function BookingWizard() {
   const router = useRouter()
   const [userId, setUserId] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string>('')
+  const [userFirstName, setUserFirstName] = useState<string | null>(null)
   const [cats, setCats] = useState<Cat[]>([])
   const [bookings, setBookings] = useState<BookingWithCats[]>([])
   const [state, setState] = useState<BookingState & { step: BookingStep }>({
@@ -44,12 +46,22 @@ export function BookingWizard() {
   const [wantsOutdoorCage, setWantsOutdoorCage] = useState(false)
 
   // Called by BookingGate once user + cats are confirmed
-  const handleReady = useCallback(async (uid: string, userCats: Cat[]) => {
-    setUserId(uid)
-    setCats(userCats)
-    const upcoming = await getUpcomingYearBookings()
-    setBookings(upcoming)
-  }, [])
+  const handleReady = useCallback(
+    async (
+      uid: string,
+      userCats: Cat[],
+      email: string,
+      firstName: string | null
+    ) => {
+      setUserId(uid)
+      setCats(userCats)
+      setUserEmail(email)
+      setUserFirstName(firstName)
+      const upcoming = await getUpcomingYearBookings()
+      setBookings(upcoming)
+    },
+    []
+  )
 
   function updateState(partial: Partial<typeof state>) {
     setState((prev) => ({ ...prev, ...partial }))
@@ -214,6 +226,8 @@ export function BookingWizard() {
                   }
                   onBack={() => goTo('behavior')}
                   onConfirmed={handleConfirmed}
+                  userEmail={userEmail}
+                  userFirstName={userFirstName}
                 />
               )}
           </div>

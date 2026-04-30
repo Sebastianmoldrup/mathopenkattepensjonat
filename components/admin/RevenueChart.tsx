@@ -34,7 +34,6 @@ const MONTH_NAMES = [
 ]
 
 export function RevenueChart({ data }: RevenueChartProps) {
-  // Determine available years from data
   const availableYears = useMemo(() => {
     const years = [
       ...new Set(data.map((d) => Number(d.month.split('-')[0]))),
@@ -49,30 +48,34 @@ export function RevenueChart({ data }: RevenueChartProps) {
   const canGoPrev = selectedYear > availableYears[0]
   const canGoNext = selectedYear < availableYears[availableYears.length - 1]
 
-  // Build 12-month dataset for selected year, filling missing months with 0
   const chartData = useMemo(() => {
     return MONTH_NAMES.map((label, i) => {
       const monthKey = `${selectedYear}-${String(i + 1).padStart(2, '0')}`
       const found = data.find((d) => d.month === monthKey)
       return {
         month: label,
-        Inntekt: found ? Number(found.revenue) : 0,
+        'Inkl. MVA': found ? Number(found.revenue) : 0,
+        'Ekskl. MVA': found ? Number(found.revenue_ex_vat) : 0,
         Bookinger: found ? Number(found.booking_count) : 0,
-        Avbestillinger: found ? Number(found.cancellation_count) : 0,
       }
     })
   }, [data, selectedYear])
 
-  const yearRevenue = chartData.reduce((sum, d) => sum + d.Inntekt, 0)
+  const yearRevenue = chartData.reduce((sum, d) => sum + d['Inkl. MVA'], 0)
+  const yearRevenueExVat = chartData.reduce(
+    (sum, d) => sum + d['Ekskl. MVA'],
+    0
+  )
+  const yearBookings = chartData.reduce((sum, d) => sum + d.Bookinger, 0)
 
   return (
     <div className="space-y-5 rounded-xl border bg-card p-6">
-      {/* Header with year selector */}
-      <div className="flex items-center justify-between">
-        <div>
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
           <h2 className="text-base font-semibold">Inntekt</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {yearRevenue.toLocaleString('nb-NO')} kr totalt i {selectedYear}
+          <p className="text-xs text-muted-foreground">
+            Kun bekreftede og gjennomførte bookinger
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -100,11 +103,34 @@ export function RevenueChart({ data }: RevenueChartProps) {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={280}>
+      {/* Summary stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-lg bg-muted/40 px-3 py-2.5">
+          <p className="text-xs text-muted-foreground">Total inkl. MVA</p>
+          <p className="text-base font-semibold">
+            {yearRevenue.toLocaleString('nb-NO')} kr
+          </p>
+        </div>
+        <div className="rounded-lg bg-muted/40 px-3 py-2.5">
+          <p className="text-xs text-muted-foreground">
+            Total ekskl. MVA (25%)
+          </p>
+          <p className="text-base font-semibold">
+            {yearRevenueExVat.toLocaleString('nb-NO')} kr
+          </p>
+        </div>
+        <div className="rounded-lg bg-muted/40 px-3 py-2.5">
+          <p className="text-xs text-muted-foreground">Bekreftede bookinger</p>
+          <p className="text-base font-semibold">{yearBookings}</p>
+        </div>
+      </div>
+
+      <ResponsiveContainer width="100%" height={260}>
         <BarChart
           data={chartData}
-          margin={{ top: 16, right: 8, bottom: 4, left: 8 }}
+          margin={{ top: 8, right: 8, bottom: 4, left: 8 }}
           barCategoryGap="30%"
+          barGap={2}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -126,12 +152,10 @@ export function RevenueChart({ data }: RevenueChartProps) {
           />
           <Tooltip
             cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }}
-            formatter={(value) => {
+            formatter={(value, name) => {
               const num = Number(value ?? 0)
-              return [`${num.toLocaleString('nb-NO')} kr`, 'Inntekt'] as [
-                string,
-                string,
-              ]
+              if (name === 'Bookinger') return [num, name]
+              return [`${num.toLocaleString('nb-NO')} kr`, name]
             }}
             contentStyle={{
               borderRadius: '8px',
@@ -141,12 +165,29 @@ export function RevenueChart({ data }: RevenueChartProps) {
             }}
           />
           <Bar
-            dataKey="Inntekt"
+            dataKey="Inkl. MVA"
             fill="hsl(var(--primary))"
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar
+            dataKey="Ekskl. MVA"
+            fill="hsl(var(--primary) / 0.4)"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
       </ResponsiveContainer>
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-primary" />
+          Inkl. MVA
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-sm bg-primary/40" />
+          Ekskl. MVA (25%)
+        </span>
+      </div>
     </div>
   )
 }

@@ -42,8 +42,9 @@ async function AdminStats() {
   const pending = bookings.filter((b) => b.status === 'pending').length
   const confirmed = bookings.filter((b) => b.status === 'confirmed').length
   const totalRevenue = bookings
-    .filter((b) => b.status !== 'cancelled')
+    .filter((b) => b.status === 'confirmed' || b.status === 'completed')
     .reduce((sum, b) => sum + b.price, 0)
+  const totalRevenueExVat = Math.round(totalRevenue / 1.25)
 
   const todayMorgen = (routineData as any[]).find(
     (r: any) => r.period === 'morgen'
@@ -58,7 +59,7 @@ async function AdminStats() {
         pending={pending}
         confirmed={confirmed}
         totalRevenue={totalRevenue}
-        totalBookings={bookings.length}
+        totalRevenueExVat={totalRevenueExVat}
       />
       <DashboardAlerts
         lastHms={hmsData ? (hmsData as any).created_at : null}

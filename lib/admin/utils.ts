@@ -53,6 +53,7 @@ export interface DailyChecklist {
 export interface RevenueStats {
   month: string
   revenue: number
+  revenue_ex_vat: number
   booking_count: number
   cancellation_count: number
 }

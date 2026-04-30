@@ -12,11 +12,11 @@ import {
   formatDateNO,
   diffInDays,
 } from '@/lib/booking/pricing'
-import { createBooking } from '@/lib/booking/actions'
 import {
   saveCatBehaviorNotes,
   CatBehaviorData,
 } from '@/lib/booking/behaviorActions'
+import { createBooking, sendBookingRequestEmail } from '@/lib/booking/actions'
 import { hasCatConflict } from '@/lib/booking/availability'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -49,6 +49,8 @@ interface BookingSummaryProps {
   onInstructionsChange: (value: string) => void
   onBack: () => void
   onConfirmed: () => void
+  userEmail: string
+  userFirstName: string | null
 }
 
 const CAGE_LABELS: Record<CageType, string> = {
@@ -71,6 +73,8 @@ export function BookingSummary({
   onInstructionsChange,
   onBack,
   onConfirmed,
+  userEmail,
+  userFirstName,
 }: BookingSummaryProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -127,6 +131,15 @@ export function BookingSummary({
       await saveCatBehaviorNotes(result.id, behaviorData)
     }
 
+    await sendBookingRequestEmail({
+      userEmail,
+      userFirstName,
+      catNames: selectedCats.map((c) => c.name),
+      dateFrom: formatDateNO(dateFrom),
+      dateTo: formatDateNO(dateTo),
+      nights,
+    })
+
     setConfirmed(true)
     setTimeout(() => onConfirmed(), 1500)
   }
@@ -137,9 +150,10 @@ export function BookingSummary({
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15">
           <CheckCircle2 className="h-9 w-9 text-primary" />
         </div>
-        <h2 className="text-2xl font-semibold">Booking bekreftet!</h2>
-        <p className="text-sm text-muted-foreground">
-          Du videresendes til Min side...
+        <h2 className="text-2xl font-semibold">Forespørsel mottatt!</h2>
+        <p className="max-w-sm text-sm text-muted-foreground">
+          Vi har mottatt bookingforespørselen din og sender deg en bekreftelse
+          på e-post. Du vil bli kontaktet så snart vi har behandlet den.
         </p>
       </div>
     )
@@ -320,6 +334,14 @@ export function BookingSummary({
         </div>
       </div>
 
+      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <p className="font-medium">Dette er en bookingforespørsel</p>
+        <p className="mt-0.5 text-amber-700">
+          Bookinger behandles fortløpende og bekreftes av oss. Du mottar en
+          e-post når forespørselen er behandlet.
+        </p>
+      </div>
+
       {error && (
         <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
@@ -339,10 +361,10 @@ export function BookingSummary({
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Bekrefter...
+              Sender forespørsel...
             </>
           ) : (
-            'Bekreft booking'
+            'Send bookingforespørsel'
           )}
         </Button>
       </div>
@@ -385,7 +407,6 @@ function groupNightsBySeason(
   nights: import('@/lib/booking/types').NightBreakdown[]
 ): SeasonGroup[] {
   const groups: SeasonGroup[] = []
-  let currentGroup: SeasonGroup | null = null
 
   // Condense: group consecutive same-season nights and show price per night × count
   let i = 0

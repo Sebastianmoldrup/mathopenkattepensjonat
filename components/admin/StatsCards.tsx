@@ -1,17 +1,17 @@
-import { Clock, CheckCircle2, Banknote, CalendarDays } from 'lucide-react'
+import { Clock, CheckCircle2, Banknote, TrendingDown } from 'lucide-react'
 
 interface StatsCardsProps {
   pending: number
   confirmed: number
   totalRevenue: number
-  totalBookings: number
+  totalRevenueExVat: number
 }
 
 export function StatsCards({
   pending,
   confirmed,
   totalRevenue,
-  totalBookings,
+  totalRevenueExVat,
 }: StatsCardsProps) {
   const stats = [
     {
@@ -29,18 +29,18 @@ export function StatsCards({
       bg: 'bg-green-50',
     },
     {
-      label: 'Totale bookinger',
-      value: totalBookings,
-      icon: CalendarDays,
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
-    },
-    {
-      label: 'Total inntekt',
+      label: 'Total inntekt inkl. MVA',
       value: `${totalRevenue.toLocaleString('nb-NO')} kr`,
       icon: Banknote,
       color: 'text-primary',
       bg: 'bg-primary/10',
+    },
+    {
+      label: 'Inntekt ekskl. MVA (25%)',
+      value: `${totalRevenueExVat.toLocaleString('nb-NO')} kr`,
+      icon: TrendingDown,
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
     },
   ]
 
