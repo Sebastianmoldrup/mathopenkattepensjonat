@@ -7,16 +7,16 @@ export function HeroSection() {
   return (
     <section className="relative bg-gradient-to-b from-background to-white px-4 py-20">
       <div className="mx-auto max-w-4xl text-center">
-        <Badge className="mb-4 bg-slate-100 text-slate-700 hover:bg-slate-200">
+        <Badge className="animate-fade-in mb-4 bg-slate-100 text-slate-700 opacity-0 [animation-delay:100ms] [animation-fill-mode:forwards] hover:bg-slate-200">
           Kattepensjonat i Bergen
         </Badge>
-        <h1 className="mb-6 text-4xl font-bold leading-tight text-slate-900 md:text-5xl">
+        <h1 className="animate-fade-in mb-6 text-4xl font-bold leading-tight text-slate-900 opacity-0 [animation-delay:200ms] [animation-fill-mode:forwards] md:text-5xl">
           Mathopen Kattepensjonat
         </h1>
-        <p className="mx-auto mb-10 max-w-2xl text-xl text-slate-600">
+        <p className="animate-fade-in mx-auto mb-10 max-w-2xl text-xl text-slate-600 opacity-0 [animation-delay:350ms] [animation-fill-mode:forwards]">
           Det trygge hjemmet når du er bortreist
         </p>
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div className="animate-fade-in flex flex-col items-center justify-center gap-4 opacity-0 [animation-delay:500ms] [animation-fill-mode:forwards] sm:flex-row">
           <Link href="/booking">
             <Button
               size="lg"

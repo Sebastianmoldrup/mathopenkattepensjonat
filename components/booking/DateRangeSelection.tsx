@@ -326,7 +326,9 @@ export function DateRangeSelection({
 
   const blockedSet = useMemo<Set<string>>(() => {
     const merged = new Set(fullyBookedSet)
+    console.log(merged)
     catBlockedSet.forEach((k) => merged.add(k))
+    console.log('[blockedSet] dates:', [...merged])
     return merged
   }, [fullyBookedSet, catBlockedSet])
 
