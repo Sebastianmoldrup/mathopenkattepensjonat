@@ -59,7 +59,7 @@ const CAGE_TYPES = [
       },
       {
         amount: '2',
-        price: 220,
+        price: 320,
       },
     ],
     highSeasonPrices: [
