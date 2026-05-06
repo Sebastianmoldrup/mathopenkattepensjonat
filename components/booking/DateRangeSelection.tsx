@@ -2,11 +2,13 @@
 
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { BookingWithCats } from '@/lib/booking/types'
+import { getCatBlockedDates } from '@/lib/booking/availability'
 import {
-  getFullyBookedDates,
-  getCatBlockedDates,
-} from '@/lib/booking/availability'
-import { getSeason, addDays } from '@/lib/booking/pricing'
+  getSeason,
+  addDays,
+  parseDateStr,
+  toLocalDateStr,
+} from '@/lib/booking/pricing'
 import { InfoIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -16,16 +18,16 @@ interface DateRangeSelectionProps {
   selectedCatIds: string[]
   selectedCats: { id: string; name: string }[]
   bookings: BookingWithCats[]
-  dateFrom: Date | null
-  dateTo: Date | null
-  onChange: (from: Date | null, to: Date | null) => void
+  dateFrom: string | null
+  dateTo: string | null
+  onChange: (from: string | null, to: string | null) => void
   onNext: () => void
   onBack: () => void
 }
 
 type FocusField = 'start' | 'end'
 
-const OPENING_DATE = new Date(2026, 6, 1) // 1. juli 2026
+const OPENING_DATE = new Date(2026, 6, 1)
 
 const MONTHS_NO = [
   'januar',
@@ -41,20 +43,19 @@ const MONTHS_NO = [
   'november',
   'desember',
 ]
-
 const WEEKDAYS_SHORT = ['ma', 'ti', 'on', 'to', 'fr', 'lø', 'sø']
 
-function toKey(d: Date): string {
-  return d.toISOString().split('T')[0]
+function toDateOnly(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
 }
 
 function sameDay(a: Date | null, b: Date | null): boolean {
   return !!a && !!b && a.getTime() === b.getTime()
 }
 
-function calcNights(a: Date | null, b: Date | null): number {
+function calcDays(a: Date | null, b: Date | null): number {
   if (!a || !b) return 0
-  return Math.round(Math.abs(b.getTime() - a.getTime()) / 864e5)
+  return Math.round(Math.abs(b.getTime() - a.getTime()) / 864e5) + 1
 }
 
 function fmtShort(d: Date | null): string {
@@ -169,8 +170,7 @@ function MonthGrid({
           onClick={onPrev}
           aria-label="Forrige måned"
           className={cn(
-            'flex h-7 w-7 items-center justify-center rounded-lg border border-border',
-            'text-base text-muted-foreground transition-colors hover:bg-accent',
+            'flex h-7 w-7 items-center justify-center rounded-lg border border-border text-base text-muted-foreground transition-colors hover:bg-accent',
             !showPrevNav && 'invisible'
           )}
         >
@@ -181,8 +181,7 @@ function MonthGrid({
           onClick={onNext}
           aria-label="Neste måned"
           className={cn(
-            'flex h-7 w-7 items-center justify-center rounded-lg border border-border',
-            'text-base text-muted-foreground transition-colors hover:bg-accent',
+            'flex h-7 w-7 items-center justify-center rounded-lg border border-border text-base text-muted-foreground transition-colors hover:bg-accent',
             !showNextNav && 'invisible'
           )}
         >
@@ -207,7 +206,7 @@ function MonthGrid({
         ))}
         {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => {
           const date = new Date(year, month, d)
-          const key = toKey(date)
+          const key = toLocalDateStr(date)
           const isPast = date < minDate || date > maxDate
           const isBlocked = blockedSet.has(key)
           const isHigh = getSeason(date) === 'high'
@@ -274,7 +273,7 @@ function MonthGrid({
                 inHoverRange && 'rounded-none bg-primary/10',
                 isHoverEnd &&
                   'rounded-l-none rounded-r-lg bg-primary/30 text-primary',
-                isToday && 'day-today font-semibold'
+                isToday && 'font-semibold'
               )}
             >
               {d}
@@ -314,23 +313,11 @@ export function DateRangeSelection({
   )
   const maxDate = useMemo(() => addDays(minDate, 365), [minDate])
 
-  const fullyBookedSet = useMemo(
-    () => getFullyBookedDates(bookings, numCats, minDate, maxDate),
-    [bookings, numCats, minDate, maxDate]
-  )
-
+  // Only cat conflict blocking — no capacity check at date selection stage
   const catBlockedSet = useMemo(
     () => getCatBlockedDates(bookings, selectedCatIds, minDate, maxDate),
     [bookings, selectedCatIds, minDate, maxDate]
   )
-
-  const blockedSet = useMemo<Set<string>>(() => {
-    const merged = new Set(fullyBookedSet)
-    console.log(merged)
-    catBlockedSet.forEach((k) => merged.add(k))
-    console.log('[blockedSet] dates:', [...merged])
-    return merged
-  }, [fullyBookedSet, catBlockedSet])
 
   const [leftYear, setLeftYear] = useState(minDate.getFullYear())
   const [leftMonth, setLeftMonth] = useState(minDate.getMonth())
@@ -342,10 +329,20 @@ export function DateRangeSelection({
     setLeftMonth(minDate.getMonth())
   }, [minDate])
 
+  // Parse string dates for display
+  const dateFromDate = useMemo(
+    () => (dateFrom ? parseDateStr(dateFrom) : null),
+    [dateFrom]
+  )
+  const dateToDate = useMemo(
+    () => (dateTo ? parseDateStr(dateTo) : null),
+    [dateTo]
+  )
+
   function hasBlockedInRange(from: Date, to: Date): boolean {
     const cur = new Date(from)
     while (cur < to) {
-      if (blockedSet.has(toKey(cur))) return true
+      if (catBlockedSet.has(toLocalDateStr(cur))) return true
       cur.setDate(cur.getDate() + 1)
     }
     return false
@@ -353,41 +350,41 @@ export function DateRangeSelection({
 
   const handleDayClick = useCallback(
     (date: Date) => {
-      if (focus === 'start' || (!dateFrom && !dateTo)) {
-        onChange(date, null)
+      if (focus === 'start' || (!dateFromDate && !dateToDate)) {
+        onChange(toLocalDateStr(date), null)
         setFocus('end')
         setHoverDate(null)
       } else {
-        let from = dateFrom!
+        let from = dateFromDate!
         let to = date
         if (to < from) {
           ;[from, to] = [to, from]
         }
         if (hasBlockedInRange(from, to)) {
-          onChange(date, null)
+          onChange(toLocalDateStr(date), null)
           setFocus('end')
           setHoverDate(null)
         } else {
-          onChange(from, to)
+          onChange(toLocalDateStr(from), toLocalDateStr(to))
           setFocus('start')
           setHoverDate(null)
         }
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dateFrom, dateTo, focus, blockedSet, onChange]
+    [dateFromDate, dateToDate, focus, catBlockedSet, onChange]
   )
 
   const handleDayHover = useCallback(
     (date: Date) => {
-      if (dateFrom && !dateTo) setHoverDate(date)
+      if (dateFromDate && !dateToDate) setHoverDate(date)
     },
-    [dateFrom, dateTo]
+    [dateFromDate, dateToDate]
   )
 
   const handleMouseLeave = useCallback(() => {
-    if (!dateTo) setHoverDate(null)
-  }, [dateTo])
+    if (!dateToDate) setHoverDate(null)
+  }, [dateToDate])
 
   function nav(delta: number) {
     const { year, month } = addMonths(leftYear, leftMonth, delta)
@@ -398,24 +395,24 @@ export function DateRangeSelection({
   const rightYear = addMonths(leftYear, leftMonth, 1).year
   const rightMonth = addMonths(leftYear, leftMonth, 1).month
 
-  const nights = calcNights(dateFrom, dateTo)
-  const canProceed = !!dateFrom && !!dateTo && nights >= 1
+  const days = calcDays(dateFromDate, dateToDate)
+  // Minimum 2 days
+  const canProceed = !!dateFromDate && !!dateToDate && days >= 2
 
-  const focusStart = () => setFocus('start')
-  const focusEnd = () => setFocus('end')
+  const hasCatConflict = selectedCats.length > 0 && catBlockedSet.size > 0
 
-  const hintText = !dateFrom
+  const hintText = !dateFromDate
     ? 'Velg innsjekkdato'
-    : !dateTo
-      ? 'Velg nå utsjekkdato'
-      : `${nights} natt${nights !== 1 ? 'er' : ''} valgt`
+    : !dateToDate
+      ? 'Velg utsjekkdato'
+      : `${days} dag${days !== 1 ? 'er' : ''} valgt`
 
   const sharedGridProps = {
     minDate,
     maxDate,
-    blockedSet,
-    rangeStart: dateFrom,
-    rangeEnd: dateTo,
+    blockedSet: catBlockedSet,
+    rangeStart: dateFromDate,
+    rangeEnd: dateToDate,
     hoverDate,
     today,
     onDayClick: handleDayClick,
@@ -423,22 +420,17 @@ export function DateRangeSelection({
     onMouseLeave: handleMouseLeave,
   }
 
-  // Check if any selected cat has blocked dates
-  const hasCatConflict = selectedCats.length > 0 && catBlockedSet.size > 0
-
   return (
     <div className="space-y-5">
-      {/* Header */}
       <div>
         <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
           Velg datoer
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Velg innsjekk- og utsjekkdato.
+          Velg innsjekk- og utsjekkdato. Begge dagene faktureres.
         </p>
       </div>
 
-      {/* Cat conflict notice */}
       {hasCatConflict && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
           <span className="font-medium">
@@ -451,11 +443,10 @@ export function DateRangeSelection({
                     ', '
                   )} og ${selectedCats[selectedCats.length - 1].name} er allerede booket`}
           </span>{' '}
-          i perioder markert med rødt. Velg datoer utenom disse.
+          i perioder markert med rødt.
         </div>
       )}
 
-      {/* Legend */}
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span className="h-4 w-4 shrink-0 rounded border-2 border-amber-400 bg-amber-100" />
@@ -469,17 +460,18 @@ export function DateRangeSelection({
           <span className="h-4 w-4 shrink-0 rounded bg-primary" />
           Valgt
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-4 w-4 shrink-0 rounded border border-red-300 bg-red-100" />
-          Utilgjengelig
-        </span>
+        {hasCatConflict && (
+          <span className="flex items-center gap-1.5">
+            <span className="h-4 w-4 shrink-0 rounded border border-red-300 bg-red-100" />
+            Katteopptatt
+          </span>
+        )}
       </div>
 
-      {/* Calendar card */}
       <div className="w-full overflow-hidden rounded-xl border bg-card">
         <div className="grid grid-cols-2 border-b border-border">
           <button
-            onClick={focusStart}
+            onClick={() => setFocus('start')}
             className={cn(
               'border-r border-border px-5 py-3.5 text-left transition-colors',
               focus === 'start' ? 'bg-green-100' : 'hover:bg-accent'
@@ -491,15 +483,14 @@ export function DateRangeSelection({
             <div
               className={cn(
                 'text-sm font-medium',
-                !dateFrom && 'font-normal text-muted-foreground'
+                !dateFromDate && 'font-normal text-muted-foreground'
               )}
             >
-              {dateFrom ? fmtShort(dateFrom) : 'Legg til dato'}
+              {dateFromDate ? fmtShort(dateFromDate) : 'Legg til dato'}
             </div>
           </button>
-
           <button
-            onClick={focusEnd}
+            onClick={() => setFocus('end')}
             className={cn(
               'px-5 py-3.5 text-left transition-colors',
               focus === 'end' ? 'bg-green-100' : 'hover:bg-accent'
@@ -511,10 +502,10 @@ export function DateRangeSelection({
             <div
               className={cn(
                 'text-sm font-medium',
-                !dateTo && 'font-normal text-muted-foreground'
+                !dateToDate && 'font-normal text-muted-foreground'
               )}
             >
-              {dateTo ? fmtShort(dateTo) : 'Legg til dato'}
+              {dateToDate ? fmtShort(dateToDate) : 'Legg til dato'}
             </div>
           </button>
         </div>
@@ -552,34 +543,32 @@ export function DateRangeSelection({
         </div>
       </div>
 
-      {/* Selection summary */}
-      {dateFrom && (
+      {dateFromDate && (
         <div className="rounded-xl border bg-card p-4">
-          {dateTo ? (
+          {dateToDate ? (
             <div className="flex flex-wrap gap-4 text-sm">
               <div>
                 <p className="mb-0.5 text-xs text-muted-foreground">Innsjekk</p>
-                <p className="font-semibold">{fmtFull(dateFrom)}</p>
+                <p className="font-semibold">{fmtFull(dateFromDate)}</p>
               </div>
               <div>
                 <p className="mb-0.5 text-xs text-muted-foreground">Utsjekk</p>
-                <p className="font-semibold">{fmtFull(dateTo)}</p>
+                <p className="font-semibold">{fmtFull(dateToDate)}</p>
               </div>
               <div>
-                <p className="mb-0.5 text-xs text-muted-foreground">Netter</p>
-                <p className="font-semibold text-primary">{nights}</p>
+                <p className="mb-0.5 text-xs text-muted-foreground">Dager</p>
+                <p className="font-semibold text-primary">{days}</p>
               </div>
             </div>
           ) : (
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <InfoIcon className="h-4 w-4 shrink-0" />
-              Velg utsjekkdato for å fortsette
+              Velg utsjekkdato for å fortsette (minimum 2 dager)
             </p>
           )}
         </div>
       )}
 
-      {/* Navigation */}
       <div className="flex justify-between">
         <Button variant="outline" onClick={onBack}>
           Tilbake

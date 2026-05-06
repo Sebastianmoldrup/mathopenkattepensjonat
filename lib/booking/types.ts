@@ -16,7 +16,7 @@ export const CAGE_CONFIGS: Record<CageType, CageConfig> = {
     label: 'Standard',
     description: 'Romslig og komfortabelt bur for 1–2 katter',
     maxCats: 2,
-    totalCount: 19,
+    totalCount: 14,
   },
   senior_comfort: {
     type: 'senior_comfort',
@@ -39,10 +39,6 @@ export const CAGE_CONFIGS: Record<CageType, CageConfig> = {
 
 export type Season = 'low' | 'high'
 
-// High season date ranges (month is 0-indexed)
-// Summer: June 15 – August 15
-// Christmas: December 20 – January 2
-// Easter: computed dynamically (Friday before Palm Sunday – 2nd Easter day)
 export interface SeasonRange {
   label: string
   start: { month: number; day: number }
@@ -51,13 +47,13 @@ export interface SeasonRange {
 
 export const FIXED_HIGH_SEASON_RANGES: SeasonRange[] = [
   { label: 'Sommer', start: { month: 5, day: 15 }, end: { month: 7, day: 15 } },
-  { label: 'Jul', start: { month: 11, day: 20 }, end: { month: 0, day: 2 } }, // wraps year
+  { label: 'Jul', start: { month: 11, day: 20 }, end: { month: 0, day: 2 } },
 ]
 
-// ─── Pricing ──────────────────────────────────────────────────────────────────
+// ─── Pricing (day-based: both check-in and check-out are billed) ──────────────
 
 export interface PriceTable {
-  low: Record<number, number> // cat count → price per night
+  low: Record<number, number>
   high: Record<number, number>
 }
 
@@ -93,57 +89,84 @@ export interface Cat {
 export interface Booking {
   id: string
   user_id: string
-  date_from: string // YYYY-MM-DD
-  date_to: string // YYYY-MM-DD
+  date_from: string
+  date_to: string
   cage_type: CageType
   cage_count: number
   num_cats: number
   price: number
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'waitlist'
   special_instructions: string | null
+  outdoor_cage_requested: boolean
+  waitlist_requested: boolean
   created_at: string
 }
 
-// Booking enriched with the cat IDs from booking_cats join table
 export interface BookingWithCats extends Booking {
   cat_ids: string[]
 }
 
 // ─── Wizard State ─────────────────────────────────────────────────────────────
 
-export type BookingStep = 'cats' | 'dates' | 'cage' | 'behavior' | 'summary'
+export type BookingStep =
+  | 'count'
+  | 'dates'
+  | 'cage'
+  | 'auth'
+  | 'cats'
+  | 'summary'
+
+export const SESSION_STORAGE_KEY = 'booking_wizard_state'
 
 export interface BookingState {
   step: BookingStep
-  selectedCatIds: string[]
-  dateFrom: Date | null
-  dateTo: Date | null
+  catCount: number | null
+  // Stored as YYYY-MM-DD strings to survive sessionStorage serialization
+  dateFrom: string | null
+  dateTo: string | null
   cageType: CageType | null
+  cageCount: number
+  selectedCatIds: string[]
   specialInstructions: string
+  wantsOutdoorCage: boolean
+  waitlistRequested: boolean
 }
 
 export const INITIAL_BOOKING_STATE: BookingState = {
-  step: 'cats',
-  selectedCatIds: [],
+  step: 'count',
+  catCount: null,
   dateFrom: null,
   dateTo: null,
   cageType: null,
+  cageCount: 1,
+  selectedCatIds: [],
   specialInstructions: '',
+  wantsOutdoorCage: false,
+  waitlistRequested: false,
 }
 
-// ─── Price Breakdown ──────────────────────────────────────────────────────────
+// ─── Price Breakdown (day-based) ──────────────────────────────────────────────
 
-export interface NightBreakdown {
-  date: string // YYYY-MM-DD
+export interface DayBreakdown {
+  date: string
   season: Season
   pricePerCage: number
   cageCount: number
   total: number
 }
 
+// Alias for backward compat
+export type NightBreakdown = DayBreakdown
+
 export interface PriceBreakdown {
-  nights: NightBreakdown[]
-  totalNights: number
+  days: DayBreakdown[]
+  totalDays: number
   totalPrice: number
+  lowSeasonDays: number
+  highSeasonDays: number
+  // Aliases
+  nights: DayBreakdown[]
+  totalNights: number
   lowSeasonNights: number
   highSeasonNights: number
 }

@@ -4,10 +4,10 @@ import {
   PRICING,
   CageType,
   PriceBreakdown,
-  NightBreakdown,
+  DayBreakdown,
 } from './types'
 
-// ─── Easter Calculation (Anonymous Gregorian algorithm) ───────────────────────
+// ─── Easter Calculation ───────────────────────────────────────────────────────
 
 export function getEasterSunday(year: number): Date {
   const a = year % 19
@@ -22,32 +22,45 @@ export function getEasterSunday(year: number): Date {
   const k = c % 4
   const l = (32 + 2 * e + 2 * i - h - k) % 7
   const m = Math.floor((a + 11 * h + 22 * l) / 451)
-  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1 // 0-indexed
+  const month = Math.floor((h + l - 7 * m + 114) / 31) - 1
   const day = ((h + l - 7 * m + 114) % 31) + 1
   return new Date(year, month, day)
 }
 
-/**
- * High season Easter range:
- * Start: Friday before Palm Sunday = Easter Sunday - 8 days
- * End:   2nd Easter day (Easter Monday) = Easter Sunday + 1 day
- */
 export function getEasterHighSeasonRange(year: number): {
   start: Date
   end: Date
 } {
   const easter = getEasterSunday(year)
   const start = new Date(easter)
-  start.setDate(easter.getDate() - 8) // Friday before Palm Sunday
+  start.setDate(easter.getDate() - 8)
   const end = new Date(easter)
-  end.setDate(easter.getDate() + 1) // Easter Monday (2. påskedag)
+  end.setDate(easter.getDate() + 1)
   return { start, end }
 }
 
-// ─── Season Check ─────────────────────────────────────────────────────────────
+// ─── Date Helpers ─────────────────────────────────────────────────────────────
 
 function toDateOnly(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
+
+/**
+ * Parse YYYY-MM-DD without UTC shift.
+ */
+export function parseDateStr(s: string): Date {
+  const [y, m, d] = s.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+/**
+ * Format a Date to YYYY-MM-DD using local time.
+ */
+export function toLocalDateStr(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 export function getSeason(date: Date): Season {
@@ -56,9 +69,7 @@ export function getSeason(date: Date): Season {
   const month = d.getMonth()
   const day = d.getDate()
 
-  // Check fixed ranges
   for (const range of FIXED_HIGH_SEASON_RANGES) {
-    // Christmas: Dec 20 – Jan 2 (wraps year)
     if (range.start.month > range.end.month) {
       const afterStart =
         month > range.start.month ||
@@ -78,11 +89,9 @@ export function getSeason(date: Date): Season {
     }
   }
 
-  // Check Easter (computed per year)
   const easter = getEasterHighSeasonRange(year)
   if (d >= toDateOnly(easter.start) && d <= toDateOnly(easter.end))
     return 'high'
-  // Also check previous year's Easter range end (for Jan dates)
   const easterPrev = getEasterHighSeasonRange(year - 1)
   if (d >= toDateOnly(easterPrev.start) && d <= toDateOnly(easterPrev.end))
     return 'high'
@@ -90,14 +99,9 @@ export function getSeason(date: Date): Season {
   return 'low'
 }
 
-// ─── Price Per Night ──────────────────────────────────────────────────────────
+// ─── Price Per Day ────────────────────────────────────────────────────────────
 
-/**
- * Returns the price for ONE cage for ONE night.
- * For the 2-standard-cage scenario (3 cats split), call this per cage
- * with the cats assigned to that cage.
- */
-export function getPricePerCagePerNight(
+export function getPricePerCagePerDay(
   cageType: CageType,
   catsInCage: number,
   season: Season
@@ -105,73 +109,77 @@ export function getPricePerCagePerNight(
   return PRICING[cageType][season][catsInCage] ?? 0
 }
 
-/**
- * For 3 cats in 2 standard cages: cage 1 gets 2 cats, cage 2 gets 1 cat.
- * Returns combined price for both cages for one night.
- */
 function getPriceForStandardSplit(season: Season): number {
   return (
-    getPricePerCagePerNight('standard', 2, season) +
-    getPricePerCagePerNight('standard', 1, season)
+    getPricePerCagePerDay('standard', 2, season) +
+    getPricePerCagePerDay('standard', 1, season)
   )
 }
 
-// ─── Full Price Breakdown ─────────────────────────────────────────────────────
+// ─── Full Price Breakdown (day-based) ─────────────────────────────────────────
+//
+// Day-based pricing: BOTH check-in day AND check-out day are billed.
+// Monday check-in → Wednesday check-out = 3 days billed.
+// Minimum 2 days.
 
-/**
- * Calculates a full price breakdown for a booking.
- * dateFrom is check-in, dateTo is check-out.
- * Nights = days between dateFrom and dateTo (dateTo is not a night).
- */
 export function calculatePriceBreakdown(
   cageType: CageType,
   cageCount: number,
   numCats: number,
-  dateFrom: Date,
-  dateTo: Date
+  dateFrom: Date | string,
+  dateTo: Date | string
 ): PriceBreakdown {
-  const nights: NightBreakdown[] = []
+  const from =
+    typeof dateFrom === 'string' ? parseDateStr(dateFrom) : toDateOnly(dateFrom)
+  const to =
+    typeof dateTo === 'string' ? parseDateStr(dateTo) : toDateOnly(dateTo)
 
-  const current = toDateOnly(dateFrom)
-  const end = toDateOnly(dateTo)
+  const days: DayBreakdown[] = []
+  const current = new Date(from)
 
-  while (current < end) {
+  // Iterate from dateFrom to dateTo INCLUSIVE (day-based)
+  while (current <= to) {
     const season = getSeason(current)
-    const dateStr = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`
+    const dateStr = toLocalDateStr(current)
 
     let pricePerCage: number
     let total: number
 
     if (cageType === 'standard' && cageCount === 2 && numCats === 3) {
-      // Special split: 2 cats in cage 1, 1 cat in cage 2
-      pricePerCage = getPricePerCagePerNight('standard', 2, season) // representative
+      pricePerCage = getPricePerCagePerDay('standard', 2, season)
       total = getPriceForStandardSplit(season)
     } else {
-      pricePerCage = getPricePerCagePerNight(cageType, numCats, season)
+      pricePerCage = getPricePerCagePerDay(cageType, numCats, season)
       total = pricePerCage * cageCount
     }
 
-    nights.push({ date: dateStr, season, pricePerCage, cageCount, total })
+    days.push({ date: dateStr, season, pricePerCage, cageCount, total })
     current.setDate(current.getDate() + 1)
   }
 
-  const totalPrice = nights.reduce((sum, n) => sum + n.total, 0)
-  const lowSeasonNights = nights.filter((n) => n.season === 'low').length
-  const highSeasonNights = nights.filter((n) => n.season === 'high').length
+  const totalPrice = days.reduce((sum, d) => sum + d.total, 0)
+  const lowSeasonDays = days.filter((d) => d.season === 'low').length
+  const highSeasonDays = days.filter((d) => d.season === 'high').length
 
   return {
-    nights,
-    totalNights: nights.length,
+    days,
+    totalDays: days.length,
     totalPrice,
-    lowSeasonNights,
-    highSeasonNights,
+    lowSeasonDays,
+    highSeasonDays,
+    // Aliases for backward compat
+    nights: days,
+    totalNights: days.length,
+    lowSeasonNights: lowSeasonDays,
+    highSeasonNights: highSeasonDays,
   }
 }
 
-// ─── Date helpers ─────────────────────────────────────────────────────────────
+// ─── Date Helpers ─────────────────────────────────────────────────────────────
 
-export function formatDateNO(date: Date): string {
-  return date.toLocaleDateString('nb-NO', {
+export function formatDateNO(date: Date | string): string {
+  const d = typeof date === 'string' ? parseDateStr(date) : date
+  return d.toLocaleDateString('nb-NO', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -184,9 +192,8 @@ export function addDays(date: Date, days: number): Date {
   return d
 }
 
-export function diffInDays(from: Date, to: Date): number {
-  const msPerDay = 1000 * 60 * 60 * 24
-  return Math.round(
-    (toDateOnly(to).getTime() - toDateOnly(from).getTime()) / msPerDay
-  )
+export function diffInDays(from: Date | string, to: Date | string): number {
+  const f = typeof from === 'string' ? parseDateStr(from) : toDateOnly(from)
+  const t = typeof to === 'string' ? parseDateStr(to) : toDateOnly(to)
+  return Math.round((t.getTime() - f.getTime()) / 864e5)
 }

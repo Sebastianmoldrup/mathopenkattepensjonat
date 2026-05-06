@@ -1,27 +1,23 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Booking, CageType, CAGE_CONFIGS } from '@/lib/booking/types'
-import { getAvailableCageOptions } from '@/lib/booking/availability'
+import { CageType, CAGE_CONFIGS } from '@/lib/booking/types'
 import { calculatePriceBreakdown } from '@/lib/booking/pricing'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { CheckCircle2, XCircle, Cat, Crown, Star } from 'lucide-react'
+import { CheckCircle2, Cat, Crown, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface CageSelectionProps {
   numCats: number
-  dateFrom: Date
-  dateTo: Date
-  bookings: Booking[]
+  dateFrom: string
+  dateTo: string
   selectedCageType: CageType | null
   onSelect: (cageType: CageType, cageCount: number) => void
   onNext: () => void
@@ -45,7 +41,7 @@ const CAGE_DESCRIPTIONS: Record<
   senior_comfort: {
     title: 'Senior & Komfort',
     bullets: [
-      'Tilrettelagt for eldre katter med helseutfordringer, eks artrose',
+      'Tilrettelagt for eldre katter med helseutfordringer',
       'Litt mindre enn standardbur, med liten trapp mellom etasjene',
       'Anbefales for katter over 10 år eller med helseutfordringer',
     ],
@@ -64,7 +60,6 @@ export function CageSelection({
   numCats,
   dateFrom,
   dateTo,
-  bookings,
   selectedCageType,
   onSelect,
   onNext,
@@ -76,32 +71,20 @@ export function CageSelection({
     cageCount: number
   } | null>(null)
 
-  const availableOptions = useMemo(
-    () => getAvailableCageOptions(bookings, numCats, dateFrom, dateTo),
-    [bookings, numCats, dateFrom, dateTo]
-  )
-
   const allOptions = useMemo(() => {
-    if (numCats <= 2) {
+    if (numCats <= 2)
       return [
         { cageType: 'standard' as CageType, cageCount: 1 },
         { cageType: 'senior_comfort' as CageType, cageCount: 1 },
         { cageType: 'suite' as CageType, cageCount: 1 },
       ]
-    }
     return [
       { cageType: 'suite' as CageType, cageCount: 1 },
       { cageType: 'standard' as CageType, cageCount: 2 },
     ]
   }, [numCats])
 
-  function isAvailable(cageType: CageType, cageCount: number) {
-    return availableOptions.some(
-      (o) => o.cageType === cageType && o.cageCount === cageCount
-    )
-  }
-
-  function getPricePreview(cageType: CageType, cageCount: number): string {
+  function getTotalPrice(cageType: CageType, cageCount: number): string {
     const breakdown = calculatePriceBreakdown(
       cageType,
       cageCount,
@@ -120,15 +103,14 @@ export function CageSelection({
       dateFrom,
       dateTo
     )
-    const prices = breakdown.nights.map((n) => n.total)
+    const prices = breakdown.days.map((d) => d.total)
     const min = Math.min(...prices)
     const max = Math.max(...prices)
-    if (min === max) return `${min} kr/natt`
-    return `${min}–${max} kr/natt`
+    if (min === max) return `${min} kr/dag`
+    return `${min}–${max} kr/dag`
   }
 
   function handleCageClick(cageType: CageType, cageCount: number) {
-    if (!isAvailable(cageType, cageCount)) return
     if (cageType === 'senior_comfort') {
       setPendingSelection({ cageType, cageCount })
       setShowSeniorWarning(true)
@@ -138,9 +120,8 @@ export function CageSelection({
   }
 
   function confirmSeniorSelection() {
-    if (pendingSelection) {
+    if (pendingSelection)
       onSelect(pendingSelection.cageType, pendingSelection.cageCount)
-    }
     setShowSeniorWarning(false)
     setPendingSelection(null)
   }
@@ -162,9 +143,8 @@ export function CageSelection({
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {allOptions.map(({ cageType, cageCount }) => {
-          const available = isAvailable(cageType, cageCount)
           const isSelected = selectedCageType === cageType
           const desc = CAGE_DESCRIPTIONS[cageType]
           const config = CAGE_CONFIGS[cageType]
@@ -173,27 +153,15 @@ export function CageSelection({
             <button
               key={`${cageType}-${cageCount}`}
               onClick={() => handleCageClick(cageType, cageCount)}
-              disabled={!available}
               className={cn(
                 'relative flex flex-col gap-4 rounded-xl border-2 p-5 text-left transition-all duration-200',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 isSelected
                   ? 'border-primary bg-primary/5 shadow-md'
-                  : available
-                    ? 'border-border bg-card hover:border-muted-foreground/40 hover:shadow-sm'
-                    : 'cursor-not-allowed border-border bg-muted/40 opacity-50'
+                  : 'border-border bg-card hover:border-muted-foreground/40 hover:shadow-sm'
               )}
             >
-              {!available && (
-                <span className="absolute right-3 top-3">
-                  <Badge variant="destructive" className="gap-1 text-xs">
-                    <XCircle className="h-3 w-3" />
-                    Fullt booket
-                  </Badge>
-                </span>
-              )}
-
-              {isSelected && available && (
+              {isSelected && (
                 <span className="absolute right-3 top-3 text-primary">
                   <CheckCircle2 className="h-5 w-5" />
                 </span>
@@ -227,25 +195,18 @@ export function CageSelection({
                   >
                     <span className="mt-0.5 text-xs">•</span>
                     {b}
-                    {cageType === 'standard' &&
-                    cageCount === 2 &&
-                    b === desc.bullets[0]
-                      ? ' (2 separate bur)'
-                      : ''}
                   </li>
                 ))}
               </ul>
 
-              {available && (
-                <div className="mt-auto space-y-0.5 border-t border-border pt-3">
-                  <p className="text-lg font-bold">
-                    {getPricePreview(cageType, cageCount)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {getDailyPriceRange(cageType, cageCount)}
-                  </p>
-                </div>
-              )}
+              <div className="mt-auto space-y-0.5 border-t border-border pt-3">
+                <p className="text-lg font-bold">
+                  {getTotalPrice(cageType, cageCount)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {getDailyPriceRange(cageType, cageCount)}
+                </p>
+              </div>
             </button>
           )
         })}
@@ -260,13 +221,10 @@ export function CageSelection({
         </Button>
       </div>
 
-      {/* Senior & Komfort warning dialog */}
       <Dialog open={showSeniorWarning} onOpenChange={setShowSeniorWarning}>
         <DialogContent className="max-w-md" aria-describedby={undefined}>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              Senior & Komfort bur
-            </DialogTitle>
+            <DialogTitle>Senior & Komfort bur</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 text-sm text-muted-foreground">
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700">
