@@ -1,7 +1,7 @@
-import { Suspense } from "react";
-import { MinSideHeader } from "@/components/minside-header";
-import { MinSideSubHeader } from "@/components/minside-subheader";
-import { LogoutButton } from "@/components/logout-button";
+import { Suspense } from 'react'
+import { MinSideHeader } from '@/components/minside-header'
+import { MinSideSubHeader } from '@/components/minside-subheader'
+import { LogoutButton } from '@/components/logout-button'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         <Suspense
           fallback={
-            <div className="mb-4 h-6 w-1/3 rounded bg-muted animate-pulse" />
+            <div className="mb-4 h-6 w-1/3 animate-pulse rounded bg-muted" />
           }
         >
           <MinSideSubHeader />
@@ -28,9 +28,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
     </div>
-  );
+  )
 }
 
 function HeaderSkeleton() {
-  return <div className="h-24 w-full rounded-2xl bg-muted animate-pulse" />;
+  return <div className="h-24 w-full animate-pulse rounded-2xl bg-muted" />
 }
