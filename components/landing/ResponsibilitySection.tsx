@@ -1,5 +1,4 @@
 'use client'
-
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 
@@ -20,46 +19,60 @@ export function ResponsibilitySection() {
     return () => observer.disconnect()
   }, [])
 
+  const fade = (delay = '') =>
+    `transition-all duration-700 ${delay} ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`
+
   return (
     <section className="px-4 py-20">
-      <div className="mx-auto max-w-4xl">
+      <div ref={ref} className="mx-auto max-w-4xl">
         <h2
-          className={`mb-12 text-center text-3xl font-bold text-slate-900 transition-all duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
+          className={`mb-10 text-center text-3xl font-bold text-slate-900 ${fade()}`}
         >
           Ansvar og forsikring
         </h2>
+
+        {/* Top: image + first two paragraphs side by side */}
         <div
-          ref={ref}
-          className="flex flex-col items-center gap-10 md:flex-row md:items-start md:gap-14"
+          className={`flex flex-col gap-8 md:flex-row md:items-center md:gap-12 ${fade()}`}
         >
-          <div
-            className={`shrink-0 transition-all duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
-          >
+          <div className="flex shrink-0 justify-center">
             <Image
               src="/illustration/handover-cat-no-bg.webp"
               alt="Overlevering av katt"
               width={300}
               height={300}
-              className="w-[200px] md:w-[260px]"
+              className="w-[180px] md:w-[240px]"
             />
           </div>
-          <div
-            className={`space-y-4 transition-all delay-150 duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
-          >
+          <div className="space-y-4">
             <p className="leading-relaxed text-slate-700">
-              Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
-              skader eller sykdom som fører til at katten blir syk, skadet, får
-              varige mén eller dør, under eller etter oppholdet. Det anbefales
-              generelt å ha forsikring på katten.
+              Vi behandler alle katter med samme omsorg og oppmerksomhet som vi
+              ville gitt våre egne. Kattens helse og velferd er vår høyeste
+              prioritet under hele oppholdet.
             </p>
-            <p className="text-sm leading-relaxed text-slate-600">
-              Pensjonatet tar heller ikke ansvar for skader eller tap som
-              skyldes tredjepart. Våre lokaler ligger på privat område, og
-              uvedkommende har ikke adgang uten godkjenning og tilstedeværelse
-              fra oss. Brudd på dette kan medføre erstatningsansvar for
-              eventuelle skader eller tap.
+            <p className="leading-relaxed text-slate-700">
+              Vi har rutiner for daglig oppfølging, tidlig oppdagelse av sykdom
+              og rask veterinærkontakt ved behov. Likevel kan vi ikke garantere
+              at en katt ikke blir syk eller skadet — dette gjelder på pensjonat
+              som hjemme.
             </p>
           </div>
+        </div>
+
+        {/* Bottom: two paragraphs full width */}
+        <div className={`mt-8 space-y-4 ${fade('delay-150')}`}>
+          <p className="leading-relaxed text-slate-700">
+            Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
+            sykdom, skade eller dødsfall som oppstår under oppholdet, med mindre
+            dette skyldes dokumentert uaktsomhet fra vår side. Vi anbefaler alle
+            katteeiere å ha forsikring på katten sin.
+          </p>
+          <p className="leading-relaxed text-slate-700">
+            Vi er ikke ansvarlige for skader eller tap som skyldes tredjepart.
+            Våre lokaler ligger på privat område og er tilgangskontrollert —
+            uvedkommende har ikke adgang uten vår godkjenning og
+            tilstedeværelse.
+          </p>
         </div>
       </div>
     </section>

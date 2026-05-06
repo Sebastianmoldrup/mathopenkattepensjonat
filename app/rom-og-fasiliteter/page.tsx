@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -22,24 +24,12 @@ const CAGE_TYPES = [
     highSeasonPrice: 250,
     img: 'hd-standard',
     lowSeasonPrices: [
-      {
-        amount: '1',
-        price: 220,
-      },
-      {
-        amount: '2',
-        price: 320,
-      },
+      { amount: '1', price: 220 },
+      { amount: '2', price: 320 },
     ],
     highSeasonPrices: [
-      {
-        amount: '1',
-        price: 250,
-      },
-      {
-        amount: '2',
-        price: 350,
-      },
+      { amount: '1', price: 250 },
+      { amount: '2', price: 350 },
     ],
     list: [
       'Eget rom på L85, D90, H100',
@@ -53,24 +43,12 @@ const CAGE_TYPES = [
     highSeasonPrice: 250,
     img: 'senior-&-comfort',
     lowSeasonPrices: [
-      {
-        amount: '1',
-        price: 220,
-      },
-      {
-        amount: '2',
-        price: 220,
-      },
+      { amount: '1', price: 220 },
+      { amount: '2', price: 220 },
     ],
     highSeasonPrices: [
-      {
-        amount: '1',
-        price: 250,
-      },
-      {
-        amount: '2',
-        price: 350,
-      },
+      { amount: '1', price: 250 },
+      { amount: '2', price: 350 },
     ],
     list: [
       'Eget rom på L90, D100, H80',
@@ -86,21 +64,10 @@ const CAGE_TYPES = [
     highSeasonPrice: 450,
     img: 'suite',
     lowSeasonPrices: [
-      {
-        amount: '1-2',
-        price: 350,
-      },
-      {
-        amount: '3',
-        price: 400,
-      },
+      { amount: '1-2', price: 350 },
+      { amount: '3', price: 400 },
     ],
-    highSeasonPrices: [
-      {
-        amount: 'Standard pris per døgn',
-        price: 450,
-      },
-    ],
+    highSeasonPrices: [{ amount: 'Standard pris per døgn', price: 450 }],
     list: [
       'Eget rom på L85, D100, H240',
       'Seng, dokasse, mat- og vannskål',
@@ -111,10 +78,9 @@ const CAGE_TYPES = [
   },
 ]
 
-const Page = () => {
+export default function Page() {
   return (
     <div className="min-h-screen bg-muted px-4 py-12">
-      {/* Header */}
       <div className="mx-auto mb-12 max-w-4xl text-center">
         <h1 className="text-3xl font-semibold tracking-tight text-foreground">
           Rom og fasiliteter
@@ -124,7 +90,6 @@ const Page = () => {
         </p>
       </div>
 
-      {/* Cage cards */}
       <section
         aria-labelledby="romtyper"
         className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -137,13 +102,11 @@ const Page = () => {
                   <CardTitle className="text-lg capitalize">
                     {cage.name}
                   </CardTitle>
-
                   {cage.premium && <Badge>Premium</Badge>}
                   {cage.highlight && (
                     <Badge variant="secondary">Tilrettelagt</Badge>
                   )}
                 </div>
-
                 <p className="text-xl font-semibold">
                   Fra {cage.lowSeasonPrice} kr
                   <span className="text-sm font-normal text-muted-foreground">
@@ -154,7 +117,6 @@ const Page = () => {
               </CardHeader>
 
               <CardContent className="space-y-5">
-                {/* Image with dialog */}
                 <Dialog>
                   <DialogTrigger asChild>
                     <button className="mx-auto block">
@@ -167,7 +129,6 @@ const Page = () => {
                       />
                     </button>
                   </DialogTrigger>
-
                   <DialogContent className="sm:max-w-3xl">
                     <DialogTitle className="text-center text-2xl font-semibold capitalize">
                       {cage.name}
@@ -186,7 +147,6 @@ const Page = () => {
                   Illustrasjon – avvik kan forekomme
                 </span>
 
-                {/* Key features (only first 3 visible) */}
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   {cage.list.slice(0, 3).map((item) => (
                     <li key={item} className="flex gap-2">
@@ -196,15 +156,12 @@ const Page = () => {
                   ))}
                 </ul>
 
-                {/* Expandable details */}
                 <Accordion type="single" collapsible>
                   <AccordionItem value="details">
                     <AccordionTrigger className="text-sm">
                       Se detaljer
                     </AccordionTrigger>
-
                     <AccordionContent className="space-y-4 text-sm text-muted-foreground">
-                      {/* Pricing */}
                       <div className="space-y-3">
                         <div className="space-y-1">
                           <span className="text-xs font-medium uppercase tracking-wider opacity-80">
@@ -267,7 +224,6 @@ const Page = () => {
                         </div>
                       </div>
 
-                      {/* Remaining features */}
                       {cage.list.length > 3 && (
                         <div className="space-y-2 border-t pt-3">
                           {cage.list.slice(3).map((item) => (
@@ -286,5 +242,3 @@ const Page = () => {
     </div>
   )
 }
-
-export default Page
