@@ -128,7 +128,7 @@ export default function Page() {
 
           <div className="flex flex-col gap-3">
             <Link href="/booking">
-              <Button size="lg">Book opphold</Button>
+              <Button size="lg">Book nå</Button>
             </Link>
 
             <div className="text-sm text-muted-foreground">

@@ -30,7 +30,7 @@ export async function MinSideHeader() {
 
       <div className="flex flex-col justify-center gap-1 lg:items-center">
         <Link href="/booking">
-          <Button className="bg-primary text-primary-foreground opacity-80">
+          <Button className="bg-primary text-primary-foreground">
             Book opphold
           </Button>
         </Link>
