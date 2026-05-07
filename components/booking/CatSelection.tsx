@@ -15,7 +15,8 @@ interface CatSelectionProps {
   onChange: (ids: string[]) => void
   onCatsUpdated: (cats: Cat[]) => void
   onNext: () => void
-  onBack?: () => void
+  onBack: () => void
+  isFirstStep?: boolean
 }
 
 export function CatSelection({
@@ -26,6 +27,7 @@ export function CatSelection({
   onCatsUpdated,
   onNext,
   onBack,
+  isFirstStep = false,
 }: CatSelectionProps) {
   const [showAddCat, setShowAddCat] = useState(false)
   const maxCats = catCount ?? 3
@@ -164,12 +166,12 @@ export function CatSelection({
         )}
 
       <div className="flex justify-between pt-2">
-        {onBack ? (
+        {isFirstStep ? (
+          <div />
+        ) : (
           <Button variant="outline" onClick={onBack}>
             Tilbake
           </Button>
-        ) : (
-          <div />
         )}
         <Button onClick={onNext} disabled={!canProceed} size="lg">
           Neste

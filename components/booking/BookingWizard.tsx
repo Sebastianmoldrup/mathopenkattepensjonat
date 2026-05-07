@@ -186,13 +186,6 @@ export function BookingWizard() {
 
   if (!hydrated) return null
 
-  const catSelectionBack =
-    userId && !state.dateFrom
-      ? undefined
-      : () => {
-          userId ? goTo('dates') : goTo('cage')
-        }
-
   const selectedCats = cats.filter((c) => state.selectedCatIds.includes(c.id))
 
   // Determine visible step index (excluding auth when logged in)
