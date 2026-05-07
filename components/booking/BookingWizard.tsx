@@ -30,14 +30,9 @@ const STEPS: { key: BookingStep; label: string }[] = [
   { key: 'summary', label: 'Oppsummering' },
 ]
 
-// Steps shown in the progress indicator (auth is hidden when logged in)
-const VISIBLE_STEPS: BookingStep[] = [
-  'count',
-  'dates',
-  'cage',
-  'cats',
-  'summary',
-]
+// Steps shown in the progress indicator — differs based on auth state
+const AUTHED_STEPS: BookingStep[] = ['cats', 'dates', 'cage', 'summary']
+const GUEST_STEPS: BookingStep[] = ['count', 'dates', 'cage', 'cats', 'summary']
 
 function loadState(): BookingState {
   if (typeof window === 'undefined') return INITIAL_BOOKING_STATE
@@ -119,6 +114,12 @@ export function BookingWizard() {
         if (saved.step === 'auth') {
           saved.step = 'cats'
         }
+        // Logged-in users skip count step entirely
+        if (saved.step === 'count') {
+          saved.step = 'cats'
+        }
+        // Reset catCount so authed flow allows free selection
+        saved.catCount = null
       } else {
         // Not logged in — if state was past cage step, put them at auth
         if (saved.step === 'cats' || saved.step === 'summary') {
@@ -144,6 +145,7 @@ export function BookingWizard() {
 
   function goTo(step: BookingStep) {
     updateState({ step })
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleAuthenticated = useCallback(async () => {
@@ -172,6 +174,7 @@ export function BookingWizard() {
     const upcoming = await getUpcomingYearBookings()
     setBookings(upcoming)
 
+    updateState({ catCount: null })
     goTo('cats')
   }, [])
 
@@ -186,7 +189,7 @@ export function BookingWizard() {
   const selectedCats = cats.filter((c) => state.selectedCatIds.includes(c.id))
 
   // Determine visible step index (excluding auth when logged in)
-  const visibleSteps = userId ? VISIBLE_STEPS : STEPS.map((s) => s.key)
+  const visibleSteps = userId ? AUTHED_STEPS : GUEST_STEPS
 
   const currentVisibleIndex = visibleSteps.indexOf(state.step)
 
@@ -286,38 +289,40 @@ export function BookingWizard() {
           />
         )}
 
-        {state.step === 'dates' && state.catCount !== null && (
-          <DateRangeSelection
-            numCats={state.catCount}
-            selectedCatIds={state.selectedCatIds}
-            selectedCats={selectedCats}
-            bookings={bookings}
-            dateFrom={state.dateFrom}
-            dateTo={state.dateTo}
-            onChange={(from, to) =>
-              updateState({ dateFrom: from, dateTo: to, cageType: null })
-            }
-            onNext={() => goTo('cage')}
-            onBack={() => goTo('count')}
-          />
-        )}
-
-        {state.step === 'cage' &&
-          state.dateFrom &&
-          state.dateTo &&
-          state.catCount !== null && (
-            <CageSelection
-              numCats={state.catCount}
+        {state.step === 'dates' &&
+          (state.catCount !== null || state.selectedCatIds.length > 0) && (
+            <DateRangeSelection
+              numCats={(state.catCount ?? state.selectedCatIds.length) || 1}
+              selectedCatIds={state.selectedCatIds}
+              selectedCats={selectedCats}
+              bookings={bookings}
               dateFrom={state.dateFrom}
               dateTo={state.dateTo}
-              selectedCageType={state.cageType}
-              onSelect={(type, count) =>
-                updateState({ cageType: type, cageCount: count })
+              onChange={(from, to) =>
+                updateState({ dateFrom: from, dateTo: to, cageType: null })
               }
-              onNext={() => goTo(userId ? 'cats' : 'auth')}
-              onBack={() => goTo('dates')}
+              onNext={() => goTo('cage')}
+              onBack={() => (userId ? goTo('cats') : goTo('count'))}
             />
           )}
+
+        {state.step === 'cage' && state.dateFrom && state.dateTo && (
+          <CageSelection
+            numCats={(state.catCount ?? state.selectedCatIds.length) || 1}
+            dateFrom={state.dateFrom}
+            dateTo={state.dateTo}
+            selectedCageType={state.cageType}
+            onSelect={(type, count) =>
+              updateState({ cageType: type, cageCount: count })
+            }
+            onNext={() => goTo(userId ? 'summary' : 'auth')}
+            onBack={
+              userId && !state.dateFrom
+                ? undefined
+                : () => (userId ? goTo('dates') : goTo('cage'))
+            }
+          />
+        )}
 
         {state.step === 'auth' && (
           <AuthGateStep onAuthenticated={handleAuthenticated} />
@@ -326,11 +331,20 @@ export function BookingWizard() {
         {state.step === 'cats' && userId && (
           <CatSelection
             cats={cats}
-            catCount={state.catCount ?? 1}
+            catCount={null}
             selectedCatIds={state.selectedCatIds}
             onChange={(ids) => updateState({ selectedCatIds: ids })}
-            onNext={() => goTo('summary')}
-            onBack={() => goTo('cage')}
+            onCatsUpdated={(updated) => setCats(updated)}
+            onNext={() => {
+              const count = state.selectedCatIds.length
+              updateState({ catCount: count, cageType: null })
+              goTo('dates')
+            }}
+            onBack={
+              userId && !state.dateFrom
+                ? undefined
+                : () => (userId ? goTo('dates') : goTo('cage'))
+            }
           />
         )}
 
@@ -346,7 +360,7 @@ export function BookingWizard() {
               dateTo={state.dateTo}
               cageType={state.cageType}
               cageCount={state.cageCount}
-              numCats={state.catCount ?? selectedCats.length}
+              numCats={(state.catCount ?? state.selectedCatIds.length) || 1}
               specialInstructions={state.specialInstructions}
               bookings={bookings}
               wantsOutdoorCage={state.wantsOutdoorCage}
@@ -356,7 +370,7 @@ export function BookingWizard() {
               }
               onOutdoorCageChange={(v) => updateState({ wantsOutdoorCage: v })}
               onWaitlistChange={(v) => updateState({ waitlistRequested: v })}
-              onBack={() => goTo('cats')}
+              onBack={() => (userId ? goTo('cage') : goTo('cats'))}
               onConfirmed={handleConfirmed}
               userEmail={userEmail}
               userFirstName={userFirstName ?? ''}
