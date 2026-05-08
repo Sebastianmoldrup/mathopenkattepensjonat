@@ -22,6 +22,7 @@ interface CageSelectionProps {
   onSelect: (cageType: CageType, cageCount: number) => void
   onNext: () => void
   onBack: () => void
+  nextLabel?: string
 }
 
 const CAGE_ICONS: Record<CageType, React.ReactNode> = {
@@ -64,6 +65,7 @@ export function CageSelection({
   onSelect,
   onNext,
   onBack,
+  nextLabel = 'Neste',
 }: CageSelectionProps) {
   const [showSeniorWarning, setShowSeniorWarning] = useState(false)
   const [pendingSelection, setPendingSelection] = useState<{
@@ -71,16 +73,19 @@ export function CageSelection({
     cageCount: number
   } | null>(null)
 
+  // Options depend on number of cats:
+  // 1-2 cats: Standard (1 bur), Senior & Komfort (1 bur), Suite (1 bur)
+  // 3 cats: Suite (1 bur), 2× Standard split (2 bur)
   const allOptions = useMemo(() => {
-    if (numCats <= 2)
+    if (numCats >= 3)
       return [
-        { cageType: 'standard' as CageType, cageCount: 1 },
-        { cageType: 'senior_comfort' as CageType, cageCount: 1 },
         { cageType: 'suite' as CageType, cageCount: 1 },
+        { cageType: 'standard' as CageType, cageCount: 2 },
       ]
     return [
+      { cageType: 'standard' as CageType, cageCount: 1 },
+      { cageType: 'senior_comfort' as CageType, cageCount: 1 },
       { cageType: 'suite' as CageType, cageCount: 1 },
-      { cageType: 'standard' as CageType, cageCount: 2 },
     ]
   }, [numCats])
 
@@ -104,10 +109,11 @@ export function CageSelection({
       dateTo
     )
     const prices = breakdown.days.map((d) => d.total)
+    if (prices.length === 0) return ''
     const min = Math.min(...prices)
     const max = Math.max(...prices)
-    if (min === max) return `${min} kr/dag`
-    return `${min}–${max} kr/dag`
+    if (min === max) return `${min} kr/natt`
+    return `${min}–${max} kr/natt`
   }
 
   function handleCageClick(cageType: CageType, cageCount: number) {
@@ -137,17 +143,24 @@ export function CageSelection({
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Velg burtype</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {numCats === 3
-            ? 'Med 3 katter kan du velge Suite (1 bur) eller 2 standard-bur.'
+          {numCats >= 3
+            ? 'Med 3 katter kan du velge Suite (1 bur) eller 2× Standard (2 separate bur).'
             : 'Velg burtype som passer best for din katt.'}
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {allOptions.map(({ cageType, cageCount }) => {
-          const isSelected = selectedCageType === cageType
+          const isSelected =
+            selectedCageType === cageType &&
+            // For standard, also check cageCount to distinguish 1x vs 2x
+            (cageType !== 'standard' ||
+              (cageType === 'standard' &&
+                ((numCats >= 3 && cageCount === 2) ||
+                  (numCats < 3 && cageCount === 1))))
           const desc = CAGE_DESCRIPTIONS[cageType]
           const config = CAGE_CONFIGS[cageType]
+          const is2xSplit = cageType === 'standard' && cageCount === 2
 
           return (
             <button
@@ -178,11 +191,12 @@ export function CageSelection({
                 </span>
                 <div>
                   <p className="font-semibold leading-none">
-                    {cageCount === 2 ? '2× Standard (split)' : desc.title}
+                    {is2xSplit ? '2× Standard (split)' : desc.title}
                   </p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Opptil {cageCount === 2 ? '3' : config.maxCats} katter
-                    {cageCount === 2 && ' · 2 bur'}
+                    {is2xSplit
+                      ? 'Opptil 3 katter · 2 separate bur'
+                      : `Opptil ${config.maxCats} katter`}
                   </p>
                 </div>
               </div>
@@ -197,6 +211,12 @@ export function CageSelection({
                     {b}
                   </li>
                 ))}
+                {is2xSplit && (
+                  <li className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <span className="mt-0.5 text-xs">•</span>Kattene fordeles på
+                    2 bur
+                  </li>
+                )}
               </ul>
 
               <div className="mt-auto space-y-0.5 border-t border-border pt-3">
@@ -217,7 +237,7 @@ export function CageSelection({
           Tilbake
         </Button>
         <Button onClick={onNext} disabled={!selectedCageType} size="lg">
-          Neste
+          {nextLabel}
         </Button>
       </div>
 

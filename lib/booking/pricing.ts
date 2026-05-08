@@ -7,8 +7,6 @@ import {
   DayBreakdown,
 } from './types'
 
-// ─── Easter Calculation ───────────────────────────────────────────────────────
-
 export function getEasterSunday(year: number): Date {
   const a = year % 19
   const b = Math.floor(year / 100)
@@ -39,23 +37,15 @@ export function getEasterHighSeasonRange(year: number): {
   return { start, end }
 }
 
-// ─── Date Helpers ─────────────────────────────────────────────────────────────
-
 function toDateOnly(d: Date): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate())
 }
 
-/**
- * Parse YYYY-MM-DD without UTC shift.
- */
 export function parseDateStr(s: string): Date {
   const [y, m, d] = s.split('-').map(Number)
   return new Date(y, m - 1, d)
 }
 
-/**
- * Format a Date to YYYY-MM-DD using local time.
- */
 export function toLocalDateStr(d: Date): string {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, '0')
@@ -99,8 +89,6 @@ export function getSeason(date: Date): Season {
   return 'low'
 }
 
-// ─── Price Per Day ────────────────────────────────────────────────────────────
-
 export function getPricePerCagePerDay(
   cageType: CageType,
   catsInCage: number,
@@ -116,11 +104,9 @@ function getPriceForStandardSplit(season: Season): number {
   )
 }
 
-// ─── Full Price Breakdown (day-based) ─────────────────────────────────────────
-//
-// Day-based pricing: BOTH check-in day AND check-out day are billed.
-// Monday check-in → Wednesday check-out = 3 days billed.
-// Minimum 2 days.
+// ─── Night-based pricing ──────────────────────────────────────────────────────
+// Fri → Sun = 2 nights (Fri night, Sat night)
+// Season is determined by the night's start day (check-in day of that night)
 
 export function calculatePriceBreakdown(
   cageType: CageType,
@@ -137,8 +123,9 @@ export function calculatePriceBreakdown(
   const days: DayBreakdown[] = []
   const current = new Date(from)
 
-  // Iterate from dateFrom to dateTo INCLUSIVE (day-based)
-  while (current <= to) {
+  // Iterate nights: from check-in up to (not including) check-out
+  // Fri→Sun: iterate Fri and Sat = 2 nights
+  while (current < to) {
     const season = getSeason(current)
     const dateStr = toLocalDateStr(current)
 
@@ -167,15 +154,12 @@ export function calculatePriceBreakdown(
     totalPrice,
     lowSeasonDays,
     highSeasonDays,
-    // Aliases for backward compat
     nights: days,
     totalNights: days.length,
     lowSeasonNights: lowSeasonDays,
     highSeasonNights: highSeasonDays,
   }
 }
-
-// ─── Date Helpers ─────────────────────────────────────────────────────────────
 
 export function formatDateNO(date: Date | string): string {
   const d = typeof date === 'string' ? parseDateStr(date) : date

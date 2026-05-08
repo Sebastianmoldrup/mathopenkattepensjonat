@@ -143,7 +143,7 @@ export function BookingSummary({
             <p className="text-sm font-semibold">{cageLabel}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Dager</p>
+            <p className="text-xs text-muted-foreground">Netter</p>
             <p className="text-sm font-semibold">{breakdown.totalDays}</p>
           </div>
         </div>
@@ -183,8 +183,8 @@ export function BookingSummary({
           {breakdown.lowSeasonDays > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
-                Lavsesong · {breakdown.lowSeasonDays} dag
-                {breakdown.lowSeasonDays !== 1 ? 'er' : ''}
+                Lavsesong · {breakdown.lowSeasonDays}
+                {breakdown.lowSeasonDays !== 1 ? ' netter' : ' natt'}
               </span>
               <span>
                 {breakdown.days
@@ -198,8 +198,8 @@ export function BookingSummary({
           {breakdown.highSeasonDays > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
-                Høysesong · {breakdown.highSeasonDays} dag
-                {breakdown.highSeasonDays !== 1 ? 'er' : ''}
+                Høysesong · {breakdown.highSeasonDays}
+                {breakdown.highSeasonDays !== 1 ? ' netter' : ' natt'}
               </span>
               <span>
                 {breakdown.days

@@ -18,12 +18,9 @@ import {
 } from '@/components/ui/dialog'
 import {
   Field,
+  FieldDescription,
   FieldError,
-  FieldGroup,
   FieldLabel,
-  FieldLegend,
-  FieldSeparator,
-  FieldSet,
 } from '@/components/ui/field'
 import {
   Select,
@@ -52,7 +49,7 @@ function YesNoToggle({
           type="button"
           onClick={() => onChange(v)}
           className={cn(
-            'rounded-lg border px-3 py-1 text-sm font-medium transition-colors',
+            'rounded-lg border px-4 py-1.5 text-sm font-medium transition-colors',
             value === v
               ? 'border-primary bg-primary text-primary-foreground'
               : 'border-border bg-card hover:border-muted-foreground/40'
@@ -73,7 +70,7 @@ function ThreeWayToggle({
   onChange: (v: YesNoUnknown) => void
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex gap-2">
       {(
         [
           { val: 'yes', label: 'Ja' },
@@ -86,7 +83,7 @@ function ThreeWayToggle({
           type="button"
           onClick={() => onChange(val)}
           className={cn(
-            'rounded-lg border px-3 py-1 text-sm font-medium transition-colors',
+            'rounded-lg border px-4 py-1.5 text-sm font-medium transition-colors',
             value === val
               ? 'border-primary bg-primary text-primary-foreground'
               : 'border-border bg-card hover:border-muted-foreground/40'
@@ -156,7 +153,7 @@ export function AddCatDialog({
         if (err.message.includes('size') || err.message.includes('large'))
           msg = 'Bildet er for stort. Maks 4.4MB.'
         else if (err.message.includes('type') || err.message.includes('mime'))
-          msg = 'Filtypen støttes ikke.'
+          msg = 'Filtypen støttes ikke. Bruk JPEG, PNG eller WEBP.'
         else msg = err.message
       }
       alert(msg)
@@ -167,11 +164,13 @@ export function AddCatDialog({
     const f = e.target.files?.[0]
     if (!f) return
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) {
-      alert('Ugyldig filtype.')
+      alert('Ugyldig filtype. Velg JPEG, PNG eller WEBP.')
       return
     }
     if (f.size > 4.4 * 1024 * 1024) {
-      alert('Bildet er for stort. Maks 4.4MB.')
+      alert(
+        `Filen er for stor (${Math.floor(f.size / 1024 / 1024)}MB). Maks 4.4MB.`
+      )
       return
     }
     if (fileInputRef.current) fileInputRef.current.value = ''
@@ -192,20 +191,22 @@ export function AddCatDialog({
 
         {form.formState.isSubmitting ? (
           <div className="flex items-center justify-center gap-3 py-10">
-            <Spinner className="size-5" />
+            <Spinner className="size-6" />
             <span className="text-sm text-muted-foreground">Lagrer katt…</span>
           </div>
         ) : (
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 pt-2"
+            className="space-y-8 pt-2"
           >
-            {/* Om katten */}
-            <FieldSet>
-              <FieldLegend>Om din katt</FieldLegend>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-5">
+            {/* ─── Om katten ─────────────────────────────────────────────────── */}
+            <section className="space-y-5">
+              <h3 className="border-b pb-2 text-base font-medium">
+                Om din katt
+              </h3>
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
                 <div className="flex shrink-0 flex-col items-center gap-2">
-                  <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border bg-muted">
+                  <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-xl border bg-muted">
                     {preview ? (
                       <img
                         src={preview}
@@ -213,8 +214,8 @@ export function AddCatDialog({
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <span className="px-1 text-center text-xs text-muted-foreground">
-                        Bilde
+                      <span className="px-2 text-center text-xs text-muted-foreground">
+                        Forhåndsvisning
                       </span>
                     )}
                   </div>
@@ -233,8 +234,14 @@ export function AddCatDialog({
                   >
                     Velg bilde
                   </Button>
+                  <span className="text-center text-xs text-muted-foreground">
+                    JPEG · PNG · WEBP
+                    <br />
+                    maks 4.4 MB
+                  </span>
                 </div>
-                <div className="grid flex-1 grid-cols-2 gap-3">
+
+                <div className="grid flex-1 grid-cols-2 gap-4">
                   <Field data-invalid={!!form.formState.errors.name}>
                     <FieldLabel>Navn *</FieldLabel>
                     <Input
@@ -243,6 +250,7 @@ export function AddCatDialog({
                     />
                     <FieldError errors={[form.formState.errors.name]} />
                   </Field>
+
                   <Controller
                     name="gender"
                     control={form.control}
@@ -254,7 +262,7 @@ export function AddCatDialog({
                           onValueChange={field.onChange}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Velg" />
+                            <SelectValue placeholder="Velg kjønn" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectGroup>
@@ -267,11 +275,13 @@ export function AddCatDialog({
                       </Field>
                     )}
                   />
+
                   <Field data-invalid={!!form.formState.errors.breed}>
                     <FieldLabel>Rase *</FieldLabel>
                     <Input {...form.register('breed')} />
                     <FieldError errors={[form.formState.errors.breed]} />
                   </Field>
+
                   <Field data-invalid={!!form.formState.errors.age}>
                     <FieldLabel>Alder *</FieldLabel>
                     <Input
@@ -282,36 +292,74 @@ export function AddCatDialog({
                     />
                     <FieldError errors={[form.formState.errors.age]} />
                   </Field>
+
                   <Field
                     orientation="horizontal"
-                    className="col-span-2 items-center gap-2"
+                    className="col-span-2 items-center gap-3"
                   >
                     <Input
                       type="checkbox"
                       {...form.register('is_sterilized')}
                       className="h-4 w-4"
                     />
-                    <FieldLabel>Sterilisert / kastrert</FieldLabel>
+                    <FieldLabel>Katten er sterilisert / kastrert</FieldLabel>
                   </Field>
                 </div>
               </div>
-            </FieldSet>
+            </section>
 
-            <FieldSeparator />
+            {/* ─── ID & Forsikring + Helse ────────────────────────────────────── */}
+            <div className="grid gap-6 sm:grid-cols-2">
+              <section className="space-y-4">
+                <h3 className="border-b pb-2 text-base font-medium">
+                  ID & Forsikring
+                </h3>
+                <Field>
+                  <FieldLabel>ID-chip</FieldLabel>
+                  <FieldDescription>
+                    La feltet være tomt hvis katten ikke har chip.
+                  </FieldDescription>
+                  <Input {...form.register('id_chip')} />
+                </Field>
+                <Field>
+                  <FieldLabel>Forsikringsnummer</FieldLabel>
+                  <FieldDescription>
+                    La feltet være tomt hvis katten ikke er forsikret.
+                  </FieldDescription>
+                  <Input {...form.register('insurance_number')} />
+                </Field>
+              </section>
 
-            {/* Helse */}
-            <FieldSet>
-              <FieldLegend>Helse</FieldLegend>
-              <FieldGroup>
+              <section className="space-y-4">
+                <h3 className="border-b pb-2 text-base font-medium">Helse</h3>
                 <Field data-invalid={!!form.formState.errors.last_vaccine_date}>
                   <FieldLabel>Sist vaksine *</FieldLabel>
+                  <FieldDescription>
+                    Hvis ikke tatt ennå, velg planlagt dato.
+                  </FieldDescription>
                   <Input
                     type="date"
                     {...form.register('last_vaccine_date')}
-                    className="input-date max-w-xs"
+                    className="input-date"
                   />
                   <FieldError
                     errors={[form.formState.errors.last_vaccine_date]}
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Ormebehandling</FieldLabel>
+                  <Textarea
+                    {...form.register('deworming_info')}
+                    rows={2}
+                    className="resize-none"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Loppebehandling</FieldLabel>
+                  <Textarea
+                    {...form.register('flea_treatment_info')}
+                    rows={2}
+                    className="resize-none"
                   />
                 </Field>
                 <Field>
@@ -322,15 +370,53 @@ export function AddCatDialog({
                     className="resize-none"
                   />
                 </Field>
-              </FieldGroup>
-            </FieldSet>
+              </section>
+            </div>
 
-            <FieldSeparator />
+            {/* ─── Daglig pleie ───────────────────────────────────────────────── */}
+            <section className="space-y-4">
+              <h3 className="border-b pb-2 text-base font-medium">
+                Daglig pleie
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field>
+                  <FieldLabel>Kosthold</FieldLabel>
+                  <FieldDescription>
+                    Spesielle behov, rutiner eller annet nyttig å vite.
+                  </FieldDescription>
+                  <Textarea
+                    {...form.register('diet')}
+                    rows={3}
+                    className="resize-none"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel>Atferdsnotater</FieldLabel>
+                  <FieldDescription>
+                    Personlighet, vaner eller ting vi bør ta hensyn til.
+                  </FieldDescription>
+                  <Textarea
+                    {...form.register('behavior_notes')}
+                    rows={3}
+                    className="resize-none"
+                  />
+                </Field>
+              </div>
+            </section>
 
-            {/* Atferd */}
-            <FieldSet>
-              <FieldLegend>Atferd</FieldLegend>
-              <FieldGroup>
+            {/* ─── Atferd & helse ─────────────────────────────────────────────── */}
+            <section className="space-y-5">
+              <div>
+                <h3 className="border-b pb-2 text-base font-medium">
+                  Atferd & helse
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Hjelper oss gi katten best mulig opphold. Ikke obligatorisk —
+                  alle felter har standardsvar.
+                </p>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
                 <Field>
                   <FieldLabel>Får katten medisiner?</FieldLabel>
                   <Controller
@@ -346,14 +432,31 @@ export function AddCatDialog({
                   {getsMedication && (
                     <Textarea
                       {...form.register('medication_details')}
-                      placeholder="Beskriv medisinering..."
+                      placeholder="Hvordan gis medisinen, og hvordan reagerer katten?"
                       rows={2}
                       className="mt-2 resize-none text-sm"
                     />
                   )}
                 </Field>
+
                 <Field>
-                  <FieldLabel>Går katten godt med andre katter?</FieldLabel>
+                  <FieldLabel>Har katten erfaring med andre katter?</FieldLabel>
+                  <Controller
+                    name="has_cat_experience"
+                    control={form.control}
+                    render={({ field }) => (
+                      <YesNoToggle
+                        value={!!field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                </Field>
+
+                <Field>
+                  <FieldLabel>
+                    Går katten godt sammen med andre katter?
+                  </FieldLabel>
                   <Controller
                     name="gets_along_with_cats"
                     control={form.control}
@@ -365,6 +468,7 @@ export function AddCatDialog({
                     )}
                   />
                 </Field>
+
                 <Field>
                   <FieldLabel>
                     Har katten stressrelaterte utfordringer?
@@ -382,16 +486,20 @@ export function AddCatDialog({
                   {hasStressIssues && (
                     <Textarea
                       {...form.register('stress_details')}
-                      placeholder="Utdyp..."
+                      placeholder="Vennligst utdyp..."
                       rows={2}
                       className="mt-2 resize-none text-sm"
                     />
                   )}
                 </Field>
-                <Field>
+
+                <Field className="sm:col-span-2">
                   <FieldLabel>
                     Kan katten utgjøre en risiko for andre katter?
                   </FieldLabel>
+                  <FieldDescription>
+                    F.eks. ved aggressiv atferd.
+                  </FieldDescription>
                   <Controller
                     name="aggression_risk"
                     control={form.control}
@@ -406,20 +514,22 @@ export function AddCatDialog({
                     aggressionRisk === 'unknown') && (
                     <Textarea
                       {...form.register('aggression_details')}
-                      placeholder="Utdyp..."
+                      placeholder="Vennligst utdyp..."
                       rows={2}
                       className="mt-2 resize-none text-sm"
                     />
                   )}
                 </Field>
-              </FieldGroup>
-            </FieldSet>
+              </div>
+            </section>
 
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" onClick={handleClose}>
                 Avbryt
               </Button>
-              <Button type="submit">Lagre katt</Button>
+              <Button type="submit" size="lg" className="px-8">
+                Lagre katt
+              </Button>
             </div>
           </form>
         )}

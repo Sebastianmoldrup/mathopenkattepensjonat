@@ -106,45 +106,6 @@ export interface BookingWithCats extends Booking {
   cat_ids: string[]
 }
 
-// ─── Wizard State ─────────────────────────────────────────────────────────────
-
-export type BookingStep =
-  | 'count'
-  | 'dates'
-  | 'cage'
-  | 'auth'
-  | 'cats'
-  | 'summary'
-
-export const SESSION_STORAGE_KEY = 'booking_wizard_state'
-
-export interface BookingState {
-  step: BookingStep
-  catCount: number | null
-  // Stored as YYYY-MM-DD strings to survive sessionStorage serialization
-  dateFrom: string | null
-  dateTo: string | null
-  cageType: CageType | null
-  cageCount: number
-  selectedCatIds: string[]
-  specialInstructions: string
-  wantsOutdoorCage: boolean
-  waitlistRequested: boolean
-}
-
-export const INITIAL_BOOKING_STATE: BookingState = {
-  step: 'count',
-  catCount: null,
-  dateFrom: null,
-  dateTo: null,
-  cageType: null,
-  cageCount: 1,
-  selectedCatIds: [],
-  specialInstructions: '',
-  wantsOutdoorCage: false,
-  waitlistRequested: false,
-}
-
 // ─── Price Breakdown (day-based) ──────────────────────────────────────────────
 
 export interface DayBreakdown {

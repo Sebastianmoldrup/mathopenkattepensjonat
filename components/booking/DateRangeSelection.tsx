@@ -45,17 +45,13 @@ const MONTHS_NO = [
 ]
 const WEEKDAYS_SHORT = ['ma', 'ti', 'on', 'to', 'fr', 'lø', 'sø']
 
-function toDateOnly(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
-}
-
 function sameDay(a: Date | null, b: Date | null): boolean {
   return !!a && !!b && a.getTime() === b.getTime()
 }
 
-function calcDays(a: Date | null, b: Date | null): number {
+function calcNights(a: Date | null, b: Date | null): number {
   if (!a || !b) return 0
-  return Math.round(Math.abs(b.getTime() - a.getTime()) / 864e5) + 1
+  return Math.round(Math.abs(b.getTime() - a.getTime()) / 864e5)
 }
 
 function fmtShort(d: Date | null): string {
@@ -395,9 +391,8 @@ export function DateRangeSelection({
   const rightYear = addMonths(leftYear, leftMonth, 1).year
   const rightMonth = addMonths(leftYear, leftMonth, 1).month
 
-  const days = calcDays(dateFromDate, dateToDate)
-  // Minimum 2 days
-  const canProceed = !!dateFromDate && !!dateToDate && days >= 2
+  const nights = calcNights(dateFromDate, dateToDate)
+  const canProceed = !!dateFromDate && !!dateToDate && nights >= 1
 
   const hasCatConflict = selectedCats.length > 0 && catBlockedSet.size > 0
 
@@ -405,7 +400,7 @@ export function DateRangeSelection({
     ? 'Velg innsjekkdato'
     : !dateToDate
       ? 'Velg utsjekkdato'
-      : `${days} dag${days !== 1 ? 'er' : ''} valgt`
+      : `${nights} natt${nights !== 1 ? 'er' : ''} valgt`
 
   const sharedGridProps = {
     minDate,
@@ -556,14 +551,14 @@ export function DateRangeSelection({
                 <p className="font-semibold">{fmtFull(dateToDate)}</p>
               </div>
               <div>
-                <p className="mb-0.5 text-xs text-muted-foreground">Dager</p>
-                <p className="font-semibold text-primary">{days}</p>
+                <p className="mb-0.5 text-xs text-muted-foreground">Netter</p>
+                <p className="font-semibold text-primary">{nights}</p>
               </div>
             </div>
           ) : (
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <InfoIcon className="h-4 w-4 shrink-0" />
-              Velg utsjekkdato for å fortsette (minimum 2 dager)
+              Velg utsjekkdato for å fortsette (minimum 1 natt)
             </p>
           )}
         </div>
