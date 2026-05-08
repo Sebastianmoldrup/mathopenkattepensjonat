@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from 'react'
 import { addDays, format, parseISO, isBefore, isAfter } from 'date-fns'
 import { nb } from 'date-fns/locale'
-import { ChevronLeft, ChevronRight, AlertTriangle, Clock } from 'lucide-react'
+import { AlertTriangle, Clock } from 'lucide-react'
 import {
   assignCage,
   updateCageAssignment,
@@ -24,31 +24,31 @@ const SECTIONS = [
     key: 'standard',
     label: 'Standard (1–14)',
     cages: Array.from({ length: 14 }, (_, i) => `Standard ${i + 1}`),
-    headerClass: 'bg-blue-50 text-blue-700 border-blue-100',
+    headerClass: 'bg-blue-50 text-blue-700',
   },
   {
     key: 'senior_comfort',
     label: 'Senior & Komfort (1–3)',
     cages: ['Senior & Komfort 1', 'Senior & Komfort 2', 'Senior & Komfort 3'],
-    headerClass: 'bg-purple-50 text-purple-700 border-purple-100',
+    headerClass: 'bg-purple-50 text-purple-700',
   },
   {
     key: 'suite',
     label: 'Suite (1–3)',
     cages: ['Suite 1', 'Suite 2', 'Suite 3'],
-    headerClass: 'bg-amber-50 text-amber-700 border-amber-100',
+    headerClass: 'bg-amber-50 text-amber-700',
   },
   {
     key: 'outdoor',
     label: 'Utebur (1–5)',
     cages: ['Utebur 1', 'Utebur 2', 'Utebur 3', 'Utebur 4', 'Utebur 5'],
-    headerClass: 'bg-teal-50 text-teal-700 border-teal-100',
+    headerClass: 'bg-teal-50 text-teal-700',
   },
   {
     key: 'other',
     label: 'Uten bur',
     cages: ['Uten bur'],
-    headerClass: 'bg-gray-50 text-gray-500 border-gray-100',
+    headerClass: 'bg-gray-50 text-gray-500',
   },
 ]
 
@@ -90,8 +90,9 @@ export default function CageGrid({
   allCages,
   initialWindowStart,
 }: Props) {
+  const parsed = parseISO(initialWindowStart)
   const [windowStart, setWindowStart] = useState<Date>(
-    parseISO(initialWindowStart)
+    new Date(parsed.getFullYear(), parsed.getMonth(), 1)
   )
   const [assignments, setAssignments] = useState(initialAssignments)
   const [unassigned, setUnassigned] = useState(initialUnassigned)
@@ -100,13 +101,21 @@ export default function CageGrid({
   const [selected, setSelected] = useState<SelectedBlock | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  const windowEnd = addDays(windowStart, 13)
+  const daysInCurrentMonth = new Date(
+    windowStart.getFullYear(),
+    windowStart.getMonth() + 1,
+    0
+  ).getDate()
+  const windowEnd = addDays(windowStart, daysInCurrentMonth - 1)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const days = Array.from({ length: 14 }, (_, i) => addDays(windowStart, i))
+  const days = Array.from({ length: daysInCurrentMonth }, (_, i) =>
+    addDays(windowStart, i)
+  )
 
   async function refreshData(from: Date) {
-    const to = addDays(from, 13)
+    const dim = new Date(from.getFullYear(), from.getMonth() + 1, 0).getDate()
+    const to = addDays(from, dim - 1)
     const [newAssignments, newUnassigned, newFree] = await Promise.all([
       getCageAssignments(localStr(from), localStr(to)),
       getUnassignedConfirmed(),
@@ -115,6 +124,25 @@ export default function CageGrid({
     setAssignments(newAssignments)
     setUnassigned(newUnassigned)
     setFreeCages(newFree)
+  }
+
+  function handleMonthChange(direction: -1 | 0 | 1) {
+    let newStart: Date
+    if (direction === 0) {
+      const t = new Date()
+      newStart = new Date(t.getFullYear(), t.getMonth(), 1)
+    } else {
+      newStart = new Date(
+        windowStart.getFullYear(),
+        windowStart.getMonth() + direction,
+        1
+      )
+    }
+    setWindowStart(newStart)
+    setSelected(null)
+    startTransition(async () => {
+      await refreshData(newStart)
+    })
   }
 
   async function handleSelectBlock(block: SelectedBlock) {
@@ -129,13 +157,6 @@ export default function CageGrid({
     const free = await getFreeCages(from, to)
     setSidebarFreeCages(free)
     setSelected(block)
-  }
-
-  function handleWindowChange(newStart: Date) {
-    setWindowStart(newStart)
-    startTransition(async () => {
-      await refreshData(newStart)
-    })
   }
 
   async function handleAssign(
@@ -219,7 +240,7 @@ export default function CageGrid({
     const cells: React.ReactNode[] = []
     let d = 0
 
-    while (d < 14) {
+    while (d < daysInCurrentMonth) {
       const day = days[d]
       const dayAssignments = getAssignmentsForCageAndDay(cageLabel, day)
 
@@ -239,12 +260,11 @@ export default function CageGrid({
       const from = parseISO(a.date_from)
       const to = parseISO(a.date_to)
       const visualEnd = addDays(to, -1)
-
       const blockStart = isAfter(from, windowStart) ? from : windowStart
       const blockEnd = isBefore(visualEnd, windowEnd) ? visualEnd : windowEnd
 
       let span = 0
-      for (let dd = d; dd < 14; dd++) {
+      for (let dd = d; dd < daysInCurrentMonth; dd++) {
         const cur = days[dd]
         if (!isBefore(cur, blockStart) && !isAfter(cur, blockEnd)) span++
         else if (span > 0) break
@@ -316,7 +336,7 @@ export default function CageGrid({
       const cells: React.ReactNode[] = []
       let d = 0
 
-      while (d < 14) {
+      while (d < daysInCurrentMonth) {
         const day = days[d]
         const inRange = !isAfter(from, day) && isAfter(to, day)
 
@@ -335,7 +355,7 @@ export default function CageGrid({
         const blockEnd = isBefore(to, windowEnd) ? to : windowEnd
 
         let span = 0
-        for (let dd = d; dd < 14; dd++) {
+        for (let dd = d; dd < daysInCurrentMonth; dd++) {
           const cur = days[dd]
           if (!isBefore(cur, blockStart) && isBefore(cur, blockEnd)) span++
           else if (span > 0) break
@@ -394,32 +414,24 @@ export default function CageGrid({
     <div className="space-y-3">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-medium text-foreground">
-          Burplassering — {format(windowStart, 'd. MMM', { locale: nb })} –{' '}
-          {format(windowEnd, 'd. MMM yyyy', { locale: nb })}
-        </h2>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => handleWindowChange(addDays(windowStart, -14))}
-            disabled={isPending}
-            className="flex items-center gap-1 rounded-md border border-border/40 px-3 py-1 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
-          >
-            <ChevronLeft className="h-3 w-3" /> Forrige
-          </button>
-          <button
-            onClick={() => handleWindowChange(new Date())}
-            disabled={isPending}
-            className="rounded-md border border-border/40 px-3 py-1 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
-          >
-            I dag
-          </button>
-          <button
-            onClick={() => handleWindowChange(addDays(windowStart, 14))}
-            disabled={isPending}
-            className="flex items-center gap-1 rounded-md border border-border/40 px-3 py-1 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
-          >
-            Neste <ChevronRight className="h-3 w-3" />
-          </button>
+        <h2 className="text-sm font-medium text-foreground">Burplassering</h2>
+        <div className="flex flex-wrap gap-4">
+          {[
+            { color: '#C0DD97', label: 'Tildelt' },
+            { color: '#FAC775', label: 'Ikke tildelt' },
+            { color: '#F0997B', label: 'Burbytte' },
+          ].map(({ color, label }) => (
+            <div
+              key={label}
+              className="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+            >
+              <div
+                className="h-2.5 w-2.5 flex-shrink-0 rounded-sm"
+                style={{ background: color }}
+              />
+              {label}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -448,24 +460,34 @@ export default function CageGrid({
         </div>
       )}
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4">
-        {[
-          { color: '#C0DD97', label: 'Tildelt' },
-          { color: '#FAC775', label: 'Ikke tildelt' },
-          { color: '#F0997B', label: 'Burbytte' },
-        ].map(({ color, label }) => (
-          <div
-            key={label}
-            className="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+      {/* Navigation */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleMonthChange(-1)}
+            disabled={isPending}
+            className="flex items-center gap-1 rounded-md border border-border/40 px-3 py-1.5 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
           >
-            <div
-              className="h-2.5 w-2.5 flex-shrink-0 rounded-sm"
-              style={{ background: color }}
-            />
-            {label}
-          </div>
-        ))}
+            ‹ Forrige
+          </button>
+          <button
+            onClick={() => handleMonthChange(0)}
+            disabled={isPending}
+            className="rounded-md border border-border/40 px-3 py-1.5 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
+          >
+            I dag
+          </button>
+          <button
+            onClick={() => handleMonthChange(1)}
+            disabled={isPending}
+            className="flex items-center gap-1 rounded-md border border-border/40 px-3 py-1.5 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
+          >
+            Neste ›
+          </button>
+        </div>
+        <span className="text-sm font-medium text-foreground">
+          {format(windowStart, 'MMMM yyyy', { locale: nb })}
+        </span>
       </div>
 
       {/* Grid */}
@@ -476,7 +498,7 @@ export default function CageGrid({
       >
         <table
           className="w-full border-collapse"
-          style={{ tableLayout: 'fixed', minWidth: 700 }}
+          style={{ tableLayout: 'fixed', minWidth: 900 }}
         >
           <thead>
             <tr>
@@ -485,16 +507,20 @@ export default function CageGrid({
               </th>
               {days.map((day) => {
                 const isToday = localStr(day) === localStr(today)
+                const isFirstOfMonth = day.getDate() === 1
                 return (
                   <th
                     key={localStr(day)}
-                    className={`border-b border-r border-border/20 py-1.5 text-center text-[10px] font-medium ${
+                    className={`border-b border-r border-border/20 py-1 text-center font-medium ${
                       isToday
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-muted/40 text-muted-foreground'
                     }`}
+                    style={{ fontSize: 9 }}
                   >
-                    {format(day, 'd')}
+                    {isFirstOfMonth
+                      ? format(day, 'd MMM', { locale: nb })
+                      : format(day, 'd')}
                   </th>
                 )
               })}
@@ -506,7 +532,7 @@ export default function CageGrid({
               <React.Fragment key={section.key}>
                 <tr>
                   <td
-                    colSpan={15}
+                    colSpan={daysInCurrentMonth + 1}
                     className={`border-b px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider ${section.headerClass}`}
                   >
                     {section.label}
@@ -605,20 +631,27 @@ function CageGridSidebar({
   )}`
 
   const freeFull = freeCages.filter((c) => c.is_fully_free)
-
   const allSorted = [...allCages].sort((x, y) => {
     if (x.cage_section !== y.cage_section)
       return x.cage_section.localeCompare(y.cage_section)
     return x.cage_number - y.cage_number
   })
-
   const conflictCage = selectedCageId
     ? !freeFull.find((c) => c.cage_id === selectedCageId)
     : false
 
+  const splitDays = React.useMemo(() => {
+    const from = parseISO(dateFrom)
+    const to = parseISO(dateTo)
+    const count =
+      Math.ceil((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24)) - 1
+    return Array.from({ length: Math.max(0, count) }, (_, i) =>
+      addDays(from, i + 1)
+    )
+  }, [dateFrom, dateTo])
+
   return (
     <div className="space-y-3 rounded-lg border border-border/30 bg-background p-4">
-      {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-sm font-medium text-foreground">{ownerName}</p>
@@ -632,7 +665,6 @@ function CageGridSidebar({
         </button>
       </div>
 
-      {/* Info rows */}
       <div className="space-y-1 border-t border-border/20 pt-3">
         {[
           { label: 'Periode', value: periodLabel },
@@ -651,7 +683,6 @@ function CageGridSidebar({
         ))}
       </div>
 
-      {/* VIEW */}
       {mode === 'view' && (
         <div className="flex flex-wrap gap-2 border-t border-border/20 pt-1">
           {!isAssigned && (
@@ -687,7 +718,6 @@ function CageGridSidebar({
         </div>
       )}
 
-      {/* ASSIGN */}
       {mode === 'assign' && (
         <div className="space-y-3 border-t border-border/20 pt-1">
           <p className="text-xs text-muted-foreground">
@@ -695,8 +725,8 @@ function CageGridSidebar({
           </p>
           {freeFull.length === 0 && (
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-              Ingen bur er helt ledige for denne perioden. Tildel et delvis
-              ledig bur og bruk "Del opp opphold" etterpå.
+              Ingen bur er helt ledige. Tildel et delvis ledig bur og bruk "Del
+              opp opphold" etterpå.
             </p>
           )}
           <select
@@ -732,7 +762,6 @@ function CageGridSidebar({
         </div>
       )}
 
-      {/* CHANGE */}
       {mode === 'change' && (
         <div className="space-y-3 border-t border-border/20 pt-1">
           <p className="text-xs text-muted-foreground">
@@ -753,8 +782,8 @@ function CageGridSidebar({
           </select>
           {conflictCage && (
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-              Dette buret er delvis opptatt. Bekreft endringen og bruk "Del opp
-              opphold" for å håndtere konflikten.
+              Dette buret er delvis opptatt. Bekreft og bruk "Del opp opphold"
+              etterpå.
             </p>
           )}
           <div className="flex gap-2">
@@ -778,51 +807,32 @@ function CageGridSidebar({
         </div>
       )}
 
-      {/* SPLIT */}
       {mode === 'split' && isAssigned && (
         <div className="space-y-3 border-t border-border/20 pt-1">
           <p className="text-xs text-muted-foreground">
             Første del beholder{' '}
             <span className="font-medium text-foreground">{a!.cage_label}</span>
-            . Velg dato og bur for andre del.
+            . Velg første dag i nytt bur:
           </p>
-          <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground">
-              Splittdato (siste dag i nåværende bur)
-            </label>
-            <div className="flex flex-wrap gap-1">
-              {Array.from(
-                {
-                  length: Math.max(
-                    0,
-                    Math.ceil(
-                      (parseISO(dateTo).getTime() -
-                        parseISO(dateFrom).getTime()) /
-                        (1000 * 60 * 60 * 24)
-                    )
-                  ),
-                },
-                (_, i) => {
-                  const d = addDays(parseISO(dateFrom), i + 1)
-                  const str = localStr(d)
-                  return (
-                    <button
-                      key={str}
-                      type="button"
-                      onClick={() => setSplitDate(str)}
-                      className={[
-                        'rounded border px-2 py-1 text-[10px] transition-colors',
-                        splitDate === str
-                          ? 'border-blue-300 bg-blue-100 text-blue-800'
-                          : 'border-border/30 bg-muted/40 text-muted-foreground hover:bg-muted',
-                      ].join(' ')}
-                    >
-                      {format(d, 'd. MMM', { locale: nb })}
-                    </button>
-                  )
-                }
-              )}
-            </div>
+          <div className="flex flex-wrap gap-1">
+            {splitDays.map((d) => {
+              const str = localStr(d)
+              return (
+                <button
+                  key={str}
+                  type="button"
+                  onClick={() => setSplitDate(str)}
+                  className={[
+                    'rounded border px-2 py-1 text-[10px] transition-colors',
+                    splitDate === str
+                      ? 'border-blue-300 bg-blue-100 text-blue-800'
+                      : 'border-border/30 bg-muted/40 text-muted-foreground hover:bg-muted',
+                  ].join(' ')}
+                >
+                  {format(d, 'd. MMM', { locale: nb })}
+                </button>
+              )
+            })}
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground">
@@ -866,7 +876,6 @@ function CageGridSidebar({
         </div>
       )}
 
-      {/* CONFIRM DELETE */}
       {mode === 'confirm-delete' && (
         <div className="space-y-3 border-t border-border/20 pt-1">
           <p className="text-xs text-muted-foreground">

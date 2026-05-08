@@ -16,26 +16,39 @@ function localStr(d: Date): string {
 async function CageGridLoader() {
   await connection()
 
-  const windowStart = new Date()
-  windowStart.setHours(0, 0, 0, 0)
-  const windowEnd = addDays(windowStart, 13)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
+  const allUnassigned = await getUnassignedConfirmed()
+
+  // Start at nearest unassigned booking, fallback to today
+  let windowStart = today
+  if (allUnassigned.length > 0) {
+    const nearest = allUnassigned
+      .map((b) => new Date(b.date_from))
+      .filter((d) => d >= today)
+      .sort((a, b) => a.getTime() - b.getTime())[0]
+    if (nearest) windowStart = nearest
+  }
+
+  // Snap to first of month
+  windowStart = new Date(windowStart.getFullYear(), windowStart.getMonth(), 1)
+
+  const windowEnd = addDays(windowStart, 13)
   const from = localStr(windowStart)
   const to = localStr(windowEnd)
 
-  const [assignments, unassigned, freeCages, allCagesResult] =
-    await Promise.all([
-      getCageAssignments(from, to),
-      getUnassignedConfirmed(),
-      getFreeCages(from, to),
-      createClient().then((supabase) =>
-        supabase
-          .from('cages')
-          .select('id, label, section, number')
-          .order('section')
-          .order('number')
-      ),
-    ])
+  const [assignments, freeCages, allCagesResult] = await Promise.all([
+    getCageAssignments(from, to),
+    getFreeCages(from, to),
+    createClient().then((supabase) =>
+      supabase
+        .from('cages')
+        .select('id, label, section, number')
+        .order('section')
+        .order('number')
+    ),
+  ])
 
   const allCages = (allCagesResult.data ?? []).map((c) => ({
     cage_id: c.id,
@@ -48,7 +61,7 @@ async function CageGridLoader() {
   return (
     <CageGrid
       initialAssignments={assignments}
-      initialUnassigned={unassigned}
+      initialUnassigned={allUnassigned}
       initialFree={freeCages}
       allCages={allCages}
       initialWindowStart={from}
