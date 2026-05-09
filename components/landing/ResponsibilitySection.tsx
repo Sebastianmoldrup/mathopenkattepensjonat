@@ -42,6 +42,7 @@ export function ResponsibilitySection() {
               width={300}
               height={300}
               className="w-[180px] md:w-[240px]"
+              style={{ height: 'auto' }}
             />
           </div>
           <div className="space-y-4">

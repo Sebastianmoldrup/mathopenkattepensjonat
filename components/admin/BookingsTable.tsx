@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   ColumnDef,
   flexRender,
@@ -22,13 +23,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   AdminBooking,
   STATUS_LABELS,
   STATUS_COLORS,
@@ -44,7 +38,14 @@ interface BookingsTableProps {
   bookings: AdminBooking[]
 }
 
-// Custom global filter that searches across name + email
+const STATUS_FILTERS = [
+  { value: 'all', label: 'Alle' },
+  { value: 'pending', label: 'Venter' },
+  { value: 'waitlist', label: 'Venteliste' },
+  { value: 'confirmed', label: 'Bekreftet' },
+  { value: 'completed', label: 'Gjennomført' },
+]
+
 const globalFilterFn: FilterFn<AdminBooking> = (
   row,
   _columnId,
@@ -81,13 +82,21 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
     { id: 'date_from', desc: true },
   ])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
   const [selectedBooking, setSelectedBooking] = useState<AdminBooking | null>(
     null
   )
   const [dialogOpen, setDialogOpen] = useState(false)
+  const router = useRouter()
 
-  // Apply status filter before passing to table
+  // Default to 'pending', but fall back to 'all' if no pending bookings
+  const hasPending = useMemo(
+    () => bookings.some((b) => b.status === 'pending'),
+    [bookings]
+  )
+  const [statusFilter, setStatusFilter] = useState(
+    hasPending ? 'pending' : 'all'
+  )
+
   const statusFiltered = useMemo(
     () =>
       statusFilter === 'all'
@@ -193,28 +202,54 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
   return (
     <>
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="mb-4 space-y-3">
+        {/* Search */}
         <Input
           placeholder="Søk etter navn eller e-post..."
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
           className="h-9 max-w-xs text-sm"
         />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 w-44 text-sm">
-            <SelectValue placeholder="Alle statuser" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle statuser</SelectItem>
-            <SelectItem value="pending">Venter</SelectItem>
-            <SelectItem value="confirmed">Bekreftet</SelectItem>
-            <SelectItem value="completed">Gjennomført</SelectItem>
-            <SelectItem value="cancelled">Avbestilt</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="ml-auto text-sm text-muted-foreground">
-          {table.getRowModel().rows.length} av {bookings.length} bookinger
-        </p>
+
+        {/* Status filter buttons */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-1.5">
+            {STATUS_FILTERS.map((f) => {
+              const count =
+                f.value === 'all'
+                  ? bookings.length
+                  : bookings.filter((b) => b.status === f.value).length
+              const isActive = statusFilter === f.value
+              return (
+                <button
+                  key={f.value}
+                  onClick={() => setStatusFilter(f.value)}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
+                    isActive
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border/40 bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  )}
+                >
+                  {f.label}
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+                      isActive
+                        ? 'bg-primary-foreground/20 text-primary-foreground'
+                        : 'bg-muted text-muted-foreground'
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {table.getRowModel().rows.length} av {bookings.length} bookinger
+          </p>
+        </div>
       </div>
 
       {/* Table */}
@@ -269,7 +304,11 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
       <BookingDetailDialog
         booking={selectedBooking}
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open)
+          if (!open) router.refresh()
+        }}
+        onDeleted={() => router.refresh()}
       />
     </>
   )

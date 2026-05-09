@@ -343,3 +343,82 @@ export function bookingRequestReceivedTemplate(booking: AdminBooking): string {
     </p>
   `)
 }
+
+export function bookingUpdatedTemplate(
+  booking: AdminBooking,
+  changes: {
+    dateChanged: boolean
+    priceChanged: boolean
+    oldDateFrom?: string
+    oldDateTo?: string
+    oldPrice?: number
+  }
+): string {
+  const firstName = booking.user_first_name ?? 'der'
+  const cats = booking.cats ?? []
+  const catNames =
+    cats.length > 0 ? cats.map((c) => c.name).join(', ') : 'katten din'
+
+  const changesHtml = `
+    <div style="background:#f9f6f2;border-radius:8px;padding:20px;margin:24px 0;border:1px solid #e8e0d8;">
+      <p style="margin:0 0 12px;font-size:13px;font-weight:bold;color:#888;text-transform:uppercase;letter-spacing:0.5px;">Endringer i din booking</p>
+      <table style="width:100%;border-collapse:collapse;">
+        ${
+          changes.dateChanged
+            ? `
+        <tr>
+          <td style="padding:6px 0;color:#666;font-size:14px;width:140px;">Tidligere datoer</td>
+          <td style="padding:6px 0;font-size:14px;text-decoration:line-through;color:#999;">
+            ${formatDateNO(changes.oldDateFrom!)} – ${formatDateNO(changes.oldDateTo!)}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#666;font-size:14px;">Nye datoer</td>
+          <td style="padding:6px 0;font-weight:bold;font-size:14px;color:#166534;">
+            ${formatDateNO(booking.date_from)} – ${formatDateNO(booking.date_to)}
+          </td>
+        </tr>
+        `
+            : ''
+        }
+        ${
+          changes.priceChanged
+            ? `
+        <tr style="${changes.dateChanged ? 'border-top:1px solid #e8e0d8;' : ''}">
+          <td style="padding:6px 0;color:#666;font-size:14px;">Tidligere pris</td>
+          <td style="padding:6px 0;font-size:14px;text-decoration:line-through;color:#999;">
+            ${changes.oldPrice!.toLocaleString('nb-NO')} kr
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#666;font-size:14px;">Ny pris</td>
+          <td style="padding:6px 0;font-weight:bold;font-size:14px;color:#166534;">
+            ${booking.price.toLocaleString('nb-NO')} kr
+          </td>
+        </tr>
+        `
+            : ''
+        }
+      </table>
+    </div>
+  `
+
+  return baseTemplate(`
+    <h2 style="color:#2C3E50;margin-top:0;">Hei ${firstName},</h2>
+
+    <p style="font-size:15px;">
+      Vi informerer om at din booking for <strong>${catNames}</strong>
+      hos <strong>Mathopen Kattepensjonat</strong> er oppdatert.
+    </p>
+
+    ${changesHtml}
+
+    ${bookingDetailsBlock(booking)}
+
+    <p style="font-size:14px;color:#555;">
+      Har du spørsmål til endringene? Ta gjerne kontakt med oss på
+      <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
+      eller ring <a href="tel:+4747322279" style="color:#c8b49a;">+47 473 22 279</a>
+    </p>
+  `)
+}

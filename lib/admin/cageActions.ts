@@ -138,3 +138,28 @@ export async function splitCageAssignment(
   revalidatePath('/admin/burplassering')
   return data as string
 }
+
+export type CageConflict = {
+  assignment_id: string
+  booking_id: string
+  conflict_from: string
+  conflict_to: string
+  owner_first: string
+  owner_last: string
+  cat_names: string
+}
+
+export async function getCageConflicts(
+  cageId: string,
+  dateFrom: string,
+  dateTo: string
+): Promise<CageConflict[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_cage_conflicts', {
+    p_cage_id: cageId,
+    p_date_from: dateFrom,
+    p_date_to: dateTo,
+  })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as CageConflict[]
+}

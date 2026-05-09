@@ -21,6 +21,7 @@ export default function Page() {
           width={800}
           height={800}
           className="w-full rounded-2xl object-cover"
+          style={{ height: 'auto' }}
           priority
         />
 
@@ -66,8 +67,9 @@ export default function Page() {
             src="/img/var-arbeider.webp"
             alt="Vår arbeider"
             width={100}
-            height={20}
+            height={100}
             className="rounded-2xl object-cover"
+            style={{ height: 'auto' }}
           />
           <div className="">
             <h2 className="mb-3 text-lg font-semibold text-foreground md:col-span-2">

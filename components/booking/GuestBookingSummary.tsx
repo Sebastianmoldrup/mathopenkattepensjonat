@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import { TriangleAlert } from 'lucide-react'
 
@@ -158,6 +159,10 @@ export function GuestBookingSummary({
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Logg inn for å fortsette</DialogTitle>
+
+            <DialogDescription className="sr-only">
+              Logg inn eller registrer deg for å fullføre bookingen
+            </DialogDescription>
           </DialogHeader>
           <AuthGateStep
             onAuthenticated={() => {

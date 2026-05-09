@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
+import React, { useState, useRef, useTransition, useEffect } from 'react'
 import { addDays, format, parseISO, isBefore, isAfter } from 'date-fns'
 import { nb } from 'date-fns/locale'
 import { AlertTriangle, Clock } from 'lucide-react'
@@ -12,11 +12,13 @@ import {
   getCageAssignments,
   getUnassignedConfirmed,
   getFreeCages,
+  getCageConflicts,
 } from '@/lib/admin/cageActions'
 import type {
   CageAssignment,
   UnassignedBooking,
   CageOption,
+  CageConflict,
 } from '@/lib/admin/cageActions'
 
 const SECTIONS = [
@@ -47,8 +49,10 @@ const SECTIONS = [
   {
     key: 'other',
     label: 'Uten bur',
-    cages: ['Uten bur'],
-    headerClass: 'bg-gray-50 text-gray-500',
+    cages: Array.from({ length: 10 }, (_, i) =>
+      i === 0 ? 'Uten bur' : `Uten bur ${i + 1}`
+    ),
+    headerClass: 'bg-gray-100 text-gray-500',
   },
 ]
 
@@ -96,10 +100,13 @@ export default function CageGrid({
   )
   const [assignments, setAssignments] = useState(initialAssignments)
   const [unassigned, setUnassigned] = useState(initialUnassigned)
-  const [freeCages, setFreeCages] = useState(initialFree)
   const [sidebarFreeCages, setSidebarFreeCages] = useState<CageOption[]>([])
   const [selected, setSelected] = useState<SelectedBlock | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    refreshData(windowStart)
+  }, [])
 
   const daysInCurrentMonth = new Date(
     windowStart.getFullYear(),
@@ -116,14 +123,12 @@ export default function CageGrid({
   async function refreshData(from: Date) {
     const dim = new Date(from.getFullYear(), from.getMonth() + 1, 0).getDate()
     const to = addDays(from, dim - 1)
-    const [newAssignments, newUnassigned, newFree] = await Promise.all([
+    const [newAssignments, newUnassigned] = await Promise.all([
       getCageAssignments(localStr(from), localStr(to)),
       getUnassignedConfirmed(),
-      getFreeCages(localStr(from), localStr(to)),
     ])
     setAssignments(newAssignments)
     setUnassigned(newUnassigned)
-    setFreeCages(newFree)
   }
 
   function handleMonthChange(direction: -1 | 0 | 1) {
@@ -212,6 +217,28 @@ export default function CageGrid({
     })
   }
 
+  // For unassigned conflict flow: assign first then split
+  async function handleAssignThenSplit(
+    firstCageId: string,
+    dateFrom: string,
+    dateTo: string,
+    splitDate: string,
+    secondCageId: string
+  ) {
+    if (selected?.type !== 'unassigned') return
+    startTransition(async () => {
+      const assignmentId = await assignCage(
+        selected.booking.booking_id,
+        firstCageId,
+        dateFrom,
+        dateTo
+      )
+      await splitCageAssignment(assignmentId, splitDate, secondCageId)
+      await refreshData(windowStart)
+      setSelected(null)
+    })
+  }
+
   const outsideUnassigned = unassigned.filter((b) => {
     const from = parseISO(b.date_from)
     const to = parseISO(b.date_to)
@@ -224,65 +251,121 @@ export default function CageGrid({
     return !(isBefore(to, windowStart) || isAfter(from, windowEnd))
   })
 
-  function getAssignmentsForCageAndDay(
-    cageLabel: string,
-    day: Date
-  ): CageAssignment[] {
-    return assignments.filter((a) => {
-      if (a.cage_label !== cageLabel) return false
-      const from = parseISO(a.date_from)
-      const to = parseISO(a.date_to)
-      return !isAfter(from, day) && isAfter(to, day)
-    })
-  }
-
   function renderCageRow(cageLabel: string) {
     const cells: React.ReactNode[] = []
     let d = 0
 
     while (d < daysInCurrentMonth) {
       const day = days[d]
-      const dayAssignments = getAssignmentsForCageAndDay(cageLabel, day)
+      const dayStr = localStr(day)
+      const isToday = dayStr === localStr(today)
+
+      const dayAssignments = assignments.filter((x) => {
+        if (x.cage_label !== cageLabel) return false
+        return dayStr >= x.date_from && dayStr <= x.date_to
+      })
 
       if (dayAssignments.length === 0) {
-        const isToday = localStr(day) === localStr(today)
         cells.push(
           <td
             key={d}
-            className={`h-8 border-b border-r border-border/20 p-0.5 ${isToday ? 'bg-blue-50/30' : ''}`}
+            className={`h-8 border-b border-r border-border/40 p-0 ${isToday ? 'bg-blue-50/40' : ''}`}
           />
         )
         d++
         continue
       }
 
-      const a = dayAssignments[0]
-      const from = parseISO(a.date_from)
-      const to = parseISO(a.date_to)
-      const visualEnd = addDays(to, -1)
-      const blockStart = isAfter(from, windowStart) ? from : windowStart
-      const blockEnd = isBefore(visualEnd, windowEnd) ? visualEnd : windowEnd
+      // Two bookings share this day — split cell in half
+      if (dayAssignments.length >= 2) {
+        const left =
+          dayAssignments.find((x) => x.date_to === dayStr) ?? dayAssignments[0]
+        const right =
+          dayAssignments.find((x) => x.date_from === dayStr) ??
+          dayAssignments[1]
 
-      let span = 0
-      for (let dd = d; dd < daysInCurrentMonth; dd++) {
-        const cur = days[dd]
-        if (!isBefore(cur, blockStart) && !isAfter(cur, blockEnd)) span++
-        else if (span > 0) break
+        const leftSwap = assignments.some(
+          (o) =>
+            o.booking_id === left.booking_id &&
+            o.assignment_id !== left.assignment_id &&
+            o.cage_id !== left.cage_id &&
+            o.date_from < left.date_from
+        )
+        const rightSwap = assignments.some(
+          (o) =>
+            o.booking_id === right.booking_id &&
+            o.assignment_id !== right.assignment_id &&
+            o.cage_id !== right.cage_id &&
+            o.date_from < right.date_from
+        )
+
+        const isSelectedLeft =
+          selected?.type === 'assigned' &&
+          selected.assignment.assignment_id === left.assignment_id
+        const isSelectedRight =
+          selected?.type === 'assigned' &&
+          selected.assignment.assignment_id === right.assignment_id
+
+        cells.push(
+          <td
+            key={d}
+            className={`h-8 border-b border-r border-border/40 p-0 ${isToday ? 'bg-blue-50/40' : ''}`}
+          >
+            <div className="flex h-full w-full">
+              <button
+                onClick={() =>
+                  handleSelectBlock({ type: 'assigned', assignment: left })
+                }
+                className={`flex h-full w-1/2 items-center overflow-hidden px-1 text-[9px] font-medium ${isSelectedLeft ? 'ring-2 ring-inset ring-amber-500' : ''}`}
+                style={{
+                  background: leftSwap ? '#F0997B' : '#C0DD97',
+                  color: leftSwap ? '#4A1B0C' : '#27500A',
+                  borderRadius: 0,
+                }}
+              >
+                <span className="truncate">
+                  {blockLabel(
+                    left.owner_first,
+                    left.owner_last,
+                    left.cat_names
+                  )}
+                </span>
+              </button>
+              <button
+                onClick={() =>
+                  handleSelectBlock({ type: 'assigned', assignment: right })
+                }
+                className={`flex h-full w-1/2 items-center overflow-hidden px-1 text-[9px] font-medium ${isSelectedRight ? 'ring-2 ring-inset ring-amber-500' : ''}`}
+                style={{
+                  background: rightSwap ? '#F0997B' : '#C0DD97',
+                  color: rightSwap ? '#4A1B0C' : '#27500A',
+                  borderRadius: 0,
+                }}
+              >
+                <span className="truncate">
+                  {blockLabel(
+                    right.owner_first,
+                    right.owner_last,
+                    right.cat_names
+                  )}
+                </span>
+              </button>
+            </div>
+          </td>
+        )
+        d++
+        continue
       }
-      if (span === 0) span = 1
 
-      const continuesLeft = isBefore(from, windowStart)
-      const continuesRight = isAfter(visualEnd, windowEnd)
-
+      const a = dayAssignments[0]
       const isCageSwap = assignments.some(
         (other) =>
           other.booking_id === a.booking_id &&
           other.assignment_id !== a.assignment_id &&
           other.cage_id !== a.cage_id &&
-          isBefore(parseISO(other.date_from), from)
+          other.date_from < a.date_from
       )
 
-      const isToday = localStr(day) === localStr(today)
       const label = isCageSwap
         ? `↪ ${blockLabel(a.owner_first, a.owner_last, a.cat_names)}`
         : blockLabel(a.owner_first, a.owner_last, a.cat_names)
@@ -291,28 +374,59 @@ export default function CageGrid({
         selected?.type === 'assigned' &&
         selected.assignment.assignment_id === a.assignment_id
 
+      const bg = isCageSwap ? '#F0997B' : '#C0DD97'
+      const color = isCageSwap ? '#4A1B0C' : '#27500A'
+
+      let span = 0
+      for (let dd = d; dd < daysInCurrentMonth; dd++) {
+        const cur = localStr(days[dd])
+        if (cur >= a.date_from && cur < a.date_to) span++
+        else if (span > 0) break
+      }
+
+      const collisionOnLastDay = assignments.some(
+        (x) =>
+          x.cage_label === cageLabel &&
+          x.assignment_id !== a.assignment_id &&
+          x.date_from === a.date_to
+      )
+      if (!collisionOnLastDay && a.date_to <= localStr(windowEnd)) span++
+      if (span === 0) span = 1
+
+      const collisionOnFirstDay = assignments.some(
+        (x) =>
+          x.cage_label === cageLabel &&
+          x.assignment_id !== a.assignment_id &&
+          x.date_to === a.date_from
+      )
+
+      const continuesRight =
+        a.date_to > localStr(windowEnd) || collisionOnLastDay
+      const startsHere =
+        a.date_from >= localStr(windowStart) && !collisionOnFirstDay
+
       cells.push(
         <td
           key={d}
           colSpan={span}
-          className={`h-8 border-b border-r border-border/20 p-0.5 ${isToday ? 'bg-blue-50/30' : ''}`}
+          className={`h-8 border-b border-r border-border/40 p-0 ${isToday ? 'bg-blue-50/40' : ''}`}
         >
           <button
             onClick={() =>
               handleSelectBlock({ type: 'assigned', assignment: a })
             }
-            className={[
-              'flex h-full w-full items-center rounded-sm px-1.5 text-[10px] font-medium',
-              'overflow-hidden whitespace-nowrap text-left transition-all',
-              continuesLeft ? 'rounded-l-none' : '',
-              continuesRight ? 'rounded-r-none' : '',
-              isSelected ? 'ring-2 ring-amber-500 ring-offset-0' : '',
-              isCageSwap
-                ? 'bg-[#F0997B] text-[#4A1B0C] hover:brightness-95'
-                : 'bg-[#C0DD97] text-[#27500A] hover:brightness-95',
-            ]
-              .filter(Boolean)
-              .join(' ')}
+            className={`flex h-full w-full items-center overflow-hidden px-1.5 text-[10px] font-medium ${isSelected ? 'ring-2 ring-inset ring-amber-500' : ''}`}
+            style={{
+              background: bg,
+              color,
+              borderRadius: continuesRight
+                ? startsHere
+                  ? '2px 0 0 2px'
+                  : '0'
+                : startsHere
+                  ? '2px'
+                  : '0 2px 2px 0',
+            }}
           >
             <span className="truncate">{label}</span>
             {a.has_note && (
@@ -344,7 +458,7 @@ export default function CageGrid({
           cells.push(
             <td
               key={d}
-              className="h-8 border-b border-r border-border/20 bg-amber-50/20 p-0.5"
+              className="h-8 border-b border-r border-border/40 bg-amber-50/30 p-0"
             />
           )
           d++
@@ -370,7 +484,7 @@ export default function CageGrid({
           <td
             key={d}
             colSpan={span}
-            className="h-8 border-b border-r border-border/20 bg-amber-50/20 p-0.5"
+            className="h-8 border-b border-r border-border/40 bg-amber-50/30 p-0"
           >
             <button
               onClick={() => handleSelectBlock({ type: 'unassigned', booking })}
@@ -401,7 +515,7 @@ export default function CageGrid({
 
       return (
         <tr key={booking.booking_id}>
-          <td className="whitespace-nowrap border-b border-r border-border/20 bg-amber-50/40 px-2 text-[10px] font-medium text-amber-700">
+          <td className="whitespace-nowrap border-b border-r border-border/40 bg-amber-50/60 px-2 text-[10px] font-medium text-amber-700">
             Ikke tildelt
           </td>
           {cells}
@@ -412,14 +526,13 @@ export default function CageGrid({
 
   return (
     <div className="space-y-3">
-      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-sm font-medium text-foreground">Burplassering</h2>
         <div className="flex flex-wrap gap-4">
           {[
             { color: '#C0DD97', label: 'Tildelt' },
-            { color: '#FAC775', label: 'Ikke tildelt' },
             { color: '#F0997B', label: 'Burbytte' },
+            { color: '#FAC775', label: 'Ikke tildelt' },
           ].map(({ color, label }) => (
             <div
               key={label}
@@ -435,7 +548,6 @@ export default function CageGrid({
         </div>
       </div>
 
-      {/* Alerts */}
       {(insideUnassigned.length > 0 || outsideUnassigned.length > 0) && (
         <div className="flex flex-wrap gap-2">
           {insideUnassigned.length > 0 && (
@@ -460,7 +572,6 @@ export default function CageGrid({
         </div>
       )}
 
-      {/* Navigation */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
@@ -490,11 +601,8 @@ export default function CageGrid({
         </span>
       </div>
 
-      {/* Grid */}
       <div
-        className={`overflow-x-auto rounded-lg border border-border/30 transition-opacity ${
-          isPending ? 'opacity-60' : ''
-        }`}
+        className={`overflow-x-auto rounded-lg border border-border/40 transition-opacity ${isPending ? 'opacity-60' : ''}`}
       >
         <table
           className="w-full border-collapse"
@@ -502,7 +610,7 @@ export default function CageGrid({
         >
           <thead>
             <tr>
-              <th className="w-[80px] border-b border-r border-border/20 bg-muted/40 px-2 py-1.5 text-left text-[10px] font-medium text-muted-foreground">
+              <th className="w-[80px] border-b border-r border-border/40 bg-muted/60 px-2 py-1.5 text-left text-[10px] font-medium text-muted-foreground">
                 Bur
               </th>
               {days.map((day) => {
@@ -511,10 +619,10 @@ export default function CageGrid({
                 return (
                   <th
                     key={localStr(day)}
-                    className={`border-b border-r border-border/20 py-1 text-center font-medium ${
+                    className={`border-b border-r border-border/40 py-1 text-center font-medium ${
                       isToday
                         ? 'bg-blue-100 text-blue-700'
-                        : 'bg-muted/40 text-muted-foreground'
+                        : 'bg-muted/60 text-muted-foreground'
                     }`}
                     style={{ fontSize: 9 }}
                   >
@@ -540,7 +648,7 @@ export default function CageGrid({
                 </tr>
                 {section.cages.map((cageLabel) => (
                   <tr key={cageLabel}>
-                    <td className="whitespace-nowrap border-b border-r border-border/20 bg-muted/30 px-2 text-[10px] font-medium text-muted-foreground">
+                    <td className="whitespace-nowrap border-b border-r border-border/40 bg-muted/40 px-2 text-[10px] font-medium text-muted-foreground">
                       {cageLabel}
                     </td>
                     {renderCageRow(cageLabel)}
@@ -552,7 +660,6 @@ export default function CageGrid({
         </table>
       </div>
 
-      {/* Sidebar */}
       {selected && (
         <CageGridSidebar
           selected={selected}
@@ -570,6 +677,7 @@ export default function CageGrid({
           }
           onClose={() => setSelected(null)}
           onAssign={handleAssign}
+          onAssignThenSplit={handleAssignThenSplit}
           onUpdate={handleUpdate}
           onDelete={handleDelete}
           onSplit={handleSplit}
@@ -582,7 +690,13 @@ export default function CageGrid({
 
 // ─── Sidebar ────────────────────────────────────────────────────────────────
 
-type SidebarMode = 'view' | 'assign' | 'change' | 'split' | 'confirm-delete'
+type SidebarMode =
+  | 'view'
+  | 'assign'
+  | 'change'
+  | 'split'
+  | 'confirm-delete'
+  | 'conflict'
 
 type SidebarProps = {
   selected: SelectedBlock
@@ -592,6 +706,13 @@ type SidebarProps = {
   dateTo: string
   onClose: () => void
   onAssign: (cageId: string, dateFrom: string, dateTo: string) => Promise<void>
+  onAssignThenSplit: (
+    firstCageId: string,
+    dateFrom: string,
+    dateTo: string,
+    splitDate: string,
+    secondCageId: string
+  ) => Promise<void>
   onUpdate: (cageId: string, dateFrom: string, dateTo: string) => Promise<void>
   onDelete: () => Promise<void>
   onSplit: (splitDate: string, secondCageId: string) => Promise<void>
@@ -606,6 +727,7 @@ function CageGridSidebar({
   dateTo,
   onClose,
   onAssign,
+  onAssignThenSplit,
   onUpdate,
   onDelete,
   onSplit,
@@ -613,7 +735,12 @@ function CageGridSidebar({
 }: SidebarProps) {
   const [mode, setMode] = useState<SidebarMode>('view')
   const [selectedCageId, setSelectedCageId] = useState('')
+  const [secondCageId, setSecondCageId] = useState('')
   const [splitDate, setSplitDate] = useState('')
+  const [conflicts, setConflicts] = useState<CageConflict[]>([])
+  const [checkingConflicts, setCheckingConflicts] = useState(false)
+  // Store first cage selection when transitioning to conflict mode
+  const firstCageRef = useRef('')
 
   const isAssigned = selected.type === 'assigned'
   const a = isAssigned ? selected.assignment : null
@@ -636,9 +763,6 @@ function CageGridSidebar({
       return x.cage_section.localeCompare(y.cage_section)
     return x.cage_number - y.cage_number
   })
-  const conflictCage = selectedCageId
-    ? !freeFull.find((c) => c.cage_id === selectedCageId)
-    : false
 
   const splitDays = React.useMemo(() => {
     const from = parseISO(dateFrom)
@@ -649,6 +773,80 @@ function CageGridSidebar({
       addDays(from, i + 1)
     )
   }, [dateFrom, dateTo])
+
+  function resetMode() {
+    setMode('view')
+    setSelectedCageId('')
+    setSecondCageId('')
+    setSplitDate('')
+    setConflicts([])
+    firstCageRef.current = ''
+  }
+
+  async function handleConfirmAssign() {
+    if (!selectedCageId) return
+    setCheckingConflicts(true)
+    try {
+      const foundConflicts = await getCageConflicts(
+        selectedCageId,
+        dateFrom,
+        dateTo
+      )
+      if (foundConflicts.length > 0) {
+        firstCageRef.current = selectedCageId
+        setConflicts(foundConflicts)
+        setSplitDate(foundConflicts[0].conflict_from)
+        setSelectedCageId('')
+        setMode('conflict')
+      } else {
+        await onAssign(selectedCageId, dateFrom, dateTo)
+      }
+    } catch {
+      await onAssign(selectedCageId, dateFrom, dateTo)
+    } finally {
+      setCheckingConflicts(false)
+    }
+  }
+
+  async function handleConfirmUpdate() {
+    if (!selectedCageId) return
+    setCheckingConflicts(true)
+    try {
+      const foundConflicts = await getCageConflicts(
+        selectedCageId,
+        dateFrom,
+        dateTo
+      )
+      if (foundConflicts.length > 0) {
+        firstCageRef.current = selectedCageId
+        setConflicts(foundConflicts)
+        setSplitDate(foundConflicts[0].conflict_from)
+        setSelectedCageId('')
+        setMode('conflict')
+      } else {
+        await onUpdate(selectedCageId, dateFrom, dateTo)
+      }
+    } catch {
+      await onUpdate(selectedCageId, dateFrom, dateTo)
+    } finally {
+      setCheckingConflicts(false)
+    }
+  }
+
+  async function handleConfirmConflictSplit() {
+    if (!splitDate || !secondCageId) return
+    if (isAssigned) {
+      await onSplit(splitDate, secondCageId)
+    } else {
+      await onAssignThenSplit(
+        firstCageRef.current,
+        dateFrom,
+        dateTo,
+        splitDate,
+        secondCageId
+      )
+    }
+  }
 
   return (
     <div className="space-y-3 rounded-lg border border-border/30 bg-background p-4">
@@ -683,6 +881,7 @@ function CageGridSidebar({
         ))}
       </div>
 
+      {/* VIEW */}
       {mode === 'view' && (
         <div className="flex flex-wrap gap-2 border-t border-border/20 pt-1">
           {!isAssigned && (
@@ -718,15 +917,17 @@ function CageGridSidebar({
         </div>
       )}
 
+      {/* ASSIGN */}
       {mode === 'assign' && (
         <div className="space-y-3 border-t border-border/20 pt-1">
           <p className="text-xs text-muted-foreground">
-            Velg et ledig bur for hele perioden:
+            Velg bur for oppholdet:
           </p>
           {freeFull.length === 0 && (
             <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-              Ingen bur er helt ledige. Tildel et delvis ledig bur og bruk "Del
-              opp opphold" etterpå.
+              Ingen bur er helt ledige for hele perioden. Velg et bur for første
+              del — systemet oppdager konflikter automatisk og hjelper deg med å
+              splitte.
             </p>
           )}
           <select
@@ -735,25 +936,31 @@ function CageGridSidebar({
             className="w-full rounded-md border border-border/40 bg-background px-2 py-1.5 text-xs"
           >
             <option value="">Velg bur...</option>
-            {freeFull.map((c) => (
-              <option key={c.cage_id} value={c.cage_id}>
-                {c.cage_label}
-              </option>
-            ))}
+            {allSorted.map((c) => {
+              const free = freeCages.find((f) => f.cage_id === c.cage_id)
+              const isFullyFree = free?.is_fully_free ?? false
+              return (
+                <option key={c.cage_id} value={c.cage_id}>
+                  {c.cage_label}
+                  {!isFullyFree ? ' — delvis opptatt' : ' — ledig'}
+                </option>
+              )
+            })}
           </select>
           <div className="flex gap-2">
             <button
-              disabled={!selectedCageId || isPending}
-              onClick={() => onAssign(selectedCageId, dateFrom, dateTo)}
+              disabled={!selectedCageId || isPending || checkingConflicts}
+              onClick={handleConfirmAssign}
               className="flex-1 rounded-md border border-blue-200 bg-blue-50 py-2 text-xs text-blue-800 transition-colors hover:bg-blue-100 disabled:opacity-40"
             >
-              {isPending ? 'Lagrer...' : 'Bekreft tildeling'}
+              {checkingConflicts
+                ? 'Sjekker...'
+                : isPending
+                  ? 'Lagrer...'
+                  : 'Bekreft tildeling'}
             </button>
             <button
-              onClick={() => {
-                setMode('view')
-                setSelectedCageId('')
-              }}
+              onClick={resetMode}
               className="rounded-md border border-border/30 px-3 py-2 text-xs transition-colors hover:bg-muted/50"
             >
               Avbryt
@@ -762,6 +969,7 @@ function CageGridSidebar({
         </div>
       )}
 
+      {/* CHANGE */}
       {mode === 'change' && (
         <div className="space-y-3 border-t border-border/20 pt-1">
           <p className="text-xs text-muted-foreground">
@@ -780,25 +988,20 @@ function CageGridSidebar({
               </option>
             ))}
           </select>
-          {conflictCage && (
-            <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-              Dette buret er delvis opptatt. Bekreft og bruk "Del opp opphold"
-              etterpå.
-            </p>
-          )}
           <div className="flex gap-2">
             <button
-              disabled={!selectedCageId || isPending}
-              onClick={() => onUpdate(selectedCageId, dateFrom, dateTo)}
+              disabled={!selectedCageId || isPending || checkingConflicts}
+              onClick={handleConfirmUpdate}
               className="flex-1 rounded-md border border-blue-200 bg-blue-50 py-2 text-xs text-blue-800 transition-colors hover:bg-blue-100 disabled:opacity-40"
             >
-              {isPending ? 'Lagrer...' : 'Bekreft endring'}
+              {checkingConflicts
+                ? 'Sjekker...'
+                : isPending
+                  ? 'Lagrer...'
+                  : 'Bekreft endring'}
             </button>
             <button
-              onClick={() => {
-                setMode('view')
-                setSelectedCageId('')
-              }}
+              onClick={resetMode}
               className="rounded-md border border-border/30 px-3 py-2 text-xs transition-colors hover:bg-muted/50"
             >
               Avbryt
@@ -807,6 +1010,90 @@ function CageGridSidebar({
         </div>
       )}
 
+      {/* CONFLICT */}
+      {mode === 'conflict' && (
+        <div className="space-y-3 border-t border-border/20 pt-1">
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs text-amber-800">
+            <p className="mb-1 font-medium">Kollisjon oppdaget</p>
+            {conflicts.map((c) => (
+              <p key={c.assignment_id}>
+                {c.owner_last} — {c.cat_names} er i dette buret{' '}
+                {format(parseISO(c.conflict_from), 'd. MMM', { locale: nb })} –{' '}
+                {format(parseISO(c.conflict_to), 'd. MMM', { locale: nb })}
+              </p>
+            ))}
+            <p className="mt-1.5">
+              Oppholdet splittes automatisk. Første del får valgt bur, andre del
+              trenger et annet bur fra splittdatoen.
+            </p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground">
+              Splittdato (første dag i nytt bur) — foreslått automatisk
+            </label>
+            <div className="flex flex-wrap gap-1">
+              {splitDays.map((d) => {
+                const str = localStr(d)
+                return (
+                  <button
+                    key={str}
+                    type="button"
+                    onClick={() => setSplitDate(str)}
+                    className={[
+                      'rounded border px-2 py-1 text-[10px] transition-colors',
+                      splitDate === str
+                        ? 'border-blue-300 bg-blue-100 text-blue-800'
+                        : 'border-border/30 bg-muted/40 text-muted-foreground hover:bg-muted',
+                    ].join(' ')}
+                  >
+                    {format(d, 'd. MMM', { locale: nb })}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground">
+              Bur for del 2
+            </label>
+            <select
+              value={secondCageId}
+              onChange={(e) => setSecondCageId(e.target.value)}
+              className="w-full rounded-md border border-border/40 bg-background px-2 py-1.5 text-xs"
+            >
+              <option value="">Velg bur for del 2...</option>
+              {allSorted
+                .filter((c) => c.cage_id !== firstCageRef.current)
+                .map((c) => (
+                  <option key={c.cage_id} value={c.cage_id}>
+                    {c.cage_label}
+                    {!c.is_fully_free ? ' — delvis opptatt' : ''}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              disabled={!splitDate || !secondCageId || isPending}
+              onClick={handleConfirmConflictSplit}
+              className="flex-1 rounded-md border border-blue-200 bg-blue-50 py-2 text-xs text-blue-800 transition-colors hover:bg-blue-100 disabled:opacity-40"
+            >
+              {isPending ? 'Lagrer...' : 'Bekreft splitting'}
+            </button>
+            <button
+              onClick={resetMode}
+              className="rounded-md border border-border/30 px-3 py-2 text-xs transition-colors hover:bg-muted/50"
+            >
+              Avbryt
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SPLIT */}
       {mode === 'split' && isAssigned && (
         <div className="space-y-3 border-t border-border/20 pt-1">
           <p className="text-xs text-muted-foreground">
@@ -839,8 +1126,8 @@ function CageGridSidebar({
               Bur for del 2
             </label>
             <select
-              value={selectedCageId}
-              onChange={(e) => setSelectedCageId(e.target.value)}
+              value={secondCageId}
+              onChange={(e) => setSecondCageId(e.target.value)}
               className="w-full rounded-md border border-border/40 bg-background px-2 py-1.5 text-xs"
             >
               <option value="">Velg bur...</option>
@@ -856,18 +1143,14 @@ function CageGridSidebar({
           </div>
           <div className="flex gap-2">
             <button
-              disabled={!splitDate || !selectedCageId || isPending}
-              onClick={() => onSplit(splitDate, selectedCageId)}
+              disabled={!splitDate || !secondCageId || isPending}
+              onClick={() => onSplit(splitDate, secondCageId)}
               className="flex-1 rounded-md border border-blue-200 bg-blue-50 py-2 text-xs text-blue-800 transition-colors hover:bg-blue-100 disabled:opacity-40"
             >
               {isPending ? 'Lagrer...' : 'Bekreft splitting'}
             </button>
             <button
-              onClick={() => {
-                setMode('view')
-                setSelectedCageId('')
-                setSplitDate('')
-              }}
+              onClick={resetMode}
               className="rounded-md border border-border/30 px-3 py-2 text-xs transition-colors hover:bg-muted/50"
             >
               Avbryt
@@ -876,6 +1159,7 @@ function CageGridSidebar({
         </div>
       )}
 
+      {/* CONFIRM DELETE */}
       {mode === 'confirm-delete' && (
         <div className="space-y-3 border-t border-border/20 pt-1">
           <p className="text-xs text-muted-foreground">
@@ -890,7 +1174,7 @@ function CageGridSidebar({
               {isPending ? 'Fjerner...' : 'Ja, fjern tildeling'}
             </button>
             <button
-              onClick={() => setMode('view')}
+              onClick={resetMode}
               className="rounded-md border border-border/30 px-3 py-2 text-xs transition-colors hover:bg-muted/50"
             >
               Avbryt

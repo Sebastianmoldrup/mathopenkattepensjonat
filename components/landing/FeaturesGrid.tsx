@@ -63,6 +63,7 @@ function FeatureCard({
             width={150}
             height={150}
             className="mb-4 h-[150px] w-fit rounded-lg"
+            style={{ width: 'auto' }}
           />
           <div>
             <h3 className="mb-2 text-lg font-semibold text-slate-900">

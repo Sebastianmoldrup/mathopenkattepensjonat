@@ -34,6 +34,7 @@ export default function Navbar() {
                 priority
                 alt="Logo"
                 className="h-24 w-24 object-contain"
+                style={{ width: 'auto' }}
               />
             </Link>
 
@@ -86,6 +87,7 @@ export default function Navbar() {
               height={160}
               alt="Logo"
               className="h-24 w-24 object-contain"
+              style={{ width: 'auto' }}
             />
             <button
               onClick={() => setIsOpen(false)}

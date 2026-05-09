@@ -1,5 +1,6 @@
 export type AdminBookingStatus =
   | 'pending'
+  | 'waitlist'
   | 'confirmed'
   | 'completed'
   | 'cancelled'
@@ -24,6 +25,7 @@ export interface AdminBooking {
   user_address: string | null
   user_emergency_contact: string | null
   wants_outdoor_cage: boolean
+  waitlist_requested: boolean
   cats?: AdminCat[]
 }
 
@@ -60,6 +62,7 @@ export interface RevenueStats {
 
 export const STATUS_LABELS: Record<AdminBookingStatus, string> = {
   pending: 'Venter',
+  waitlist: 'Venteliste',
   confirmed: 'Bekreftet',
   completed: 'Gjennomført',
   cancelled: 'Avbestilt',
@@ -67,6 +70,7 @@ export const STATUS_LABELS: Record<AdminBookingStatus, string> = {
 
 export const STATUS_COLORS: Record<AdminBookingStatus, string> = {
   pending: 'bg-amber-100 text-amber-800 border-amber-300',
+  waitlist: 'bg-purple-100 text-purple-800 border-purple-300',
   confirmed: 'bg-green-100 text-green-800 border-green-300',
   completed: 'bg-blue-100 text-blue-800 border-blue-300',
   cancelled: 'bg-red-100 text-red-800 border-red-300',

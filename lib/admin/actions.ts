@@ -312,3 +312,62 @@ export async function adminDeleteBooking(
   revalidatePath('/admin')
   return { success: true }
 }
+
+// ─── Update booking details ────────────────────────────────────────────────────
+
+import { sendBookingUpdatedEmail } from '@/lib/email/resend'
+
+export async function adminUpdateBookingDetails(
+  bookingId: string,
+  details: {
+    date_from: string
+    date_to: string
+    cage_type: string
+    cage_count: number
+    price: number
+    wants_outdoor_cage: boolean
+    special_instructions: string | null
+  },
+  existingBooking: AdminBooking
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('admin_update_booking_details', {
+    p_booking_id: bookingId,
+    p_date_from: details.date_from,
+    p_date_to: details.date_to,
+    p_cage_type: details.cage_type,
+    p_cage_count: details.cage_count,
+    p_price: details.price,
+    p_wants_outdoor_cage: details.wants_outdoor_cage,
+    p_special_instructions: details.special_instructions,
+  })
+
+  if (error) {
+    console.error('[adminUpdateBookingDetails]', error.message)
+    return { success: false, error: 'Kunne ikke oppdatere booking.' }
+  }
+
+  // Send email only if dates or price changed
+  const dateChanged =
+    details.date_from !== existingBooking.date_from ||
+    details.date_to !== existingBooking.date_to
+  const priceChanged = details.price !== existingBooking.price
+
+  if (dateChanged || priceChanged) {
+    await sendBookingUpdatedEmail(
+      { ...existingBooking, ...details },
+      {
+        dateChanged,
+        priceChanged,
+        oldDateFrom: existingBooking.date_from,
+        oldDateTo: existingBooking.date_to,
+        oldPrice: existingBooking.price,
+      }
+    )
+  }
+
+  revalidatePath('/admin/bookinger')
+  revalidatePath('/admin')
+  return { success: true }
+}

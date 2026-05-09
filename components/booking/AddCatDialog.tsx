@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog'
 import {
   Field,
@@ -187,6 +188,10 @@ export function AddCatDialog({
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Legg til katt</DialogTitle>
+
+          <DialogDescription className="sr-only">
+            Legg til informasjon om katten din
+          </DialogDescription>
         </DialogHeader>
 
         {form.formState.isSubmitting ? (

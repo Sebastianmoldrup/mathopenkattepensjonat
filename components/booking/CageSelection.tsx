@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -245,6 +246,10 @@ export function CageSelection({
         <DialogContent className="max-w-md" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>Senior & Komfort bur</DialogTitle>
+
+            <DialogDescription className="sr-only">
+              Velg burtype for oppholdet
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm text-muted-foreground">
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-700">

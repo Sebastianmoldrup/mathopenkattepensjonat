@@ -1,14 +1,14 @@
-import Link from "next/link";
-import Image from "next/image";
-import { MapPin, Phone, Mail, Clock, FileText, Shield } from "lucide-react";
+import Link from 'next/link'
+import Image from 'next/image'
+import { MapPin, Phone, Mail, Clock, FileText, Shield } from 'lucide-react'
 
-const CURRENT_YEAR = new Date().getFullYear();
+const CURRENT_YEAR = new Date().getFullYear()
 
 const Footer = () => {
   return (
-    <footer className="text-slate-200 bg-slate-700">
+    <footer className="bg-slate-700 text-slate-200">
       <div className="bg-slate-700">
-        <div className="max-w-6xl mx-auto px-4 py-20">
+        <div className="mx-auto max-w-6xl px-4 py-20">
           <div className="grid gap-14 md:grid-cols-4">
             {/* Om */}
             <div>
@@ -17,12 +17,13 @@ const Footer = () => {
                 alt="Mathopen Kattepensjonat"
                 width={100}
                 height={100}
-                className="mb-4 object-contain rounded-lg"
+                className="mb-4 rounded-lg object-contain"
+                style={{ width: 'auto' }}
               />
-              <h3 className="text-lg font-semibold mb-5 text-white">
+              <h3 className="mb-5 text-lg font-semibold text-white">
                 Mathopen Kattepensjonat
               </h3>
-              <p className="text-sm text-slate-400 leading-relaxed">
+              <p className="text-sm leading-relaxed text-slate-400">
                 Et trygt og omsorgsfullt kattepensjonat i Mathopen, Bergen. Vi
                 tilbyr rolige omgivelser, god plass og tett oppfølging gjennom
                 hele oppholdet.
@@ -31,12 +32,12 @@ const Footer = () => {
 
             {/* Hurtiglenker */}
             <div>
-              <h4 className="font-semibold mb-5 text-white">Hurtiglenker</h4>
+              <h4 className="mb-5 font-semibold text-white">Hurtiglenker</h4>
               <ul className="space-y-3 text-sm text-slate-400">
                 <li>
                   <Link
                     href="/booking"
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
                     Bestill opphold
                   </Link>
@@ -44,7 +45,7 @@ const Footer = () => {
                 <li>
                   <Link
                     href="/priser"
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
                     Priser
                   </Link>
@@ -52,7 +53,7 @@ const Footer = () => {
                 <li>
                   <Link
                     href="/om-oss"
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
                     Om oss
                   </Link>
@@ -60,7 +61,7 @@ const Footer = () => {
                 <li>
                   <Link
                     href="/kontakt"
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
                     Kontakt
                   </Link>
@@ -70,7 +71,7 @@ const Footer = () => {
 
             {/* Kontakt */}
             <div>
-              <h4 className="font-semibold mb-5 text-white">Kontakt</h4>
+              <h4 className="mb-5 font-semibold text-white">Kontakt</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                 <li className="flex items-start gap-3">
                   <MapPin size={16} className="mt-0.5 text-slate-500" />
@@ -81,7 +82,7 @@ const Footer = () => {
                   <Phone size={16} className="mt-0.5 text-slate-500" />
                   <a
                     href="tel:47322279"
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
                     473 22 279
                   </a>
@@ -91,7 +92,7 @@ const Footer = () => {
                   <Mail size={16} className="mt-0.5 text-slate-500" />
                   <a
                     href="mailto:post@mathopenkattepensjonat.no"
-                    className="hover:text-white transition-colors break-all"
+                    className="break-all transition-colors hover:text-white"
                   >
                     post@mathopenkattepensjonat.no
                   </a>
@@ -110,7 +111,7 @@ const Footer = () => {
 
             {/* Praktisk */}
             <div>
-              <h4 className="font-semibold mb-5 text-white">Praktisk</h4>
+              <h4 className="mb-5 font-semibold text-white">Praktisk</h4>
               <ul className="space-y-4 text-sm text-slate-400">
                 <li className="flex items-center gap-3">
                   <Shield size={16} className="text-slate-500" />
@@ -121,7 +122,7 @@ const Footer = () => {
                   <FileText size={16} className="text-slate-500" />
                   <Link
                     href="/personvern"
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
                     Personvern
                   </Link>
@@ -131,7 +132,7 @@ const Footer = () => {
                   <FileText size={16} className="text-slate-500" />
                   <Link
                     href="/vilkar"
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-white"
                   >
                     Vilkår
                   </Link>
@@ -143,19 +144,19 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="border-t border-slate-800">
-          <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-6 text-xs text-slate-500 md:flex-row">
             <p className="text-center md:text-left">
               © {CURRENT_YEAR} Mathopen Kattepensjonat. Alle rettigheter
               reservert.
             </p>
 
             <p>
-              Utviklet av{" "}
+              Utviklet av{' '}
               <a
                 href="https://sebastianmoldrup.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="transition-colors text-white"
+                className="text-white transition-colors"
               >
                 Sebastian Møldrup
               </a>
@@ -164,7 +165,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

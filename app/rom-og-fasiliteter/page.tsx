@@ -7,6 +7,7 @@ import { Check, Cat } from 'lucide-react'
 import {
   Dialog,
   DialogTrigger,
+  DialogDescription,
   DialogTitle,
   DialogContent,
 } from '@/components/ui/dialog'
@@ -140,6 +141,10 @@ export default function Page() {
                       height={400}
                       className="mx-auto rounded-lg object-contain"
                     />
+
+                    <DialogDescription className="sr-only">
+                      Bilder og informasjon om rommet
+                    </DialogDescription>
                   </DialogContent>
                 </Dialog>
 

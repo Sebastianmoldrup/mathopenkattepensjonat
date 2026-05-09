@@ -1,4 +1,9 @@
 import Image from 'next/image'
+import catEating from '@/public/illustration/cat-eating.webp'
+import phoneDisplay from '@/public/illustration/phone-display.webp'
+import petting from '@/public/illustration/petting.webp'
+import handoverCat from '@/public/illustration/handover-cat.webp'
+import surveillance from '@/public/illustration/surveillance-v2.webp'
 
 export default function Page() {
   return (
@@ -17,11 +22,10 @@ export default function Page() {
         {/* Miljø */}
         <section className="grid gap-6 md:grid-cols-2 md:items-center">
           <Image
-            src="/illustration/cat-eating.webp"
+            src={catEating}
             alt="Katt spiser"
-            width={500}
-            height={350}
-            className="w-full rounded-2xl object-cover"
+            className="rounded-2xl"
+            style={{ width: '100%', height: 'auto' }}
           />
           <div className="space-y-4 text-muted-foreground">
             <h2 className="text-xl font-semibold text-foreground">
@@ -53,11 +57,10 @@ export default function Page() {
         {/* Oppdateringer */}
         <section className="grid gap-6 md:grid-cols-2 md:items-center">
           <Image
-            src="/illustration/phone-display.webp"
+            src={phoneDisplay}
             alt="Oppdateringer"
-            width={500}
-            height={350}
-            className="w-full rounded-2xl object-cover md:order-2"
+            className="rounded-2xl md:order-2"
+            style={{ width: '100%', height: 'auto' }}
           />
           <div className="space-y-4 text-muted-foreground md:order-1">
             <h2 className="text-xl font-semibold text-foreground">
@@ -82,11 +85,10 @@ export default function Page() {
         {/* Helse og trivsel */}
         <section className="grid gap-6 md:grid-cols-2 md:items-center">
           <Image
-            src="/illustration/petting.webp"
+            src={petting}
             alt="Omsorg"
-            width={500}
-            height={350}
-            className="w-full rounded-2xl object-cover"
+            className="rounded-2xl"
+            style={{ width: '100%', height: 'auto' }}
           />
           <div className="space-y-4 text-muted-foreground">
             <h2 className="text-xl font-semibold text-foreground">
@@ -119,11 +121,10 @@ export default function Page() {
         {/* Beliggenhet */}
         <section className="grid gap-6 md:grid-cols-2 md:items-center">
           <Image
-            src="/illustration/handover-cat.webp"
+            src={handoverCat}
             alt="Levering"
-            width={500}
-            height={350}
-            className="w-full rounded-2xl object-cover md:order-2"
+            className="rounded-2xl md:order-2"
+            style={{ width: '100%', height: 'auto' }}
           />
           <div className="space-y-4 text-muted-foreground md:order-1">
             <h2 className="text-xl font-semibold text-foreground">
@@ -145,11 +146,10 @@ export default function Page() {
         {/* Sikkerhet */}
         <section className="grid gap-6 md:grid-cols-2 md:items-center">
           <Image
-            src="/illustration/surveillance-v2.webp"
+            src={surveillance}
             alt="Sikkerhet"
-            width={500}
-            height={350}
-            className="w-full rounded-2xl object-cover"
+            className="rounded-2xl"
+            style={{ width: '100%', height: 'auto' }}
           />
           <div className="space-y-4 text-muted-foreground">
             <h2 className="text-xl font-semibold text-foreground">Sikkerhet</h2>

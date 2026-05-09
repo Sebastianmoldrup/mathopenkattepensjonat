@@ -6,6 +6,7 @@ import {
   bookingCancelledByAdminTemplate,
   cancellationFeeReminderTemplate,
   bookingRequestReceivedTemplate,
+  bookingUpdatedTemplate,
 } from './templates/booking'
 
 const FROM_EMAIL = 'Mathopen Kattepensjonat <post@mathopenkattepensjonat.no>'
@@ -88,6 +89,29 @@ export async function sendBookingRequestReceivedEmail(booking: AdminBooking) {
   })
   if (error) {
     console.error('[sendBookingRequestReceivedEmail]', error)
+    return { success: false, error }
+  }
+  return { success: true }
+}
+
+export async function sendBookingUpdatedEmail(
+  booking: AdminBooking,
+  changes: {
+    dateChanged: boolean
+    priceChanged: boolean
+    oldDateFrom?: string
+    oldDateTo?: string
+    oldPrice?: number
+  }
+) {
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: booking.user_email,
+    subject: 'Endring i din booking – Mathopen Kattepensjonat',
+    html: bookingUpdatedTemplate(booking, changes),
+  })
+  if (error) {
+    console.error('[sendBookingUpdatedEmail]', error)
     return { success: false, error }
   }
   return { success: true }
