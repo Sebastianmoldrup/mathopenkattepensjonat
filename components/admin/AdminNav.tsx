@@ -12,6 +12,7 @@ import {
   BookMarked,
   XCircle,
   Grid3X3,
+  LogIn,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,6 +26,8 @@ const NAV_ITEMS = [
   { href: '/admin/guide', label: 'Guide', icon: BookMarked },
   { href: '/admin/dokumentasjon', label: 'Dokumentasjon', icon: FileText },
   { href: '/admin/hms', label: 'HMS & Beredskap', icon: ShieldCheck },
+
+  { href: '/admin/innsjekk', label: 'Innsjekk / Utsjekk', icon: LogIn },
 ]
 
 export function AdminNav() {

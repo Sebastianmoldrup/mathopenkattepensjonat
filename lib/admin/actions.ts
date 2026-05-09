@@ -371,3 +371,38 @@ export async function adminUpdateBookingDetails(
   revalidatePath('/admin')
   return { success: true }
 }
+
+// ─── Checkin/Checkout by date ──────────────────────────────────────────────────
+
+export interface CheckinCheckoutEntry {
+  booking_id: string
+  event_type: 'checkin' | 'checkout'
+  date_from: string
+  date_to: string
+  owner_first: string | null
+  owner_last: string | null
+  owner_email: string
+  owner_phone: string | null
+  cat_names: string | null
+  cage_type: string
+  cage_count: number
+  num_cats: number
+  special_instructions: string | null
+  wants_outdoor_cage: boolean
+  admin_notes: string | null
+}
+
+export async function adminGetCheckinCheckoutByDate(
+  date: string
+): Promise<CheckinCheckoutEntry[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc(
+    'admin_get_checkin_checkout_by_date',
+    { p_date: date }
+  )
+  if (error) {
+    console.error('[adminGetCheckinCheckoutByDate]', error.message)
+    return []
+  }
+  return (data ?? []) as CheckinCheckoutEntry[]
+}
