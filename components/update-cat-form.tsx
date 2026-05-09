@@ -123,7 +123,7 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
       name: cat.name,
       gender: cat.gender as 'hann' | 'hunn',
       breed: cat.breed ?? '',
-      age: cat.age ?? '',
+      age: cat.age !== null ? String(cat.age) : '',
       id_chip: cat.id_chip ?? '',
       insurance_number: cat.insurance_number ?? '',
       last_vaccine_date: cat.last_vaccine_date,
