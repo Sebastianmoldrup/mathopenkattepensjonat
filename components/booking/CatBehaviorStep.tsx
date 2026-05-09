@@ -299,7 +299,8 @@ export function CatBehaviorStep({
         </div>
         <div className="space-y-2">
           <Label className="text-sm font-medium">
-            Ønsker du å booke et utebur til katten din?
+            Dersom et utebur er tilgjengelig, ønsker du et utebur for katten
+            din?
           </Label>
           <YesNoToggle
             value={wantsOutdoorCage}
