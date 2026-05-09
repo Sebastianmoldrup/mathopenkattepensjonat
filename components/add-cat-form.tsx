@@ -35,12 +35,19 @@ type YesNoUnknown = 'yes' | 'no' | 'unknown'
 function YesNoToggle({
   value,
   onChange,
+  hasError,
 }: {
-  value: boolean
+  value: boolean | undefined
   onChange: (v: boolean) => void
+  hasError?: boolean
 }) {
   return (
-    <div className="flex gap-2">
+    <div
+      className={cn(
+        'flex gap-2 rounded-lg',
+        hasError && value === undefined && 'rounded-lg ring-1 ring-destructive'
+      )}
+    >
       {([true, false] as const).map((v) => (
         <button
           key={String(v)}
@@ -63,12 +70,19 @@ function YesNoToggle({
 function ThreeWayToggle({
   value,
   onChange,
+  hasError,
 }: {
-  value: YesNoUnknown
+  value: YesNoUnknown | undefined
   onChange: (v: YesNoUnknown) => void
+  hasError?: boolean
 }) {
   return (
-    <div className="flex gap-2">
+    <div
+      className={cn(
+        'flex gap-2',
+        hasError && value === undefined && 'rounded-lg ring-1 ring-destructive'
+      )}
+    >
       {(
         [
           { val: 'yes', label: 'Ja' },
@@ -103,20 +117,25 @@ export default function AddCatForm() {
   const form = useForm<CatInput>({
     resolver: zodResolver(CatSchema),
     defaultValues: {
+      name: '',
+      breed: '',
+      age: '',
       is_sterilized: false,
+      id_chip: '',
+      insurance_number: '',
       deworming_info: '',
       flea_treatment_info: '',
       medical_notes: '',
       diet: '',
       behavior_notes: '',
-      gets_medication: false,
       medication_details: '',
-      has_cat_experience: false,
-      gets_along_with_cats: 'unknown',
-      has_stress_issues: false,
       stress_details: '',
-      aggression_risk: 'unknown',
       aggression_details: '',
+      gets_medication: null,
+      has_cat_experience: null,
+      has_stress_issues: null,
+      gets_along_with_cats: '',
+      aggression_risk: '',
     },
   })
 
@@ -264,7 +283,29 @@ export default function AddCatForm() {
 
             <Field data-invalid={!!form.formState.errors.age}>
               <FieldLabel>Alder *</FieldLabel>
-              <Input type="number" min={0} max={40} {...form.register('age')} />
+              <Controller
+                name="age"
+                control={form.control}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Velg alder" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="3 måneder">3 måneder</SelectItem>
+                        <SelectItem value="6 måneder">6 måneder</SelectItem>
+                        <SelectItem value="9 måneder">9 måneder</SelectItem>
+                        {Array.from({ length: 20 }, (_, i) => (
+                          <SelectItem key={i + 1} value={`${i + 1} år`}>
+                            {i + 1} år
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               <FieldError errors={[form.formState.errors.age]} />
             </Field>
 
@@ -393,12 +434,23 @@ export default function AddCatForm() {
         <div className="grid gap-5 sm:grid-cols-2">
           {/* Medisinering */}
           <Field>
-            <FieldLabel>Får katten medisiner?</FieldLabel>
+            <FieldLabel>Får katten medisiner? *</FieldLabel>
             <Controller
               name="gets_medication"
               control={form.control}
-              render={({ field }) => (
-                <YesNoToggle value={!!field.value} onChange={field.onChange} />
+              render={({ field, fieldState }) => (
+                <>
+                  <YesNoToggle
+                    value={field.value}
+                    onChange={field.onChange}
+                    hasError={!!fieldState.error}
+                  />
+                  {fieldState.error && (
+                    <p className="text-xs text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </>
               )}
             />
             {getsMedication && (
@@ -413,39 +465,69 @@ export default function AddCatForm() {
 
           {/* Erfaring */}
           <Field>
-            <FieldLabel>Har katten erfaring med andre katter?</FieldLabel>
+            <FieldLabel>Har katten erfaring med andre katter? *</FieldLabel>
             <Controller
               name="has_cat_experience"
               control={form.control}
-              render={({ field }) => (
-                <YesNoToggle value={!!field.value} onChange={field.onChange} />
+              render={({ field, fieldState }) => (
+                <>
+                  <YesNoToggle
+                    value={field.value}
+                    onChange={field.onChange}
+                    hasError={!!fieldState.error}
+                  />
+                  {fieldState.error && (
+                    <p className="text-xs text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </>
               )}
             />
           </Field>
 
           {/* Går godt med andre */}
           <Field>
-            <FieldLabel>Går katten godt sammen med andre katter?</FieldLabel>
+            <FieldLabel>Går katten godt sammen med andre katter? *</FieldLabel>
             <Controller
               name="gets_along_with_cats"
               control={form.control}
-              render={({ field }) => (
-                <ThreeWayToggle
-                  value={(field.value ?? 'unknown') as YesNoUnknown}
-                  onChange={field.onChange}
-                />
+              render={({ field, fieldState }) => (
+                <>
+                  <ThreeWayToggle
+                    value={field.value as YesNoUnknown}
+                    onChange={field.onChange}
+                    hasError={!!fieldState.error}
+                  />
+                  {fieldState.error && (
+                    <p className="text-xs text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </>
               )}
             />
           </Field>
 
           {/* Stress */}
           <Field>
-            <FieldLabel>Har katten stressrelaterte utfordringer?</FieldLabel>
+            <FieldLabel>Har katten stressrelaterte utfordringer? *</FieldLabel>
             <Controller
               name="has_stress_issues"
               control={form.control}
-              render={({ field }) => (
-                <YesNoToggle value={!!field.value} onChange={field.onChange} />
+              render={({ field, fieldState }) => (
+                <>
+                  <YesNoToggle
+                    value={field.value}
+                    onChange={field.onChange}
+                    hasError={!!fieldState.error}
+                  />
+                  {fieldState.error && (
+                    <p className="text-xs text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </>
               )}
             />
             {hasStressIssues && (
@@ -458,20 +540,28 @@ export default function AddCatForm() {
             )}
           </Field>
 
-          {/* Aggresjonsrisiko — full bredde siden den kan ekspandere */}
+          {/* Aggresjonsrisiko */}
           <Field className="sm:col-span-2">
             <FieldLabel>
-              Kan katten utgjøre en risiko for andre katter?
+              Kan katten utgjøre en risiko for andre katter? *
             </FieldLabel>
             <FieldDescription>F.eks. ved aggressiv atferd.</FieldDescription>
             <Controller
               name="aggression_risk"
               control={form.control}
-              render={({ field }) => (
-                <ThreeWayToggle
-                  value={(field.value ?? 'unknown') as YesNoUnknown}
-                  onChange={field.onChange}
-                />
+              render={({ field, fieldState }) => (
+                <>
+                  <ThreeWayToggle
+                    value={field.value as YesNoUnknown}
+                    onChange={field.onChange}
+                    hasError={!!fieldState.error}
+                  />
+                  {fieldState.error && (
+                    <p className="text-xs text-destructive">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </>
               )}
             />
             {(aggressionRisk === 'yes' || aggressionRisk === 'unknown') && (

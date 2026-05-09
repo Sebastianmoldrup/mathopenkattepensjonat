@@ -6,7 +6,22 @@ const optionalText = z
   .transform((v) => (v === '' ? undefined : v))
   .optional()
 
-const yesNoUnknown = z.enum(['yes', 'no', 'unknown']).default('unknown')
+const requiredBoolean = z
+  .any()
+  .refine((v) => v === true || v === false, { message: 'Må fylles ut' })
+
+const yesNoUnknown = z
+  .any()
+  .refine((v) => v === 'yes' || v === 'no' || v === 'unknown', {
+    message: 'Må fylles ut',
+  })
+
+export const AGE_OPTIONS = [
+  '3 måneder',
+  '6 måneder',
+  '9 måneder',
+  ...Array.from({ length: 20 }, (_, i) => `${i + 1} år`),
+] as const
 
 export const CatSchema = z.object({
   name: z
@@ -23,11 +38,7 @@ export const CatSchema = z.object({
     .trim()
     .min(1, 'Rase er påkrevd')
     .max(50, 'Rase er for lang'),
-  age: z.coerce
-    .number()
-    .int('Alder må være et helt tall')
-    .min(0, 'Ugyldig alder')
-    .max(40, 'Ugyldig alder'),
+  age: z.string().min(1, 'Velg alder'),
   is_sterilized: z.coerce.boolean().default(false),
   id_chip: z.string().trim().optional(),
   insurance_number: z.string().trim().optional(),
@@ -39,12 +50,11 @@ export const CatSchema = z.object({
   medical_notes: optionalText,
   diet: optionalText,
   behavior_notes: optionalText,
-  // ─── Behavior fields ───────────────────────────────────────────────────────
-  gets_medication: z.coerce.boolean().default(false),
+  gets_medication: requiredBoolean,
   medication_details: optionalText,
-  has_cat_experience: z.coerce.boolean().default(false),
+  has_cat_experience: requiredBoolean,
   gets_along_with_cats: yesNoUnknown,
-  has_stress_issues: z.coerce.boolean().default(false),
+  has_stress_issues: requiredBoolean,
   stress_details: optionalText,
   aggression_risk: yesNoUnknown,
   aggression_details: optionalText,
