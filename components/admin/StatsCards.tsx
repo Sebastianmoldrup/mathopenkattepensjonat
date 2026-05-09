@@ -1,17 +1,17 @@
-import { Clock, CheckCircle2, Banknote, TrendingDown } from 'lucide-react'
+import { Clock, Banknote, TrendingDown } from 'lucide-react'
 
 interface StatsCardsProps {
   pending: number
-  confirmed: number
   totalRevenue: number
   totalRevenueExVat: number
+  totalVat: number
 }
 
 export function StatsCards({
   pending,
-  confirmed,
   totalRevenue,
   totalRevenueExVat,
+  totalVat,
 }: StatsCardsProps) {
   const stats = [
     {
@@ -22,13 +22,6 @@ export function StatsCards({
       bg: 'bg-amber-50',
     },
     {
-      label: 'Bekreftede bookinger',
-      value: confirmed,
-      icon: CheckCircle2,
-      color: 'text-green-600',
-      bg: 'bg-green-50',
-    },
-    {
       label: 'Total inntekt inkl. MVA',
       value: `${totalRevenue.toLocaleString('nb-NO')} kr`,
       icon: Banknote,
@@ -36,14 +29,20 @@ export function StatsCards({
       bg: 'bg-primary/10',
     },
     {
-      label: 'Inntekt ekskl. MVA (25%)',
+      label: 'Netto inntekt etter MVA',
       value: `${totalRevenueExVat.toLocaleString('nb-NO')} kr`,
       icon: TrendingDown,
       color: 'text-blue-600',
       bg: 'bg-blue-50',
     },
+    {
+      label: 'MVA å innbetale (25%)',
+      value: `${totalVat.toLocaleString('nb-NO')} kr`,
+      icon: TrendingDown,
+      color: 'text-red-600',
+      bg: 'bg-red-50',
+    },
   ]
-
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       {stats.map((stat) => (
