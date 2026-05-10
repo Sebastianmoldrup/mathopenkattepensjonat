@@ -471,7 +471,7 @@ export default function CageGrid({
         let span = 0
         for (let dd = d; dd < daysInCurrentMonth; dd++) {
           const cur = days[dd]
-          if (!isBefore(cur, blockStart) && isBefore(cur, blockEnd)) span++
+          if (!isBefore(cur, blockStart) && !isAfter(cur, blockEnd)) span++
           else if (span > 0) break
         }
         if (span === 0) span = 1
@@ -601,65 +601,6 @@ export default function CageGrid({
         </span>
       </div>
 
-      <div
-        className={`overflow-x-auto rounded-lg border border-border/40 transition-opacity ${isPending ? 'opacity-60' : ''}`}
-      >
-        <table
-          className="w-full border-collapse"
-          style={{ tableLayout: 'fixed', minWidth: 900 }}
-        >
-          <thead>
-            <tr>
-              <th className="w-[80px] border-b border-r border-border/40 bg-muted/60 px-2 py-1.5 text-left text-[10px] font-medium text-muted-foreground">
-                Bur
-              </th>
-              {days.map((day) => {
-                const isToday = localStr(day) === localStr(today)
-                const isFirstOfMonth = day.getDate() === 1
-                return (
-                  <th
-                    key={localStr(day)}
-                    className={`border-b border-r border-border/40 py-1 text-center font-medium ${
-                      isToday
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-muted/60 text-muted-foreground'
-                    }`}
-                    style={{ fontSize: 9 }}
-                  >
-                    {isFirstOfMonth
-                      ? format(day, 'd MMM', { locale: nb })
-                      : format(day, 'd')}
-                  </th>
-                )
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {renderUnassignedRows()}
-            {SECTIONS.map((section) => (
-              <React.Fragment key={section.key}>
-                <tr>
-                  <td
-                    colSpan={daysInCurrentMonth + 1}
-                    className={`border-b px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider ${section.headerClass}`}
-                  >
-                    {section.label}
-                  </td>
-                </tr>
-                {section.cages.map((cageLabel) => (
-                  <tr key={cageLabel}>
-                    <td className="whitespace-nowrap border-b border-r border-border/40 bg-muted/40 px-2 text-[10px] font-medium text-muted-foreground">
-                      {cageLabel}
-                    </td>
-                    {renderCageRow(cageLabel)}
-                  </tr>
-                ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
       {selected && (
         <CageGridSidebar
           selected={selected}
@@ -684,6 +625,69 @@ export default function CageGrid({
           isPending={isPending}
         />
       )}
+
+      <div
+        className={`rounded-lg border border-border/40 transition-opacity ${isPending ? 'opacity-60' : ''}`}
+      >
+        <div className="overflow-x-auto">
+          <div className="max-h-[75vh] overflow-y-auto">
+            <table
+              className="w-full border-collapse"
+              style={{ tableLayout: 'fixed', minWidth: 900 }}
+            >
+              <thead className="sticky top-0 z-10 bg-muted/80">
+                <tr>
+                  <th className="w-[80px] border-b border-r border-border/40 bg-muted/60 px-2 py-1.5 text-left text-[10px] font-medium text-muted-foreground">
+                    Bur
+                  </th>
+                  {days.map((day) => {
+                    const isToday = localStr(day) === localStr(today)
+                    const isFirstOfMonth = day.getDate() === 1
+                    return (
+                      <th
+                        key={localStr(day)}
+                        className={`border-b border-r border-border/40 py-1 text-center font-medium ${
+                          isToday
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-muted/60 text-muted-foreground'
+                        }`}
+                        style={{ fontSize: 9 }}
+                      >
+                        {isFirstOfMonth
+                          ? format(day, 'd MMM', { locale: nb })
+                          : format(day, 'd')}
+                      </th>
+                    )
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {renderUnassignedRows()}
+                {SECTIONS.map((section) => (
+                  <React.Fragment key={section.key}>
+                    <tr>
+                      <td
+                        colSpan={daysInCurrentMonth + 1}
+                        className={`border-b px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider ${section.headerClass}`}
+                      >
+                        {section.label}
+                      </td>
+                    </tr>
+                    {section.cages.map((cageLabel) => (
+                      <tr key={cageLabel}>
+                        <td className="whitespace-nowrap border-b border-r border-border/40 bg-muted/40 px-2 text-[10px] font-medium text-muted-foreground">
+                          {cageLabel}
+                        </td>
+                        {renderCageRow(cageLabel)}
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
