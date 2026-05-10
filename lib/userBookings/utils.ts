@@ -143,6 +143,7 @@ export function formatDateNO(dateStr: string): string {
 
 export const STATUS_LABELS: Record<BookingStatus, string> = {
   pending: 'Venter på bekreftelse',
+  waitlist: 'Venteliste',
   confirmed: 'Bekreftet',
   completed: 'Gjennomført',
   cancelled: 'Avbestilt',
@@ -150,6 +151,7 @@ export const STATUS_LABELS: Record<BookingStatus, string> = {
 
 export const STATUS_COLORS: Record<BookingStatus, string> = {
   pending: 'bg-amber-100 text-amber-800 border-amber-300',
+  waitlist: 'bg-purple-100 text-purple-800 border-purple-300',
   confirmed: 'bg-green-100 text-green-800 border-green-300',
   completed: 'bg-muted text-muted-foreground border-border',
   cancelled: 'bg-red-100 text-red-700 border-red-300',
