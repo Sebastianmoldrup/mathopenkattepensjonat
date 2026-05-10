@@ -246,7 +246,7 @@ export async function sendBookingRequestEmail(payload: {
     ? `<tr><td style="padding:5px 0;color:#666;">Utebur</td><td style="padding:5px 0;font-weight:bold;">Ønsket (ikke garantert)</td></tr>`
     : ''
   const waitlistNote = payload.waitlistRequested
-    ? `<tr><td style="padding:5px 0;color:#666;">Venteliste</td><td style="padding:5px 0;font-weight:bold;">Ja, ønsker ventelisteplass ved fullt</td></tr>`
+    ? `<tr><td style="padding:5px 0;color:#666;">Venteliste</td><td style="padding:5px 0;font-weight:bold;">Du vil bli satt på venteliste dersom oppholdet er fullbooket.</td></tr>`
     : ''
 
   await resend.emails.send({
