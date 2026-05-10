@@ -440,7 +440,7 @@ export function bookingWaitlistTemplate(booking: AdminBooking): string {
     <div style="background:#f9f6f2;border-left:4px solid #a855f7;padding:14px 20px;border-radius:4px;font-size:14px;margin:24px 0;line-height:1.7;">
       <p style="margin:0;font-weight:bold;color:#581c87;">Du er satt på venteliste</p>
       <p style="margin:8px 0 0;color:#6b21a8;">
-        Vi vil ta kontakt så snart det blir ledig plass. Du trenger ikke gjøre noe mer.
+        Vi vil ta kontakt dersom det blir ledig plass.
       </p>
     </div>
 
