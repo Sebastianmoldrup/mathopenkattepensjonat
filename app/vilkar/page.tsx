@@ -125,7 +125,7 @@ const Page = () => {
             <p className="leading-relaxed text-slate-700">
               Ordinære tider:
               <br />
-              Man–fre og søndag: 17:00–19:00
+              Man–fre og søndag: 17:30–19:30
               <br />
               Lørdag: Stengt
             </p>

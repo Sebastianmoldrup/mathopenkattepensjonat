@@ -147,6 +147,18 @@ export function BookingDetailDialog({
   const [selectedCat, setSelectedCat] = useState<CatBehaviorNote | null>(null)
   const [catSheetOpen, setCatSheetOpen] = useState(false)
 
+  // Status confirmation
+  const [pendingStatus, setPendingStatus] = useState<AdminBookingStatus | null>(
+    null
+  )
+  const [currentStatus, setCurrentStatus] = useState<AdminBookingStatus>(
+    booking?.status ?? 'pending'
+  )
+
+  useEffect(() => {
+    if (booking) setCurrentStatus(booking.status)
+  }, [booking])
+
   useEffect(() => {
     if (booking && open && !logsLoaded) {
       setNotes(booking.admin_notes ?? '')
@@ -168,6 +180,7 @@ export function BookingDetailDialog({
       setConfirmDelete(false)
       setCatSheetOpen(false)
       setSelectedCat(null)
+      setPendingStatus(null)
     }
   }, [booking, open, logsLoaded])
 
@@ -192,24 +205,31 @@ export function BookingDetailDialog({
   }
 
   function handleStatusChange(status: AdminBookingStatus) {
-    if (status === booking!.status) return
-    setActiveAction(status)
+    if (status === currentStatus) return
+    setPendingStatus(status)
+  }
+
+  function confirmStatusChange() {
+    if (!pendingStatus) return
+    setActiveAction(pendingStatus)
     setMessage(null)
     startTransition(async () => {
       const result = await adminUpdateBookingStatus(
         booking!.id,
-        status,
+        pendingStatus,
         booking!
       )
-      setMessage(
-        result.success
-          ? {
-              type: 'success',
-              text: `Status oppdatert til "${STATUS_LABELS[status]}"`,
-            }
-          : { type: 'error', text: result.error ?? 'Noe gikk galt.' }
-      )
+      if (result.success) {
+        setCurrentStatus(pendingStatus)
+        setMessage({
+          type: 'success',
+          text: `Status oppdatert til "${STATUS_LABELS[pendingStatus]}"`,
+        })
+      } else {
+        setMessage({ type: 'error', text: result.error ?? 'Noe gikk galt.' })
+      }
       setActiveAction(null)
+      setPendingStatus(null)
     })
   }
 
@@ -272,6 +292,62 @@ export function BookingDetailDialog({
 
   return (
     <>
+      {/* ── STATUS BEKREFTELSE DIALOG ─────────────────────────────────── */}
+      <Dialog
+        open={!!pendingStatus}
+        onOpenChange={() => setPendingStatus(null)}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Bekreft statusendring</DialogTitle>
+            <DialogDescription asChild>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>
+                  Er du sikker på at du vil endre status til{' '}
+                  <span className="font-medium text-foreground">
+                    {pendingStatus ? STATUS_LABELS[pendingStatus] : ''}
+                  </span>
+                  ?
+                </p>
+                {pendingStatus === 'cancelled' && (
+                  <p className="text-destructive">
+                    Dette vil sende en avbestillingsbekreftelse til kunden.
+                  </p>
+                )}
+                {pendingStatus === 'confirmed' && (
+                  <p className="text-green-700">
+                    Dette vil sende en bekreftelsesmail til kunden.
+                  </p>
+                )}
+                {pendingStatus === 'waitlist' && (
+                  <p className="text-purple-700">
+                    Dette vil sende en venteliste-email til kunden.
+                  </p>
+                )}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 pt-2">
+            <Button
+              onClick={confirmStatusChange}
+              disabled={isPending}
+              className="flex-1 gap-1.5"
+            >
+              {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Bekreft
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setPendingStatus(null)}
+              disabled={isPending}
+            >
+              Avbryt
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── HOVED DIALOG ─────────────────────────────────────────────── */}
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto p-6">
           <DialogHeader className="pb-2">
@@ -279,9 +355,9 @@ export function BookingDetailDialog({
               Booking
               <Badge
                 variant="outline"
-                className={cn('text-xs', STATUS_COLORS[booking.status])}
+                className={cn('text-xs', STATUS_COLORS[currentStatus])}
               >
-                {STATUS_LABELS[booking.status]}
+                {STATUS_LABELS[currentStatus]}
               </Badge>
               <div className="ml-auto">
                 <BookingPDFButton
@@ -340,7 +416,7 @@ export function BookingDetailDialog({
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {ALL_STATUSES.map((s) => {
-                    const isActive = booking.status === s
+                    const isActive = currentStatus === s
                     return (
                       <Button
                         key={s}
@@ -474,7 +550,7 @@ export function BookingDetailDialog({
                 </div>
               )}
 
-              {/* Cat photos — simple display */}
+              {/* Cat photos */}
               {booking.cats && booking.cats.length > 0 && (
                 <div className="flex gap-3">
                   {booking.cats.map((cat) => (
@@ -502,7 +578,8 @@ export function BookingDetailDialog({
                       </p>
                       {cat.age && (
                         <p className="text-center text-xs text-muted-foreground">
-                          {cat.age.includes('år') || cat.age.includes('måneder')
+                          {String(cat.age).includes('år') ||
+                          String(cat.age).includes('måneder')
                             ? cat.age
                             : cat.age + ' år'}
                         </p>
@@ -790,7 +867,7 @@ export function BookingDetailDialog({
         </DialogContent>
       </Dialog>
 
-      {/* Cat behavior sheet */}
+      {/* ── CAT BEHAVIOR SHEET ───────────────────────────────────────── */}
       <Sheet open={catSheetOpen} onOpenChange={setCatSheetOpen}>
         <SheetContent className="w-full overflow-y-auto sm:max-w-md">
           <SheetHeader className="mb-4">

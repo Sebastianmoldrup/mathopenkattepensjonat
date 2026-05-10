@@ -1,10 +1,9 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
 import { AuthButton } from './auth-button'
+import { AdminButton } from './navbar/AdminButton'
+import { MobileMenuButton } from './navbar/MobileMenu'
+import { Suspense } from 'react'
 
 const LIST_ITEMS = [
   { url: '/', text: 'Hjem' },
@@ -16,16 +15,12 @@ const LIST_ITEMS = [
   { url: '/kontakt', text: 'Kontakt oss' },
 ]
 
-export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-
+export default async function Navbar() {
   return (
     <>
-      {/* ================= HEADER ================= */}
       <header className="sticky top-0 z-40 border-b border-border bg-accent/95 p-2 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex h-24 items-center justify-between">
-            {/* Logo */}
             <Link href="/" aria-label="Hjem" className="flex items-center">
               <Image
                 src="/img/cropped.webp"
@@ -38,7 +33,6 @@ export default function Navbar() {
               />
             </Link>
 
-            {/* Desktop navigation */}
             <nav className="hidden items-center gap-6 lg:flex">
               {LIST_ITEMS.map(({ url, text }) => (
                 <Link
@@ -51,87 +45,17 @@ export default function Navbar() {
               ))}
             </nav>
 
-            {/* Desktop CTA */}
-            <div className="hidden lg:block">
+            <div className="hidden items-center gap-2 lg:flex">
+              <Suspense fallback={null}>
+                <AdminButton />
+              </Suspense>
               <AuthButton />
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsOpen(true)}
-              className="rounded-md p-2 transition-colors hover:bg-accent-foreground/10 lg:hidden"
-              aria-label="Åpne meny"
-            >
-              <Menu size={28} />
-            </button>
+            <MobileMenuButton />
           </div>
         </div>
       </header>
-
-      {/* ================= MOBILE MENU ================= */}
-      <div
-        className={`fixed inset-0 z-50 bg-accent transition-all duration-300 ease-out ${
-          isOpen
-            ? 'pointer-events-auto opacity-100'
-            : 'pointer-events-none opacity-0'
-        } `}
-      >
-        <div
-          className={`flex h-full transform flex-col transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0' : '-translate-y-4'} `}
-        >
-          {/* Top bar */}
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
-            <Image
-              src="/img/cropped.webp"
-              width={160}
-              height={160}
-              alt="Logo"
-              className="h-24 w-24 object-contain"
-              style={{ width: 'auto' }}
-            />
-            <button
-              onClick={() => setIsOpen(false)}
-              className="rounded-md p-2 transition-colors hover:bg-accent-foreground/10"
-              aria-label="Lukk meny"
-            >
-              <X size={28} />
-            </button>
-          </div>
-
-          {/* Navigation (centered vertically) */}
-          <nav className="flex flex-1 items-center justify-center">
-            <ul className="flex flex-col gap-8 text-center">
-              {LIST_ITEMS.map(({ url, text }, index) => (
-                <li
-                  key={url}
-                  style={{ transitionDelay: `${index * 40}ms` }}
-                  className={`transform transition-all duration-300 ease-out ${
-                    isOpen
-                      ? 'translate-y-0 opacity-100'
-                      : 'translate-y-2 opacity-0'
-                  } `}
-                >
-                  <Link
-                    href={url}
-                    onClick={() => setIsOpen(false)}
-                    className="text-3xl font-medium tracking-tight text-foreground transition-colors hover:text-primary"
-                  >
-                    {text}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Bottom CTA */}
-          <div
-            className="flex justify-center border-t border-border p-4"
-            onClick={() => setIsOpen(false)}
-          >
-            <AuthButton fullWidth mobile />
-          </div>
-        </div>
-      </div>
     </>
   )
 }

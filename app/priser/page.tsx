@@ -198,15 +198,15 @@ export default function Page() {
 
           <div className="text-muted-foreground">
             <p className="mb-1 font-medium text-foreground">Ordinære tider</p>
-            <p>Man–fre og søndag: 17:00–19:00</p>
+            <p>Man–fre og søndag: 17:30–19:30</p>
             <p>Lørdag: Stengt</p>
             <p>Andre tidspunkt: Kun etter avtale</p>
           </div>
 
           <div className="text-muted-foreground">
             <p className="mb-1 font-medium text-foreground">Sommertider</p>
-            <p>Innsjekk: 17:00–20:00</p>
-            <p>Utsjekk: 11:00–13:00</p>
+            <p>Innsjekk: 17:30–19:30</p>
+            <p>Utsjekk: 17:30–19:30</p>
           </div>
         </div>
       </section>

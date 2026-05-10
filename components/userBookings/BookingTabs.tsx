@@ -3,17 +3,18 @@
 import { useState } from 'react'
 import { UserBooking } from '@/lib/userBookings/utils'
 import { BookingCard } from './BookingCard'
-import { CalendarClock, History } from 'lucide-react'
+import { CalendarClock, History, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface BookingTabsProps {
   upcoming: UserBooking[]
   history: UserBooking[]
+  waitlist: UserBooking[]
 }
 
-type Tab = 'upcoming' | 'history'
+type Tab = 'upcoming' | 'waitlist' | 'history'
 
-export function BookingTabs({ upcoming, history }: BookingTabsProps) {
+export function BookingTabs({ upcoming, history, waitlist }: BookingTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>('upcoming')
 
   const tabs: {
@@ -29,6 +30,12 @@ export function BookingTabs({ upcoming, history }: BookingTabsProps) {
       count: upcoming.length,
     },
     {
+      key: 'waitlist',
+      label: 'Venteliste',
+      icon: <Clock className="h-4 w-4" />,
+      count: waitlist.length,
+    },
+    {
       key: 'history',
       label: 'Historikk',
       icon: <History className="h-4 w-4" />,
@@ -36,11 +43,15 @@ export function BookingTabs({ upcoming, history }: BookingTabsProps) {
     },
   ]
 
-  const items = activeTab === 'upcoming' ? upcoming : history
+  const items =
+    activeTab === 'upcoming'
+      ? upcoming
+      : activeTab === 'waitlist'
+        ? waitlist
+        : history
 
   return (
     <div className="space-y-5">
-      {/* Tab bar */}
       <div className="flex gap-1 rounded-xl border bg-muted/40 p-1">
         {tabs.map((tab) => (
           <button
@@ -61,7 +72,9 @@ export function BookingTabs({ upcoming, history }: BookingTabsProps) {
                 className={cn(
                   'ml-1 rounded-full px-1.5 py-0.5 text-[11px] font-semibold leading-none',
                   activeTab === tab.key
-                    ? 'bg-primary/15 text-primary'
+                    ? tab.key === 'waitlist'
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'bg-primary/15 text-primary'
                     : 'bg-muted text-muted-foreground'
                 )}
               >
@@ -72,10 +85,9 @@ export function BookingTabs({ upcoming, history }: BookingTabsProps) {
         ))}
       </div>
 
-      {/* Content */}
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          {activeTab === 'upcoming' ? (
+          {activeTab === 'upcoming' && (
             <>
               <CalendarClock className="h-10 w-10 text-muted-foreground/40" />
               <p className="text-sm font-medium text-muted-foreground">
@@ -85,7 +97,19 @@ export function BookingTabs({ upcoming, history }: BookingTabsProps) {
                 Bookinger med status «venter» eller «bekreftet» vises her.
               </p>
             </>
-          ) : (
+          )}
+          {activeTab === 'waitlist' && (
+            <>
+              <Clock className="h-10 w-10 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-muted-foreground">
+                Ingen ventelistebookinger
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Bookinger på venteliste vises her.
+              </p>
+            </>
+          )}
+          {activeTab === 'history' && (
             <>
               <History className="h-10 w-10 text-muted-foreground/40" />
               <p className="text-sm font-medium text-muted-foreground">
