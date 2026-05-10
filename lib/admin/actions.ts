@@ -15,6 +15,8 @@ import {
   sendCancellationFeeReminderEmail,
 } from '@/lib/email/resend'
 
+import { sendBookingWaitlistEmail } from '@/lib/email/resend'
+
 // ─── Auth guard ────────────────────────────────────────────────────────────────
 
 export async function requireAdmin() {
@@ -71,29 +73,56 @@ export async function adminUpdateBookingStatus(
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
 
-  if (status === 'cancelled') {
-    // Admin cancels — use dedicated RPC (no fee by default)
-    const { error } = await supabase.rpc('admin_cancel_booking', {
-      p_booking_id: bookingId,
-      p_cancellation_fee: null,
-      p_note: null,
-    })
-    if (error) {
-      console.error('[adminUpdateBookingStatus cancel]', error.message)
-      return { success: false, error: 'Kunne ikke avbestille booking.' }
+  switch (status) {
+    case 'cancelled': {
+      const { error } = await supabase.rpc('admin_cancel_booking', {
+        p_booking_id: bookingId,
+        p_cancellation_fee: null,
+        p_note: null,
+      })
+      if (error) {
+        console.error('[adminUpdateBookingStatus cancel]', error.message)
+        return { success: false, error: 'Kunne ikke avbestille booking.' }
+      }
+      await sendBookingCancelledByAdminEmail({ ...booking, status })
+      break
     }
-    await sendBookingCancelledByAdminEmail({ ...booking, status })
-  } else {
-    const { error } = await supabase.rpc('admin_update_booking_status', {
-      p_booking_id: bookingId,
-      p_status: status,
-    })
-    if (error) {
-      console.error('[adminUpdateBookingStatus]', error.message)
-      return { success: false, error: 'Kunne ikke oppdatere status.' }
+
+    case 'waitlist': {
+      const { error } = await supabase.rpc('admin_update_booking_status', {
+        p_booking_id: bookingId,
+        p_status: status,
+      })
+      if (error) {
+        console.error('[adminUpdateBookingStatus waitlist]', error.message)
+        return { success: false, error: 'Kunne ikke oppdatere status.' }
+      }
+      await sendBookingWaitlistEmail({ ...booking, status })
+      break
     }
-    if (status === 'confirmed') {
+
+    case 'confirmed': {
+      const { error } = await supabase.rpc('admin_update_booking_status', {
+        p_booking_id: bookingId,
+        p_status: status,
+      })
+      if (error) {
+        console.error('[adminUpdateBookingStatus confirmed]', error.message)
+        return { success: false, error: 'Kunne ikke oppdatere status.' }
+      }
       await sendBookingConfirmedEmail({ ...booking, status })
+      break
+    }
+
+    default: {
+      const { error } = await supabase.rpc('admin_update_booking_status', {
+        p_booking_id: bookingId,
+        p_status: status,
+      })
+      if (error) {
+        console.error('[adminUpdateBookingStatus]', error.message)
+        return { success: false, error: 'Kunne ikke oppdatere status.' }
+      }
     }
   }
 

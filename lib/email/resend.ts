@@ -7,6 +7,7 @@ import {
   cancellationFeeReminderTemplate,
   bookingRequestReceivedTemplate,
   bookingUpdatedTemplate,
+  bookingWaitlistTemplate,
 } from './templates/booking'
 
 const FROM_EMAIL = 'Mathopen Kattepensjonat <post@mathopenkattepensjonat.no>'
@@ -112,6 +113,20 @@ export async function sendBookingUpdatedEmail(
   })
   if (error) {
     console.error('[sendBookingUpdatedEmail]', error)
+    return { success: false, error }
+  }
+  return { success: true }
+}
+
+export async function sendBookingWaitlistEmail(booking: AdminBooking) {
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: booking.user_email,
+    subject: 'Du er satt på venteliste – Mathopen Kattepensjonat',
+    html: bookingWaitlistTemplate(booking),
+  })
+  if (error) {
+    console.error('[sendBookingWaitlistEmail]', error)
     return { success: false, error }
   }
   return { success: true }

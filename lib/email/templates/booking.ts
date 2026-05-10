@@ -422,3 +422,34 @@ export function bookingUpdatedTemplate(
     </p>
   `)
 }
+
+export function bookingWaitlistTemplate(booking: AdminBooking): string {
+  const firstName = booking.user_first_name ?? 'der'
+  const cats = booking.cats ?? []
+  const catNames =
+    cats.length > 0 ? cats.map((c) => c.name).join(', ') : 'katten din'
+
+  return baseTemplate(`
+    <h2 style="color:#2C3E50;margin-top:0;">Hei ${firstName},</h2>
+
+    <p style="font-size:15px;">
+      Vi har satt bookingen din for <strong>${catNames}</strong>
+      hos <strong>Mathopen Kattepensjonat</strong> på venteliste.
+    </p>
+
+    <div style="background:#f9f6f2;border-left:4px solid #a855f7;padding:14px 20px;border-radius:4px;font-size:14px;margin:24px 0;line-height:1.7;">
+      <p style="margin:0;font-weight:bold;color:#581c87;">Du er satt på venteliste</p>
+      <p style="margin:8px 0 0;color:#6b21a8;">
+        Vi vil ta kontakt så snart det blir ledig plass. Du trenger ikke gjøre noe mer.
+      </p>
+    </div>
+
+    ${bookingDetailsBlock(booking)}
+
+    <p style="font-size:14px;color:#555;">
+      Spørsmål? Ta kontakt på
+      <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
+      eller ring <a href="tel:+4747322279" style="color:#c8b49a;">+47 473 22 279</a>
+    </p>
+  `)
+}
