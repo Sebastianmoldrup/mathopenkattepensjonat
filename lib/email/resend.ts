@@ -53,7 +53,7 @@ export async function sendBookingCancelledByAdminEmail(booking: AdminBooking) {
   const { error } = await getResend().emails.send({
     from: FROM_EMAIL,
     to: booking.user_email,
-    subject: 'Avlysning av booking – Mathopen Kattepensjonat',
+    subject: 'Avbestilling av booking – Mathopen Kattepensjonat',
     html: bookingCancelledByAdminTemplate(booking),
   })
   if (error) {

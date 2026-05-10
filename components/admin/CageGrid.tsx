@@ -31,7 +31,7 @@ const SECTIONS = [
   {
     key: 'senior_comfort',
     label: 'Senior & Komfort (1–3)',
-    cages: ['Senior & Komfort 1', 'Senior & Komfort 2', 'Senior & Komfort 3'],
+    cages: ['S&K 1', 'S&K 2', 'S&K 3'],
     headerClass: 'bg-purple-50 text-purple-700',
   },
   {

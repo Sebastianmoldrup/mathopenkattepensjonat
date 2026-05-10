@@ -251,7 +251,7 @@ export function bookingCancelledByAdminTemplate(booking: AdminBooking): string {
     </p>
 
     <div style="background:#f0fdf4;border-left:4px solid #4ade80;padding:14px 20px;border-radius:4px;font-size:14px;margin:24px 0;">
-      <p style="margin:0;color:#166534;">✅ Du belastes ingenting. Avlysningen er kostnadsfri for deg.</p>
+      <p style="margin:0;color:#166534;">✅ Du belastes ingenting. Avbestilling er kostnadsfri for deg.</p>
     </div>
 
     <p style="font-size:14px;color:#555;">

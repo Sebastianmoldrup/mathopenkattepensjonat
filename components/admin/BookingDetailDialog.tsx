@@ -502,7 +502,9 @@ export function BookingDetailDialog({
                       </p>
                       {cat.age && (
                         <p className="text-center text-xs text-muted-foreground">
-                          {cat.age} år
+                          {cat.age.includes('år') || cat.age.includes('måneder')
+                            ? cat.age
+                            : cat.age + ' år'}
                         </p>
                       )}
                     </div>

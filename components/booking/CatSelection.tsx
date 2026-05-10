@@ -146,7 +146,10 @@ export function CatSelection({
                   )}
                   {cat.age && (
                     <p className="text-xs text-muted-foreground">
-                      {cat.age} år
+                      {String(cat.age).includes('år') ||
+                      String(cat.age).includes('måneder')
+                        ? cat.age
+                        : cat.age + ' år'}
                     </p>
                   )}
                 </div>

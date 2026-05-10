@@ -65,7 +65,7 @@ export const STATUS_LABELS: Record<AdminBookingStatus, string> = {
   waitlist: 'Venteliste',
   confirmed: 'Bekreftet',
   completed: 'Gjennomført',
-  cancelled: 'Avbestilt',
+  cancelled: 'Avbestill',
 }
 
 export const STATUS_COLORS: Record<AdminBookingStatus, string> = {

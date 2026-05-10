@@ -64,4 +64,5 @@ export async function deleteCat(formData: FormData) {
   if (deleteError) throw deleteError
 
   revalidatePath('/minside/minekatter')
+  revalidatePath('/booking')
 }
