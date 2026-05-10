@@ -44,8 +44,14 @@ const CAGE_TYPES = [
     highSeasonPrice: 250,
     img: 'senior-&-comfort',
     lowSeasonPrices: [
-      { amount: '1', price: 220 },
-      { amount: '2', price: 220 },
+      {
+        amount: '1',
+        price: 220,
+      },
+      {
+        amount: '2',
+        price: 320,
+      },
     ],
     highSeasonPrices: [
       { amount: '1', price: 250 },

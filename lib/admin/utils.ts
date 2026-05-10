@@ -56,6 +56,7 @@ export interface RevenueStats {
   month: string
   revenue: number
   revenue_ex_vat: number
+  vat_amount: number
   booking_count: number
   cancellation_count: number
 }
