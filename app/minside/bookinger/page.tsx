@@ -56,10 +56,9 @@ export default async function userBookingsPage() {
             <PawPrint className="h-8 w-8 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <p className="font-semibold">Ingen userBookings ennå</p>
+            <p className="font-semibold">Ingen bookinger ennå</p>
             <p className="max-w-xs text-sm text-muted-foreground">
-              Du har ikke gjort noen userBookings ennå. Book et opphold for
-              katten din i dag!
+              Book et opphold for katten din i dag!
             </p>
           </div>
           <Button asChild>

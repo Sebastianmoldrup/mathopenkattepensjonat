@@ -2,7 +2,12 @@ import { getSeason } from '@/lib/booking/pricing'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled'
+export type BookingStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled'
+  | 'waitlist'
 
 export interface BookingCat {
   id: string
