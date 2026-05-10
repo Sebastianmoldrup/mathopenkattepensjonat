@@ -52,14 +52,14 @@ export function BookingTabs({ upcoming, history, waitlist }: BookingTabsProps) {
 
   return (
     <div className="space-y-5">
-      <div className="flex gap-1 rounded-xl border bg-muted/40 p-1">
+      <div className="flex gap-1 overflow-x-auto rounded-xl border bg-muted/40 p-1">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={cn(
-              'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5',
-              'text-sm font-medium transition-all duration-150',
+              'flex flex-1 shrink-0 items-center justify-center gap-2 rounded-lg px-3 py-2.5',
+              'whitespace-nowrap text-sm font-medium transition-all duration-150',
               activeTab === tab.key
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'

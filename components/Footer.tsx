@@ -18,6 +18,7 @@ const Footer = () => {
                 width={100}
                 height={100}
                 className="mb-4 rounded-lg object-contain"
+                loading="eager"
                 style={{ width: 'auto' }}
               />
               <h3 className="mb-5 text-lg font-semibold text-white">

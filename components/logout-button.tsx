@@ -1,19 +1,27 @@
 'use client'
+
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 
-export function LogoutButton() {
-  const supabase = createClient()
-
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (!error) {
-      window.location.href = '/'
-    }
+export function LogoutButton({
+  fullWidth = false,
+  mobile = false,
+}: {
+  fullWidth?: boolean
+  mobile?: boolean
+}) {
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    window.location.href = '/'
   }
 
   return (
-    <Button type="submit" variant="outline" onClick={signOut}>
+    <Button
+      variant="outline"
+      onClick={handleSignOut}
+      className={`${fullWidth ? 'w-full max-w-lg' : ''} ${mobile ? 'py-8' : ''}`}
+    >
       Logg ut
     </Button>
   )
