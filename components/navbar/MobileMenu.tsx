@@ -30,11 +30,13 @@ export function MobileMenuButton() {
       </button>
 
       <div
-        className={`fixed inset-0 z-50 bg-accent transition-all duration-300 ease-out ${
-          isOpen
-            ? 'pointer-events-auto opacity-100'
-            : 'pointer-events-none opacity-0'
-        }`}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 9999,
+          backgroundColor: 'red',
+          display: isOpen ? 'block' : 'none',
+        }}
       >
         <div
           className={`flex h-full transform flex-col transition-transform duration-300 ease-out ${

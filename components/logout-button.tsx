@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/client'
+import { signOut } from '@/actions/auth/signOut'
 
 export function LogoutButton({
   fullWidth = false,
@@ -11,8 +11,7 @@ export function LogoutButton({
   mobile?: boolean
 }) {
   async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+    await signOut()
     window.location.href = '/'
   }
 
