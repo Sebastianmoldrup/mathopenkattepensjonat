@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { cn } from '@/lib/utils'
-import { createClient } from '@/lib/supabase/client'
-import { updatePasswordSchema } from '@/schemas/updatePasswordSchema'
+import { updatePassword } from '@/actions/auth/updatePassword'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -15,47 +17,36 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-type FieldErrors = {
-  password?: string
-}
+const schema = z.object({
+  password: z
+    .string()
+    .min(8, 'Passordet må være minst 8 tegn')
+    .max(72, 'Passordet er for langt'),
+})
+
+type FormData = z.infer<typeof schema>
 
 export function UpdatePasswordForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<'div'>) {
-  const [password, setPassword] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formError, setFormError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
 
-  const handleUpdatePassword = async () => {
-    setIsLoading(true)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  })
+
+  async function onSubmit(data: FormData) {
     setFormError(null)
-    setFieldErrors({})
-
-    const result = updatePasswordSchema.safeParse({ password })
-    if (!result.success) {
-      const errors: FieldErrors = {}
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof FieldErrors
-        if (field && !errors[field]) errors[field] = issue.message
-      })
-      setFieldErrors(errors)
-      setIsLoading(false)
+    const result = await updatePassword(data.password)
+    if (result.error) {
+      setFormError(result.error)
       return
     }
-
-    const supabase = createClient()
-    const { error } = await supabase.auth.updateUser({
-      password: result.data.password,
-    })
-
-    if (error) {
-      setFormError('Kunne ikke oppdatere passordet. Prøv igjen.')
-      setIsLoading(false)
-      return
-    }
-
     window.location.href = '/login'
   }
 
@@ -68,31 +59,27 @@ export function UpdatePasswordForm({
         </CardHeader>
         <CardContent>
           <form
-            noValidate
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleUpdatePassword()
-            }}
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-6"
           >
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="password">Nytt passord</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Nytt passord"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                {fieldErrors.password && (
-                  <p className="text-sm text-red-500">{fieldErrors.password}</p>
-                )}
-              </div>
-              {formError && <p className="text-sm text-red-500">{formError}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Lagrer passord...' : 'Lagre nytt passord'}
-              </Button>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Nytt passord</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Nytt passord"
+                {...register('password')}
+              />
+              {errors.password && (
+                <p className="text-sm text-red-500">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
+            {formError && <p className="text-sm text-red-500">{formError}</p>}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Lagrer passord...' : 'Lagre nytt passord'}
+            </Button>
           </form>
         </CardContent>
       </Card>
