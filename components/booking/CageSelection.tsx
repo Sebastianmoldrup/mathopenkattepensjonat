@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { CageType, CAGE_CONFIGS } from '@/lib/booking/types'
-import { calculatePriceBreakdown } from '@/lib/booking/pricing'
+import { calculatePriceBreakdown, parseDateStr } from '@/lib/booking/pricing'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -117,6 +117,12 @@ export function CageSelection({
     return `${min}–${max} kr/natt`
   }
 
+  function isOneNight(): boolean {
+    const from = parseDateStr(dateFrom)
+    const to = parseDateStr(dateTo)
+    return Math.round((to.getTime() - from.getTime()) / 864e5) === 1
+  }
+
   function handleCageClick(cageType: CageType, cageCount: number) {
     if (cageType === 'senior_comfort') {
       setPendingSelection({ cageType, cageCount })
@@ -227,6 +233,11 @@ export function CageSelection({
                 <p className="text-xs text-muted-foreground">
                   {getDailyPriceRange(cageType, cageCount)}
                 </p>
+                {isOneNight() && (
+                  <p className="text-xs text-amber-600">
+                    Minimum pris tilsvarer 2 døgn
+                  </p>
+                )}
               </div>
             </button>
           )

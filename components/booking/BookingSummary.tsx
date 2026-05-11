@@ -210,6 +210,11 @@ export function BookingSummary({
               </span>
             </div>
           )}
+          {breakdown.totalDays === 1 && (
+            <p className="text-xs text-muted-foreground">
+              Minimum pris tilsvarer 2 døgn.
+            </p>
+          )}
           <div className="flex justify-between border-t pt-2 font-semibold">
             <span>Totalt</span>
             <span className="text-lg text-primary">

@@ -144,7 +144,11 @@ export function calculatePriceBreakdown(
     current.setDate(current.getDate() + 1)
   }
 
-  const totalPrice = days.reduce((sum, d) => sum + d.total, 0)
+  const rawTotal = days.reduce((sum, d) => sum + d.total, 0)
+
+  // Minimum 2 døgn — bruk første dag sin pris som minimum
+  const minTotal = days.length > 0 ? days[0].total * 2 : 0
+  const totalPrice = days.length < 2 ? Math.max(rawTotal, minTotal) : rawTotal
   const lowSeasonDays = days.filter((d) => d.season === 'low').length
   const highSeasonDays = days.filter((d) => d.season === 'high').length
 
