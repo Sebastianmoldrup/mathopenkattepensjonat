@@ -111,13 +111,25 @@ export interface CatBehaviorNote {
   id: string
   cat_id: string
   cat_name: string
-  gets_medication: boolean
+  cat_breed: string | null
+  cat_age: string | null
+  cat_gender: string | null
+  cat_image_url: string | null
+  is_sterilized: boolean | null
+  id_chip: string | null
+  last_vaccine_date: string | null
+  deworming_info: string | null
+  flea_treatment_info: string | null
+  medical_notes: string | null
+  diet: string | null
+  behavior_notes: string | null
+  gets_medication: boolean | null
   medication_details: string | null
-  has_cat_experience: boolean
-  gets_along_with_cats: string
-  has_stress_issues: boolean
+  has_cat_experience: boolean | null
+  gets_along_with_cats: string | null
+  has_stress_issues: boolean | null
   stress_details: string | null
-  aggression_risk: string
+  aggression_risk: string | null
   aggression_details: string | null
 }
 

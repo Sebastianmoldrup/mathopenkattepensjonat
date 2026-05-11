@@ -48,6 +48,7 @@ import {
 import {
   adminGetHealthLogs,
   adminGetCatBehaviorNotes,
+  CatBehaviorNote,
 } from '@/lib/admin/formActions'
 import { HealthLog } from '@/lib/admin/formTypes'
 import { HealthLogForm } from './forms/HealthLogForm'
@@ -71,49 +72,11 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export interface CatBehaviorNote {
-  id: string
-  cat_id: string
-  cat_name: string
-  cat_breed: string | null
-  cat_age: string | null
-  cat_gender: string | null
-  cat_image_url: string | null
-  is_sterilized: boolean | null
-  id_chip: string | null
-  last_vaccine_date: string | null
-  deworming_info: string | null
-  flea_treatment_info: string | null
-  medical_notes: string | null
-  diet: string | null
-  behavior_notes: string | null
-  gets_medication: boolean | null
-  medication_details: string | null
-  has_cat_experience: boolean | null
-  gets_along_with_cats: string | null
-  has_stress_issues: boolean | null
-  stress_details: string | null
-  aggression_risk: string | null
-  aggression_details: string | null
-}
-
 interface BookingDetailDialogProps {
   booking: AdminBooking | null
   open: boolean
   onOpenChange: (open: boolean) => void
   onDeleted?: () => void
-}
-
-const ALONG_LABELS: Record<string, string> = {
-  yes: 'Ja',
-  no: 'Nei',
-  unknown: 'Vet ikke',
-}
-
-const RISK_LABELS: Record<string, string> = {
-  yes: 'Ja',
-  no: 'Nei',
-  unknown: 'Vet ikke',
 }
 
 const CAGE_TYPE_OPTIONS = [
