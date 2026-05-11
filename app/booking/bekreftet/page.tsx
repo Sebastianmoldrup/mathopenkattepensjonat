@@ -47,10 +47,10 @@ export default function BookingBekreftetPage() {
       </div>
 
       <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">
-        <Button asChild size="lg" className="flex-1">
+        <Button asChild size="lg" className="flex-1 py-2">
           <Link href="/minside/bookinger">Se mine bookinger</Link>
         </Button>
-        <Button asChild size="lg" variant="outline" className="flex-1">
+        <Button asChild size="lg" variant="outline" className="flex-1 py-2">
           <Link href="/">Gå til hjemmesiden</Link>
         </Button>
       </div>
