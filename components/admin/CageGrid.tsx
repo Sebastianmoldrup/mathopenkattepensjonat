@@ -31,7 +31,8 @@ const SECTIONS = [
   {
     key: 'senior_comfort',
     label: 'Senior & Komfort (1–3)',
-    cages: ['S&K 1', 'S&K 2', 'S&K 3'],
+    cages: ['Senior & Komfort 1', 'Senior & Komfort 2', 'Senior & Komfort 3'],
+    displayLabels: ['S&K 1', 'S&K 2', 'S&K 3'],
     headerClass: 'bg-purple-50 text-purple-700',
   },
   {
@@ -429,8 +430,13 @@ export default function CageGrid({
             }}
           >
             <span className="truncate">{label}</span>
+            <span className="ml-1 flex-shrink-0 rounded bg-black/10 px-1 py-0.5 text-[9px]">
+              {a.cage_label
+                .replace('Senior & Komfort', 'S&K')
+                .replace(/\s*\d+$/, '')}
+            </span>
             {a.has_note && (
-              <span className="ml-auto h-1.5 w-1.5 flex-shrink-0 rounded-full bg-black/20" />
+              <span className="ml-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-black/20" />
             )}
           </button>
         </td>
@@ -673,10 +679,10 @@ export default function CageGrid({
                         {section.label}
                       </td>
                     </tr>
-                    {section.cages.map((cageLabel) => (
+                    {section.cages.map((cageLabel, idx) => (
                       <tr key={cageLabel}>
                         <td className="whitespace-nowrap border-b border-r border-border/40 bg-muted/40 px-2 text-[10px] font-medium text-muted-foreground">
-                          {cageLabel}
+                          {section.displayLabels?.[idx] ?? cageLabel}
                         </td>
                         {renderCageRow(cageLabel)}
                       </tr>
@@ -870,7 +876,14 @@ function CageGridSidebar({
       <div className="space-y-1 border-t border-border/20 pt-3">
         {[
           { label: 'Periode', value: periodLabel },
-          ...(isAssigned ? [{ label: 'Bur', value: a!.cage_label }] : []),
+          ...(isAssigned
+            ? [{ label: 'Bur', value: a!.cage_label }]
+            : [
+                {
+                  label: 'Burtype',
+                  value: CAGE_TYPE_LABELS[b!.cage_type] ?? b!.cage_type,
+                },
+              ]),
           {
             label: 'Status',
             value: isAssigned
