@@ -67,6 +67,7 @@ import {
   Pill,
   AlertTriangle,
   ChevronRight,
+  CheckCircle2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -74,13 +75,25 @@ export interface CatBehaviorNote {
   id: string
   cat_id: string
   cat_name: string
-  gets_medication: boolean
+  cat_breed: string | null
+  cat_age: string | null
+  cat_gender: string | null
+  cat_image_url: string | null
+  is_sterilized: boolean | null
+  id_chip: string | null
+  last_vaccine_date: string | null
+  deworming_info: string | null
+  flea_treatment_info: string | null
+  medical_notes: string | null
+  diet: string | null
+  behavior_notes: string | null
+  gets_medication: boolean | null
   medication_details: string | null
-  has_cat_experience: boolean
-  gets_along_with_cats: string
-  has_stress_issues: boolean
+  has_cat_experience: boolean | null
+  gets_along_with_cats: string | null
+  has_stress_issues: boolean | null
   stress_details: string | null
-  aggression_risk: string
+  aggression_risk: string | null
   aggression_details: string | null
 }
 
@@ -691,9 +704,9 @@ export function BookingDetailDialog({
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       {behaviorNotes.map((note) => {
-                        const hasMedication = note.gets_medication
+                        const hasMedication = note.gets_medication === true
                         const hasWarning =
-                          note.has_stress_issues ||
+                          note.has_stress_issues === true ||
                           note.aggression_risk === 'yes' ||
                           note.aggression_risk === 'unknown'
 
@@ -869,55 +882,250 @@ export function BookingDetailDialog({
 
       {/* ── CAT BEHAVIOR SHEET ───────────────────────────────────────── */}
       <Sheet open={catSheetOpen} onOpenChange={setCatSheetOpen}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-md">
-          <SheetHeader className="mb-4">
-            <SheetTitle className="flex items-center gap-2">
-              <span className="text-lg">🐱</span>
-              {selectedCat?.cat_name}
+        <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+          <SheetHeader className="pb-4">
+            <SheetTitle className="flex items-center gap-3">
+              {selectedCat?.cat_image_url ? (
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border bg-muted">
+                  <Image
+                    src={selectedCat.cat_image_url}
+                    alt={selectedCat.cat_name}
+                    fill
+                    className="object-cover"
+                    sizes="40px"
+                  />
+                </div>
+              ) : (
+                <span className="text-2xl">🐱</span>
+              )}
+              <div>
+                <p className="text-base font-semibold">
+                  {selectedCat?.cat_name}
+                </p>
+                {selectedCat?.cat_breed && (
+                  <p className="text-xs font-normal text-muted-foreground">
+                    {selectedCat.cat_breed}
+                  </p>
+                )}
+              </div>
             </SheetTitle>
             <SheetDescription className="sr-only">
-              Atferd og informasjon om katten
+              Informasjon om katten
             </SheetDescription>
           </SheetHeader>
 
           {selectedCat && (
-            <div className="space-y-4">
-              <BehaviorItem
-                label="Medisinering"
-                value={selectedCat.gets_medication ? 'Ja' : 'Nei'}
-                detail={selectedCat.medication_details}
-                highlight={selectedCat.gets_medication}
-              />
-              <BehaviorItem
-                label="Erfaring med katter"
-                value={selectedCat.has_cat_experience ? 'Ja' : 'Nei'}
-              />
-              <BehaviorItem
-                label="Går godt med andre katter"
-                value={
-                  ALONG_LABELS[selectedCat.gets_along_with_cats] ??
-                  selectedCat.gets_along_with_cats
-                }
-                highlight={selectedCat.gets_along_with_cats === 'no'}
-              />
-              <BehaviorItem
-                label="Stressutfordringer"
-                value={selectedCat.has_stress_issues ? 'Ja' : 'Nei'}
-                detail={selectedCat.stress_details}
-                highlight={selectedCat.has_stress_issues}
-              />
-              <BehaviorItem
-                label="Aggresjonsrisiko"
-                value={
-                  RISK_LABELS[selectedCat.aggression_risk] ??
-                  selectedCat.aggression_risk
-                }
-                detail={selectedCat.aggression_details}
-                highlight={
-                  selectedCat.aggression_risk === 'yes' ||
-                  selectedCat.aggression_risk === 'unknown'
-                }
-              />
+            <div className="space-y-6 p-3 pb-6">
+              {/* ── Varsler ── */}
+              {(selectedCat.gets_medication === true ||
+                selectedCat.has_stress_issues === true ||
+                selectedCat.aggression_risk === 'yes' ||
+                selectedCat.aggression_risk === 'unknown') && (
+                <div className="space-y-2">
+                  <SectionTitle>Varsler</SectionTitle>
+                  <div className="space-y-2">
+                    {selectedCat.gets_medication === true && (
+                      <div className="flex items-start gap-2.5 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs text-blue-800">
+                        <Pill className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                        <div className="space-y-0.5">
+                          <p className="font-semibold">Katten tar medisiner</p>
+                          {selectedCat.medication_details && (
+                            <p className="text-blue-700">
+                              {selectedCat.medication_details}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {selectedCat.has_stress_issues === true && (
+                      <div className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                        <div className="space-y-0.5">
+                          <p className="font-semibold">
+                            Stressrelaterte utfordringer
+                          </p>
+                          {selectedCat.stress_details && (
+                            <p className="text-amber-700">
+                              {selectedCat.stress_details}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {(selectedCat.aggression_risk === 'yes' ||
+                      selectedCat.aggression_risk === 'unknown') && (
+                      <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+                        <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                        <div className="space-y-0.5">
+                          <p className="font-semibold">
+                            Aggresjonsrisiko —{' '}
+                            {selectedCat.aggression_risk === 'yes'
+                              ? 'Ja'
+                              : 'Vet ikke'}
+                          </p>
+                          {selectedCat.aggression_details && (
+                            <p className="text-red-700">
+                              {selectedCat.aggression_details}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Ingen utslag */}
+              {selectedCat.gets_medication !== true &&
+                selectedCat.has_stress_issues !== true &&
+                selectedCat.aggression_risk !== 'yes' &&
+                selectedCat.aggression_risk !== 'unknown' &&
+                selectedCat.gets_medication !== null && (
+                  <div className="flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-xs text-green-800">
+                    <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
+                    <p className="font-medium">Ingen varsler registrert</p>
+                  </div>
+                )}
+
+              {/* Ikke utfylt */}
+              {selectedCat.gets_medication === null && (
+                <div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-3 text-xs text-muted-foreground">
+                  <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                  <p>Atferdsinformasjon ikke fylt ut av kunden ennå</p>
+                </div>
+              )}
+
+              {/* ── Grunninfo ── */}
+              <div className="space-y-2">
+                <SectionTitle>Om katten</SectionTitle>
+                <div className="divide-y divide-border/40 rounded-lg border">
+                  <InfoRow
+                    label="Alder"
+                    value={
+                      selectedCat.cat_age
+                        ? String(selectedCat.cat_age).includes('år') ||
+                          String(selectedCat.cat_age).includes('måneder')
+                          ? selectedCat.cat_age
+                          : selectedCat.cat_age + ' år'
+                        : null
+                    }
+                  />
+                  <InfoRow
+                    label="Kjønn"
+                    value={
+                      selectedCat.cat_gender === 'hann'
+                        ? 'Hann'
+                        : selectedCat.cat_gender === 'hunn'
+                          ? 'Hunn'
+                          : null
+                    }
+                  />
+                  <InfoRow
+                    label="Sterilisert"
+                    value={
+                      selectedCat.is_sterilized === null
+                        ? null
+                        : selectedCat.is_sterilized
+                          ? 'Ja'
+                          : 'Nei'
+                    }
+                  />
+                  <InfoRow label="ID-chip" value={selectedCat.id_chip} />
+                  <InfoRow
+                    label="Siste vaksine"
+                    value={
+                      selectedCat.last_vaccine_date
+                        ? new Date(
+                            selectedCat.last_vaccine_date
+                          ).toLocaleDateString('nb-NO', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })
+                        : null
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* ── Helse ── */}
+              {(selectedCat.deworming_info ||
+                selectedCat.flea_treatment_info ||
+                selectedCat.medical_notes) && (
+                <div className="space-y-2">
+                  <SectionTitle>Helse</SectionTitle>
+                  <div className="space-y-2">
+                    {selectedCat.deworming_info && (
+                      <NoteCard
+                        label="Ormebehandling"
+                        value={selectedCat.deworming_info}
+                      />
+                    )}
+                    {selectedCat.flea_treatment_info && (
+                      <NoteCard
+                        label="Loppebehandling"
+                        value={selectedCat.flea_treatment_info}
+                      />
+                    )}
+                    {selectedCat.medical_notes && (
+                      <NoteCard
+                        label="Medisinske notater"
+                        value={selectedCat.medical_notes}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Daglig pleie ── */}
+              {(selectedCat.diet || selectedCat.behavior_notes) && (
+                <div className="space-y-2">
+                  <SectionTitle>Daglig pleie</SectionTitle>
+                  <div className="space-y-2">
+                    {selectedCat.diet && (
+                      <NoteCard label="Kosthold" value={selectedCat.diet} />
+                    )}
+                    {selectedCat.behavior_notes && (
+                      <NoteCard
+                        label="Atferdsnotater"
+                        value={selectedCat.behavior_notes}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Atferd ── */}
+              <div className="space-y-2">
+                <SectionTitle>Atferd</SectionTitle>
+                <div className="divide-y divide-border/40 rounded-lg border">
+                  <BehaviorRow
+                    label="Får medisiner"
+                    value={selectedCat.gets_medication}
+                    type="boolean"
+                  />
+                  <BehaviorRow
+                    label="Erfaring med katter"
+                    value={selectedCat.has_cat_experience}
+                    type="boolean"
+                  />
+                  <BehaviorRow
+                    label="Går godt med andre"
+                    value={selectedCat.gets_along_with_cats}
+                    type="yesno"
+                  />
+                  <BehaviorRow
+                    label="Stressutfordringer"
+                    value={selectedCat.has_stress_issues}
+                    type="boolean"
+                  />
+                  <BehaviorRow
+                    label="Aggresjonsrisiko"
+                    value={selectedCat.aggression_risk}
+                    type="yesno"
+                  />
+                </div>
+              </div>
             </div>
           )}
         </SheetContent>
@@ -942,6 +1150,57 @@ function Row({
         {label}
       </span>
       <span className="break-all text-xs font-medium">{value}</span>
+    </div>
+  )
+}
+
+const ALONG_DISPLAY: Record<string, { label: string; color: string }> = {
+  yes: { label: 'Ja', color: 'text-green-700' },
+  no: { label: 'Nei', color: 'text-red-700' },
+  unknown: { label: 'Vet ikke', color: 'text-amber-700' },
+}
+
+function BehaviorRow({
+  label,
+  value,
+  type,
+}: {
+  label: string
+  value: boolean | null | string
+  type: 'boolean' | 'yesno'
+}) {
+  let display: React.ReactNode
+
+  if (value === null || value === undefined || value === '') {
+    display = (
+      <span className="text-xs italic text-muted-foreground">Ikke oppgitt</span>
+    )
+  } else if (type === 'boolean') {
+    const v = value as boolean
+    display = (
+      <span
+        className={cn(
+          'text-xs font-medium',
+          v ? 'text-amber-700' : 'text-green-700'
+        )}
+      >
+        {v ? 'Ja' : 'Nei'}
+      </span>
+    )
+  } else {
+    const v = value as string
+    const d = ALONG_DISPLAY[v]
+    display = d ? (
+      <span className={cn('text-xs font-medium', d.color)}>{d.label}</span>
+    ) : (
+      <span className="text-xs text-muted-foreground">{v}</span>
+    )
+  }
+
+  return (
+    <div className="flex items-center justify-between px-3 py-2.5">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      {display}
     </div>
   )
 }
@@ -972,6 +1231,42 @@ function BehaviorItem({
         {value}
       </p>
       {detail && <p className="mt-1 text-xs text-muted-foreground">{detail}</p>}
+    </div>
+  )
+}
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      {children}
+    </p>
+  )
+}
+
+function InfoRow({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null | undefined
+}) {
+  return (
+    <div className="flex items-center justify-between px-3 py-2.5">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs font-medium text-foreground">
+        {value ?? (
+          <span className="italic text-muted-foreground">Ikke oppgitt</span>
+        )}
+      </span>
+    </div>
+  )
+}
+
+function NoteCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <p className="mb-1 text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-sm">{value}</p>
     </div>
   )
 }
