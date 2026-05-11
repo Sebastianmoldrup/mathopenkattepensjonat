@@ -67,7 +67,13 @@ export function UpdatePasswordForm({
           <CardDescription>Skriv inn ditt nye passord nedenfor</CardDescription>
         </CardHeader>
         <CardContent>
-          <form noValidate action={handleUpdatePassword}>
+          <form
+            noValidate
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleUpdatePassword()
+            }}
+          >
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="password">Nytt passord</Label>
