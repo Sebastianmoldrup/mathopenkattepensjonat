@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
+import { adminGetCheckinCheckoutLog } from '@/lib/admin/actions'
 import { nb } from 'date-fns/locale'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
@@ -21,6 +22,7 @@ import {
   Phone,
   Mail,
   BedDouble,
+  AlertTriangle,
   AlertCircle,
   Loader2,
   CheckCircle2,
@@ -130,7 +132,7 @@ export default function CheckinCheckoutClient({
   const router = useRouter()
   const [date, setDate] = useState(initialDate)
   const [entries, setEntries] = useState(initialEntries)
-  const [isPending, startTransition] = useTransition()
+  const [isLoading, setIsLoading] = useState(false)
 
   const [dialogEntry, setDialogEntry] = useState<CheckinCheckoutEntry | null>(
     null
@@ -148,9 +150,10 @@ export default function CheckinCheckoutClient({
   function handleDateChange(newDate: string) {
     setDate(newDate)
     router.push('/admin/innsjekk?dato=' + newDate, { scroll: false })
-    startTransition(async () => {
-      const newEntries = await adminGetCheckinCheckoutByDate(newDate)
+    setIsLoading(true)
+    adminGetCheckinCheckoutByDate(newDate).then((newEntries) => {
       setEntries(newEntries)
+      setIsLoading(false)
     })
   }
 
@@ -160,12 +163,14 @@ export default function CheckinCheckoutClient({
     handleDateChange(localStr(d))
   }
 
-  function openChecklist(
+  async function openChecklist(
     entry: CheckinCheckoutEntry,
     type: 'checkin' | 'checkout'
   ) {
     setDialogEntry(entry)
     setDialogType(type)
+    setConfirmOpen(false)
+
     const groups = type === 'checkin' ? CHECKIN_GROUPS : CHECKOUT_GROUPS
     const initial: Record<string, boolean> = {}
     groups.forEach((group) =>
@@ -173,8 +178,20 @@ export default function CheckinCheckoutClient({
         initial[item.key] = false
       })
     )
+
+    // Hent eksisterende verdier
+    const log = await adminGetCheckinCheckoutLog(entry.booking_id)
+    if (log) {
+      groups.forEach((group) =>
+        group.items.forEach((item) => {
+          if (item.key in log && log[item.key] !== null) {
+            initial[item.key] = log[item.key] as boolean
+          }
+        })
+      )
+    }
+
     setChecklist(initial)
-    setConfirmOpen(false)
   }
 
   async function handleSave() {
@@ -212,7 +229,7 @@ export default function CheckinCheckoutClient({
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigateDay(-1)}
-            disabled={isPending}
+            disabled={isLoading}
             className="rounded-md border border-border/40 px-3 py-1.5 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
           >
             ‹ Forrige
@@ -225,14 +242,14 @@ export default function CheckinCheckoutClient({
           />
           <button
             onClick={() => handleDateChange(localStr(new Date()))}
-            disabled={isPending || isToday}
+            disabled={isLoading || isToday}
             className="rounded-md border border-border/40 px-3 py-1.5 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
           >
             I dag
           </button>
           <button
             onClick={() => navigateDay(1)}
-            disabled={isPending}
+            disabled={isLoading}
             className="rounded-md border border-border/40 px-3 py-1.5 text-xs transition-colors hover:bg-muted/50 disabled:opacity-50"
           >
             Neste ›
@@ -240,7 +257,7 @@ export default function CheckinCheckoutClient({
         </div>
       </div>
 
-      {isPending && (
+      {isLoading && (
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
           Laster...
@@ -572,10 +589,39 @@ function EntryCard({
       </div>
 
       <div className="space-y-1.5 text-xs">
-        <div className="flex items-center gap-1.5 text-muted-foreground">
-          <BedDouble className="h-3.5 w-3.5 flex-shrink-0" />
-          <span>{cageLabel}</span>
-        </div>
+        {entry.cage_assignments.length === 0 ? (
+          <div className="flex items-start gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+            <span>Ingen burtildeling — må tildeles i burplassering</span>
+          </div>
+        ) : entry.cage_assignments.length === 1 ? (
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <BedDouble className="h-3.5 w-3.5 flex-shrink-0" />
+            <span>{entry.cage_assignments[0].cage_label}</span>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <BedDouble className="h-3.5 w-3.5 flex-shrink-0" />
+              <span className="text-xs font-medium">Burbytte</span>
+            </div>
+            {entry.cage_assignments.map((ca, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-1.5 pl-5 text-xs text-muted-foreground"
+              >
+                <span className="font-medium text-foreground">
+                  {ca.cage_label}
+                </span>
+                <span>
+                  {format(parseISO(ca.date_from), 'd. MMM', { locale: nb })}
+                  {' – '}
+                  {format(parseISO(ca.date_to), 'd. MMM', { locale: nb })}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Mail className="h-3.5 w-3.5 flex-shrink-0" />
           <a

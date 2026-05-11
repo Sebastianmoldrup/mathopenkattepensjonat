@@ -425,6 +425,7 @@ export interface CheckinCheckoutEntry {
   checked_out_at: string | null
   checked_in_by: string | null
   checked_out_by: string | null
+  cage_assignments: { cage_label: string; date_from: string; date_to: string }[]
 }
 
 export async function adminGetCheckinCheckoutByDate(
@@ -440,6 +441,18 @@ export async function adminGetCheckinCheckoutByDate(
     return []
   }
   return (data ?? []) as CheckinCheckoutEntry[]
+}
+
+export async function adminGetCheckinCheckoutLog(bookingId: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_checkin_checkout_log', {
+    p_booking_id: bookingId,
+  })
+  if (error) {
+    console.error('[adminGetCheckinCheckoutLog]', error.message)
+    return null
+  }
+  return data?.[0] ?? null
 }
 
 export async function adminUpsertCheckin(
