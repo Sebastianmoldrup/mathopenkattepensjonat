@@ -199,6 +199,40 @@ export async function createBooking(
     throw new Error('Kunne ikke opprette booking. Prøv igjen.')
   }
 
+  // ── Lagre snapshot ──────────────────────────────────────────────────
+  try {
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('first_name, last_name, email, phone, address')
+      .eq('id', payload.userId)
+      .single()
+
+    const { data: catRows } = await supabase
+      .from('cats')
+      .select('name, gender, breed, age, id_chip')
+      .in('id', payload.catIds)
+
+    await supabase.from('booking_snapshots').insert({
+      booking_id: bookingId,
+      snapshot_at: new Date().toISOString(),
+      owner_name: userProfile
+        ? `${userProfile.first_name ?? ''} ${userProfile.last_name ?? ''}`.trim()
+        : payload.userFirstName,
+      owner_email: userProfile?.email ?? payload.userEmail,
+      owner_phone: userProfile?.phone ?? null,
+      owner_address: userProfile?.address ?? null,
+      cats: (catRows ?? []).map((c) => ({
+        name: c.name,
+        gender: c.gender,
+        breed: c.breed,
+        age: c.age,
+        id_chip: c.id_chip,
+      })),
+    })
+  } catch (snapshotErr) {
+    console.error('[createBooking] snapshot failed:', snapshotErr)
+  }
+
   // Send confirmation email
   try {
     const days = calculatePriceBreakdown(
