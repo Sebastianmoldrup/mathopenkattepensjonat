@@ -7,6 +7,14 @@ import { nb } from 'date-fns/locale'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import {
   LogIn,
   LogOut,
@@ -15,9 +23,13 @@ import {
   BedDouble,
   AlertCircle,
   Loader2,
+  CheckCircle2,
+  ClipboardList,
 } from 'lucide-react'
 import {
   adminGetCheckinCheckoutByDate,
+  adminUpsertCheckin,
+  adminUpsertCheckout,
   CheckinCheckoutEntry,
 } from '@/lib/admin/actions'
 import { CAGE_LABELS } from '@/lib/admin/utils'
@@ -35,6 +47,46 @@ function localStr(d: Date): string {
   return y + '-' + m + '-' + day
 }
 
+const CHECKIN_ITEMS = [
+  { key: 'inn_vaksinasjonskort_mottatt', label: 'Vaksinasjonskort mottatt' },
+  { key: 'inn_eier_identifisert', label: 'Eier identifisert' },
+  { key: 'inn_kontakt_registrert', label: 'Kontaktinfo registrert' },
+  { key: 'inn_nødkontakt_registrert', label: 'Nødkontakt registrert' },
+  { key: 'inn_vaksinasjon_kontrollert', label: 'Vaksinasjon kontrollert' },
+  { key: 'inn_helseopplysninger_mottatt', label: 'Helseopplysninger mottatt' },
+  { key: 'inn_medisiner_mottatt', label: 'Medisiner mottatt' },
+  { key: 'inn_fôr_avklart', label: 'Fôr avklart' },
+  { key: 'inn_avtale_signert', label: 'Avtale signert' },
+  { key: 'inn_frisk', label: 'Katten er frisk' },
+  { key: 'inn_ingen_sår', label: 'Ingen sår eller skader' },
+  { key: 'inn_øyne_nese_pels', label: 'Øyne, nese og pels OK' },
+  { key: 'inn_normal_atferd', label: 'Normal atferd' },
+  { key: 'inn_avvik_observert', label: 'Avvik observert' },
+  { key: 'inn_bur_rengjort', label: 'Bur rengjort' },
+  { key: 'inn_overflater_desinfisert', label: 'Overflater desinfisert' },
+  { key: 'inn_kattedo_rengjort', label: 'Kattedo rengjort' },
+  { key: 'inn_ren_kattesand', label: 'Ren kattesand' },
+  { key: 'inn_skåler_vasket', label: 'Skåler vasket' },
+  { key: 'inn_rene_tepper', label: 'Rene tepper' },
+]
+
+const CHECKOUT_ITEMS = [
+  { key: 'ut_rom_tomt', label: 'Rom tomt for kattens eiendeler' },
+  { key: 'ut_kattedo_tømt', label: 'Kattedo tømt' },
+  { key: 'ut_kattedo_rengjort', label: 'Kattedo rengjort' },
+  { key: 'ut_skåler_vasket', label: 'Skåler vasket' },
+  { key: 'ut_tepper_vask', label: 'Tepper til vask' },
+  { key: 'ut_bur_rengjort', label: 'Bur rengjort' },
+  { key: 'ut_overflater_desinfisert', label: 'Overflater desinfisert' },
+  { key: 'ut_utstyr_klart', label: 'Utstyr klart til neste katt' },
+  { key: 'ut_frisk', label: 'Katten er frisk ved utsjekk' },
+  { key: 'ut_normal_appetitt', label: 'Normal appetitt under oppholdet' },
+  { key: 'ut_ingen_skader', label: 'Ingen skader' },
+  { key: 'ut_eier_informert', label: 'Eier informert om oppholdet' },
+  { key: 'ut_avvik_forklart', label: 'Eventuelle avvik forklart' },
+  { key: 'ut_medisiner_levert', label: 'Medisiner levert tilbake' },
+]
+
 export default function CheckinCheckoutClient({
   initialEntries,
   initialDate,
@@ -43,6 +95,16 @@ export default function CheckinCheckoutClient({
   const [date, setDate] = useState(initialDate)
   const [entries, setEntries] = useState(initialEntries)
   const [isPending, startTransition] = useTransition()
+
+  const [dialogEntry, setDialogEntry] = useState<CheckinCheckoutEntry | null>(
+    null
+  )
+  const [dialogType, setDialogType] = useState<'checkin' | 'checkout' | null>(
+    null
+  )
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({})
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const checkins = entries.filter((e) => e.event_type === 'checkin')
   const checkouts = entries.filter((e) => e.event_type === 'checkout')
@@ -62,8 +124,44 @@ export default function CheckinCheckoutClient({
     handleDateChange(localStr(d))
   }
 
+  function openChecklist(
+    entry: CheckinCheckoutEntry,
+    type: 'checkin' | 'checkout'
+  ) {
+    setDialogEntry(entry)
+    setDialogType(type)
+    const items = type === 'checkin' ? CHECKIN_ITEMS : CHECKOUT_ITEMS
+    const initial: Record<string, boolean> = {}
+    items.forEach((item) => {
+      initial[item.key] = false
+    })
+    setChecklist(initial)
+    setConfirmOpen(false)
+  }
+
+  async function handleSave() {
+    if (!dialogEntry || !dialogType) return
+    setSaving(true)
+    try {
+      const result =
+        dialogType === 'checkin'
+          ? await adminUpsertCheckin(dialogEntry.booking_id, checklist)
+          : await adminUpsertCheckout(dialogEntry.booking_id, checklist)
+      if (result.success) {
+        const newEntries = await adminGetCheckinCheckoutByDate(date)
+        setEntries(newEntries)
+        setDialogEntry(null)
+        setDialogType(null)
+        setConfirmOpen(false)
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const dateLabel = format(parseISO(date), 'EEEE d. MMMM yyyy', { locale: nb })
   const isToday = date === localStr(new Date())
+  const items = dialogType === 'checkin' ? CHECKIN_ITEMS : CHECKOUT_ITEMS
 
   return (
     <div className="space-y-4">
@@ -142,42 +240,205 @@ export default function CheckinCheckoutClient({
 
         <TabsContent value="checkin" className="mt-4">
           <div className="space-y-4">
-            <ChecklistAccordion type="checkin" />
             {checkins.length === 0 ? (
               <EmptyState label="Ingen innsjekk denne dagen" />
             ) : (
-              <div className="space-y-3">
-                {checkins.map((entry) => (
-                  <EntryCard
-                    key={entry.booking_id}
-                    entry={entry}
-                    type="checkin"
-                  />
-                ))}
-              </div>
+              <>
+                {checkins.filter((e) => !e.is_checked_in).length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Ikke sjekket inn (
+                      {checkins.filter((e) => !e.is_checked_in).length})
+                    </p>
+                    {checkins
+                      .filter((e) => !e.is_checked_in)
+                      .map((entry) => (
+                        <EntryCard
+                          key={entry.booking_id}
+                          entry={entry}
+                          type="checkin"
+                          onOpenChecklist={() =>
+                            openChecklist(entry, 'checkin')
+                          }
+                        />
+                      ))}
+                  </div>
+                )}
+                {checkins.filter((e) => e.is_checked_in).length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium uppercase tracking-wider text-green-600">
+                      Sjekket inn (
+                      {checkins.filter((e) => e.is_checked_in).length})
+                    </p>
+                    {checkins
+                      .filter((e) => e.is_checked_in)
+                      .map((entry) => (
+                        <EntryCard
+                          key={entry.booking_id}
+                          entry={entry}
+                          type="checkin"
+                          onOpenChecklist={() =>
+                            openChecklist(entry, 'checkin')
+                          }
+                        />
+                      ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </TabsContent>
 
         <TabsContent value="checkout" className="mt-4">
           <div className="space-y-4">
-            <ChecklistAccordion type="checkout" />
             {checkouts.length === 0 ? (
               <EmptyState label="Ingen utsjekk denne dagen" />
             ) : (
-              <div className="space-y-3">
-                {checkouts.map((entry) => (
-                  <EntryCard
-                    key={entry.booking_id}
-                    entry={entry}
-                    type="checkout"
-                  />
-                ))}
-              </div>
+              <>
+                {checkouts.filter((e) => !e.is_checked_out).length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Ikke sjekket ut (
+                      {checkouts.filter((e) => !e.is_checked_out).length})
+                    </p>
+                    {checkouts
+                      .filter((e) => !e.is_checked_out)
+                      .map((entry) => (
+                        <EntryCard
+                          key={entry.booking_id}
+                          entry={entry}
+                          type="checkout"
+                          onOpenChecklist={() =>
+                            openChecklist(entry, 'checkout')
+                          }
+                        />
+                      ))}
+                  </div>
+                )}
+                {checkouts.filter((e) => e.is_checked_out).length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium uppercase tracking-wider text-blue-600">
+                      Sjekket ut (
+                      {checkouts.filter((e) => e.is_checked_out).length})
+                    </p>
+                    {checkouts
+                      .filter((e) => e.is_checked_out)
+                      .map((entry) => (
+                        <EntryCard
+                          key={entry.booking_id}
+                          entry={entry}
+                          type="checkout"
+                          onOpenChecklist={() =>
+                            openChecklist(entry, 'checkout')
+                          }
+                        />
+                      ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Checklist Dialog */}
+      <Dialog
+        open={!!dialogEntry && !confirmOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDialogEntry(null)
+            setDialogType(null)
+          }
+        }}
+      >
+        <DialogContent className="max-h-[85vh] max-w-md overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4" />
+              {dialogType === 'checkin'
+                ? 'Innsjekk-sjekkliste'
+                : 'Utsjekk-sjekkliste'}
+            </DialogTitle>
+            <DialogDescription>
+              {dialogEntry?.owner_first} {dialogEntry?.owner_last} —{' '}
+              {dialogEntry?.cat_names}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-2 py-2">
+            {items.map((item) => (
+              <label
+                key={item.key}
+                className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/40"
+              >
+                <input
+                  type="checkbox"
+                  checked={checklist[item.key] ?? false}
+                  onChange={(e) =>
+                    setChecklist((prev) => ({
+                      ...prev,
+                      [item.key]: e.target.checked,
+                    }))
+                  }
+                  className="h-4 w-4 rounded"
+                />
+                <span className="text-sm">{item.label}</span>
+              </label>
+            ))}
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Button onClick={() => setConfirmOpen(true)} className="flex-1">
+              {dialogType === 'checkin'
+                ? 'Fullfør innsjekk'
+                : 'Fullfør utsjekk'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDialogEntry(null)
+                setDialogType(null)
+              }}
+            >
+              Avbryt
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Dialog */}
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>
+              Bekreft {dialogType === 'checkin' ? 'innsjekk' : 'utsjekk'}
+            </DialogTitle>
+            <DialogDescription>
+              Er du sikker på at du vil fullføre{' '}
+              {dialogType === 'checkin' ? 'innsjekk' : 'utsjekk'} for{' '}
+              {dialogEntry?.owner_first} {dialogEntry?.owner_last}? Dette lagres
+              med tidspunkt og ditt brukernavn.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2 pt-2">
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 gap-1.5"
+            >
+              {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Bekreft
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+              disabled={saving}
+            >
+              Tilbake
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -185,9 +446,11 @@ export default function CheckinCheckoutClient({
 function EntryCard({
   entry,
   type,
+  onOpenChecklist,
 }: {
   entry: CheckinCheckoutEntry
   type: 'checkin' | 'checkout'
+  onOpenChecklist: () => void
 }) {
   const cageLabel =
     entry.cage_count === 2
@@ -202,6 +465,10 @@ function EntryCard({
     ' – ' +
     format(parseISO(entry.date_to), 'd. MMM yyyy', { locale: nb })
 
+  const isCompleted =
+    type === 'checkin' ? entry.is_checked_in : entry.is_checked_out
+  const completedAt =
+    type === 'checkin' ? entry.checked_in_at : entry.checked_out_at
   const mailtoHref = 'mailto:' + entry.owner_email
   const telHref = entry.owner_phone ? 'tel:' + entry.owner_phone : null
 
@@ -209,6 +476,7 @@ function EntryCard({
     <div
       className={cn(
         'space-y-3 rounded-lg border p-4',
+        isCompleted ? 'opacity-60' : '',
         type === 'checkin'
           ? 'border-green-200 bg-green-50/30'
           : 'border-blue-200 bg-blue-50/30'
@@ -216,20 +484,37 @@ function EntryCard({
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-sm font-medium">{ownerName}</p>
+          <div className="flex items-center gap-2">
+            {isCompleted && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+            <p className="text-sm font-medium">{ownerName}</p>
+          </div>
           <p className="text-xs text-muted-foreground">{periodLabel}</p>
+          {isCompleted && completedAt && (
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Fullført{' '}
+              {format(parseISO(completedAt), 'd. MMM HH:mm', { locale: nb })}
+            </p>
+          )}
         </div>
         <div className="flex flex-col items-end gap-1">
           <Badge
             variant="outline"
             className={cn(
               'text-xs',
-              type === 'checkin'
+              isCompleted
                 ? 'border-green-300 bg-green-100 text-green-800'
-                : 'border-blue-300 bg-blue-100 text-blue-800'
+                : type === 'checkin'
+                  ? 'border-green-300 bg-green-100 text-green-800'
+                  : 'border-blue-300 bg-blue-100 text-blue-800'
             )}
           >
-            {type === 'checkin' ? 'Innsjekk' : 'Utsjekk'}
+            {isCompleted
+              ? type === 'checkin'
+                ? 'Sjekket inn'
+                : 'Sjekket ut'
+              : type === 'checkin'
+                ? 'Innsjekk'
+                : 'Utsjekk'}
           </Badge>
           <span className="text-xs text-muted-foreground">
             {entry.num_cats} {entry.num_cats === 1 ? 'katt' : 'katter'}
@@ -287,6 +572,27 @@ function EntryCard({
           {'📝 ' + entry.admin_notes}
         </div>
       )}
+
+      <Button
+        size="sm"
+        onClick={onOpenChecklist}
+        className={cn(
+          'w-full gap-1.5',
+          isCompleted
+            ? 'border-border/40 bg-muted/40 text-muted-foreground hover:bg-muted'
+            : type === 'checkin'
+              ? 'border-green-200 bg-green-50 text-green-800 hover:bg-green-100'
+              : 'border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100'
+        )}
+        variant="outline"
+      >
+        <ClipboardList className="h-3.5 w-3.5" />
+        {isCompleted
+          ? 'Se sjekkliste'
+          : type === 'checkin'
+            ? 'Start innsjekk'
+            : 'Start utsjekk'}
+      </Button>
     </div>
   )
 }
@@ -296,66 +602,6 @@ function EmptyState({ label }: { label: string }) {
     <div className="flex flex-col items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
       <span className="text-3xl">📅</span>
       {label}
-    </div>
-  )
-}
-
-function ChecklistAccordion({ type }: { type: 'checkin' | 'checkout' }) {
-  const [open, setOpen] = useState(false)
-
-  const checkinItems = [
-    'Sjekk at vaksinasjonskort er gyldig (innen 12 mnd, minst 14 dager før innsjekk)',
-    'Ta i mot og oppbevar vaksinasjonskort for hver katt',
-    'Registrer eventuell medisinering og instruksjoner',
-    'Sjekk at hannkatter over 6 mnd er kastrert',
-    'Gjennomgå spesielle instruksjoner fra eier',
-    'Tildel bur og registrer i system (skal være gjort)',
-  ]
-
-  const checkoutItems = [
-    'Hent frem vaksinasjonskort og gi tilbake til eier',
-    'Sjekk at riktig katt leveres til riktig eier',
-    'Gjennomgå helselogg — informer eier om eventuelle avvik',
-    'Sjekk at bur er tomt og klart for rengjøring',
-    'Registrer betaling',
-    'Oppdater bookingstatus til Gjennomført',
-  ]
-
-  const items = type === 'checkin' ? checkinItems : checkoutItems
-  const label =
-    type === 'checkin' ? 'Innsjekk-huskeliste' : 'Utsjekk-huskeliste'
-
-  return (
-    <div className="overflow-hidden rounded-lg border border-border/40">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium transition-colors hover:bg-muted/40"
-      >
-        <span className="flex items-center gap-2">
-          <span>{type === 'checkin' ? '📋' : '✅'}</span>
-          {label}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {open ? '▲' : '▼'}
-        </span>
-      </button>
-      {open && (
-        <div className="border-t border-border/40 bg-muted/20 px-4 py-3">
-          <ul className="space-y-2">
-            {items.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-xs text-muted-foreground"
-              >
-                <span className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border border-border/60 bg-background text-[9px] font-medium text-foreground">
-                  {i + 1}
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   )
 }

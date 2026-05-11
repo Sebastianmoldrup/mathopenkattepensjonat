@@ -401,7 +401,7 @@ export async function adminUpdateBookingDetails(
   return { success: true }
 }
 
-// ─── Checkin/Checkout by date ──────────────────────────────────────────────────
+// ─── Checkin/Checkout ─────────────────────────────────────────────────────────
 
 export interface CheckinCheckoutEntry {
   booking_id: string
@@ -419,6 +419,12 @@ export interface CheckinCheckoutEntry {
   special_instructions: string | null
   wants_outdoor_cage: boolean
   admin_notes: string | null
+  is_checked_in: boolean
+  is_checked_out: boolean
+  checked_in_at: string | null
+  checked_out_at: string | null
+  checked_in_by: string | null
+  checked_out_by: string | null
 }
 
 export async function adminGetCheckinCheckoutByDate(
@@ -434,4 +440,36 @@ export async function adminGetCheckinCheckoutByDate(
     return []
   }
   return (data ?? []) as CheckinCheckoutEntry[]
+}
+
+export async function adminUpsertCheckin(
+  bookingId: string,
+  checklist: Record<string, boolean | string>
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('admin_upsert_checkin', {
+    p_booking_id: bookingId,
+    p_checklist: checklist,
+  })
+  if (error) {
+    console.error('[adminUpsertCheckin]', error.message)
+    return { success: false, error: 'Kunne ikke lagre innsjekk.' }
+  }
+  return { success: true }
+}
+
+export async function adminUpsertCheckout(
+  bookingId: string,
+  checklist: Record<string, boolean | string>
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('admin_upsert_checkout', {
+    p_booking_id: bookingId,
+    p_checklist: checklist,
+  })
+  if (error) {
+    console.error('[adminUpsertCheckout]', error.message)
+    return { success: false, error: 'Kunne ikke lagre utsjekk.' }
+  }
+  return { success: true }
 }
