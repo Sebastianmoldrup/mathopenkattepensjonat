@@ -47,44 +47,80 @@ function localStr(d: Date): string {
   return y + '-' + m + '-' + day
 }
 
-const CHECKIN_ITEMS = [
-  { key: 'inn_vaksinasjonskort_mottatt', label: 'Vaksinasjonskort mottatt' },
-  { key: 'inn_eier_identifisert', label: 'Eier identifisert' },
-  { key: 'inn_kontakt_registrert', label: 'Kontaktinfo registrert' },
-  { key: 'inn_nødkontakt_registrert', label: 'Nødkontakt registrert' },
-  { key: 'inn_vaksinasjon_kontrollert', label: 'Vaksinasjon kontrollert' },
-  { key: 'inn_helseopplysninger_mottatt', label: 'Helseopplysninger mottatt' },
-  { key: 'inn_medisiner_mottatt', label: 'Medisiner mottatt' },
-  { key: 'inn_fôr_avklart', label: 'Fôr avklart' },
-  { key: 'inn_avtale_signert', label: 'Avtale signert' },
-  { key: 'inn_frisk', label: 'Katten er frisk' },
-  { key: 'inn_ingen_sår', label: 'Ingen sår eller skader' },
-  { key: 'inn_øyne_nese_pels', label: 'Øyne, nese og pels OK' },
-  { key: 'inn_normal_atferd', label: 'Normal atferd' },
-  { key: 'inn_avvik_observert', label: 'Avvik observert' },
-  { key: 'inn_bur_rengjort', label: 'Bur rengjort' },
-  { key: 'inn_overflater_desinfisert', label: 'Overflater desinfisert' },
-  { key: 'inn_kattedo_rengjort', label: 'Kattedo rengjort' },
-  { key: 'inn_ren_kattesand', label: 'Ren kattesand' },
-  { key: 'inn_skåler_vasket', label: 'Skåler vasket' },
-  { key: 'inn_rene_tepper', label: 'Rene tepper' },
+const CHECKIN_GROUPS = [
+  {
+    title: 'Eier og dokumentasjon',
+    items: [
+      {
+        key: 'inn_vaksinasjonskort_mottatt',
+        label: 'Vaksinasjonskort mottatt',
+      },
+      { key: 'inn_eier_identifisert', label: 'Eier identifisert' },
+      { key: 'inn_kontakt_registrert', label: 'Kontaktinfo registrert' },
+      { key: 'inn_nødkontakt_registrert', label: 'Nødkontakt registrert' },
+      { key: 'inn_vaksinasjon_kontrollert', label: 'Vaksinasjon kontrollert' },
+      {
+        key: 'inn_helseopplysninger_mottatt',
+        label: 'Helseopplysninger mottatt',
+      },
+      { key: 'inn_medisiner_mottatt', label: 'Medisiner mottatt' },
+      { key: 'inn_fôr_avklart', label: 'Fôr avklart' },
+      { key: 'inn_avtale_signert', label: 'Avtale signert' },
+    ],
+  },
+  {
+    title: 'Kattens tilstand',
+    items: [
+      { key: 'inn_frisk', label: 'Katten er frisk' },
+      { key: 'inn_ingen_sår', label: 'Ingen sår eller skader' },
+      { key: 'inn_øyne_nese_pels', label: 'Øyne, nese og pels OK' },
+      { key: 'inn_normal_atferd', label: 'Normal atferd' },
+      { key: 'inn_avvik_observert', label: 'Avvik observert' },
+    ],
+  },
+  {
+    title: 'Bur og utstyr',
+    items: [
+      { key: 'inn_bur_rengjort', label: 'Bur rengjort' },
+      { key: 'inn_overflater_desinfisert', label: 'Overflater desinfisert' },
+      { key: 'inn_kattedo_rengjort', label: 'Kattedo rengjort' },
+      { key: 'inn_ren_kattesand', label: 'Ren kattesand' },
+      { key: 'inn_skåler_vasket', label: 'Skåler vasket' },
+      { key: 'inn_rene_tepper', label: 'Rene tepper' },
+    ],
+  },
 ]
 
-const CHECKOUT_ITEMS = [
-  { key: 'ut_rom_tomt', label: 'Rom tomt for kattens eiendeler' },
-  { key: 'ut_kattedo_tømt', label: 'Kattedo tømt' },
-  { key: 'ut_kattedo_rengjort', label: 'Kattedo rengjort' },
-  { key: 'ut_skåler_vasket', label: 'Skåler vasket' },
-  { key: 'ut_tepper_vask', label: 'Tepper til vask' },
-  { key: 'ut_bur_rengjort', label: 'Bur rengjort' },
-  { key: 'ut_overflater_desinfisert', label: 'Overflater desinfisert' },
-  { key: 'ut_utstyr_klart', label: 'Utstyr klart til neste katt' },
-  { key: 'ut_frisk', label: 'Katten er frisk ved utsjekk' },
-  { key: 'ut_normal_appetitt', label: 'Normal appetitt under oppholdet' },
-  { key: 'ut_ingen_skader', label: 'Ingen skader' },
-  { key: 'ut_eier_informert', label: 'Eier informert om oppholdet' },
-  { key: 'ut_avvik_forklart', label: 'Eventuelle avvik forklart' },
-  { key: 'ut_medisiner_levert', label: 'Medisiner levert tilbake' },
+const CHECKOUT_GROUPS = [
+  {
+    title: 'Kattens tilstand',
+    items: [
+      { key: 'ut_frisk', label: 'Katten er frisk ved utsjekk' },
+      { key: 'ut_normal_appetitt', label: 'Normal appetitt under oppholdet' },
+      { key: 'ut_ingen_skader', label: 'Ingen skader' },
+    ],
+  },
+  {
+    title: 'Eier og informasjon',
+    items: [
+      { key: 'ut_eier_informert', label: 'Eier informert om oppholdet' },
+      { key: 'ut_avvik_forklart', label: 'Eventuelle avvik forklart' },
+      { key: 'ut_medisiner_levert', label: 'Medisiner levert tilbake' },
+    ],
+  },
+  {
+    title: 'Rengjøring og utstyr',
+    items: [
+      { key: 'ut_rom_tomt', label: 'Rom tomt for kattens eiendeler' },
+      { key: 'ut_kattedo_tømt', label: 'Kattedo tømt' },
+      { key: 'ut_kattedo_rengjort', label: 'Kattedo rengjort' },
+      { key: 'ut_skåler_vasket', label: 'Skåler vasket' },
+      { key: 'ut_tepper_vask', label: 'Tepper til vask' },
+      { key: 'ut_bur_rengjort', label: 'Bur rengjort' },
+      { key: 'ut_overflater_desinfisert', label: 'Overflater desinfisert' },
+      { key: 'ut_utstyr_klart', label: 'Utstyr klart til neste katt' },
+    ],
+  },
 ]
 
 export default function CheckinCheckoutClient({
@@ -130,11 +166,13 @@ export default function CheckinCheckoutClient({
   ) {
     setDialogEntry(entry)
     setDialogType(type)
-    const items = type === 'checkin' ? CHECKIN_ITEMS : CHECKOUT_ITEMS
+    const groups = type === 'checkin' ? CHECKIN_GROUPS : CHECKOUT_GROUPS
     const initial: Record<string, boolean> = {}
-    items.forEach((item) => {
-      initial[item.key] = false
-    })
+    groups.forEach((group) =>
+      group.items.forEach((item) => {
+        initial[item.key] = false
+      })
+    )
     setChecklist(initial)
     setConfirmOpen(false)
   }
@@ -161,7 +199,6 @@ export default function CheckinCheckoutClient({
 
   const dateLabel = format(parseISO(date), 'EEEE d. MMMM yyyy', { locale: nb })
   const isToday = date === localStr(new Date())
-  const items = dialogType === 'checkin' ? CHECKIN_ITEMS : CHECKOUT_ITEMS
 
   return (
     <div className="space-y-4">
@@ -365,26 +402,38 @@ export default function CheckinCheckoutClient({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-2 py-2">
-            {items.map((item) => (
-              <label
-                key={item.key}
-                className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/40"
-              >
-                <input
-                  type="checkbox"
-                  checked={checklist[item.key] ?? false}
-                  onChange={(e) =>
-                    setChecklist((prev) => ({
-                      ...prev,
-                      [item.key]: e.target.checked,
-                    }))
-                  }
-                  className="h-4 w-4 rounded"
-                />
-                <span className="text-sm">{item.label}</span>
-              </label>
-            ))}
+          <div className="space-y-5 py-2">
+            {(dialogType === 'checkin' ? CHECKIN_GROUPS : CHECKOUT_GROUPS).map(
+              (group, gi) => (
+                <div key={gi} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      {group.title}
+                    </p>
+                    <div className="h-px flex-1 bg-border/40" />
+                  </div>
+                  {group.items.map((item) => (
+                    <label
+                      key={item.key}
+                      className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/40"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checklist[item.key] ?? false}
+                        onChange={(e) =>
+                          setChecklist((prev) => ({
+                            ...prev,
+                            [item.key]: e.target.checked,
+                          }))
+                        }
+                        className="h-4 w-4 rounded"
+                      />
+                      <span className="text-sm">{item.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )
+            )}
           </div>
 
           <div className="flex gap-2 pt-2">
