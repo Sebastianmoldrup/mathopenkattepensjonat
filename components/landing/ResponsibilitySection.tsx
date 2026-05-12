@@ -64,9 +64,8 @@ export function ResponsibilitySection() {
         <div className={`mt-8 space-y-4 ${fade('delay-150')}`}>
           <p className="leading-relaxed text-slate-700">
             Mathopen Kattepensjonat kan ikke holdes økonomisk ansvarlig for
-            sykdom, skade eller dødsfall som oppstår under oppholdet, med mindre
-            dette skyldes dokumentert uaktsomhet fra vår side. Vi anbefaler alle
-            katteeiere å ha forsikring på katten sin.
+            sykdom, skade eller dødsfall som oppstår under oppholdet. Vi
+            anbefaler alle katteeiere å ha forsikring på katten sin.
           </p>
           <p className="leading-relaxed text-slate-700">
             Vi er ikke ansvarlige for skader eller tap som skyldes tredjepart.
