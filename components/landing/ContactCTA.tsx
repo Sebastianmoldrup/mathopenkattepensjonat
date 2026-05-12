@@ -71,7 +71,7 @@ export function ContactCTA() {
             </a>
           </p>
           <p className="text-sm text-slate-500">
-            Telefontid: kl. 11:00–12:00 og 17:00–20:00
+            Telefontid: kl. 11:00–12:00 og 17:30–19:30
           </p>
         </div>
       </div>
