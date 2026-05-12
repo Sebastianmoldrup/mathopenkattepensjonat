@@ -158,23 +158,23 @@ export async function createBooking(
     )
 
   // Cage availability check
-  const { data: cageAvailable, error: cageError } = await supabase.rpc(
-    'check_cage_availability',
-    {
-      p_cage_type: payload.cageType,
-      p_cage_count: payload.cageCount,
-      p_date_from: payload.dateFrom,
-      p_date_to: payload.dateTo,
-    }
-  )
-
-  if (cageError)
-    throw new Error('Kunne ikke verifisere burstilgjengelighet. Prøv igjen.')
-  if (!cageAvailable && !payload.waitlistRequested) {
-    throw new Error(
-      'Beklager, dette buret er ikke lenger tilgjengelig for valgte datoer.'
-    )
-  }
+  // const { data: cageAvailable, error: cageError } = await supabase.rpc(
+  //   'check_cage_availability',
+  //   {
+  //     p_cage_type: payload.cageType,
+  //     p_cage_count: payload.cageCount,
+  //     p_date_from: payload.dateFrom,
+  //     p_date_to: payload.dateTo,
+  //   }
+  // )
+  //
+  // if (cageError)
+  //   throw new Error('Kunne ikke verifisere burstilgjengelighet. Prøv igjen.')
+  // if (!cageAvailable && !payload.waitlistRequested) {
+  //   throw new Error(
+  //     'Beklager, dette buret er ikke lenger tilgjengelig for valgte datoer.'
+  //   )
+  // }
 
   // Insert booking
   const { data: bookingId, error: insertError } = await supabase.rpc(
