@@ -16,17 +16,31 @@ async function BookingLoader() {
     getUpcomingYearBookings(),
     user ? getUserCats(user.id) : Promise.resolve([]),
     user
-      ? supabase.from('users').select('first_name').eq('id', user.id).single()
+      ? supabase
+          .from('users')
+          .select('first_name, last_name, phone, address')
+          .eq('id', user.id)
+          .single()
       : Promise.resolve({ data: null }),
   ])
+
+  const userProfile = profile.data
+
+  const isProfileComplete =
+    !user ||
+    (userProfile?.first_name?.trim() &&
+      userProfile?.last_name?.trim() &&
+      userProfile?.phone?.trim() &&
+      userProfile?.address?.trim())
 
   return (
     <BookingWizard
       initialUserId={user?.id ?? null}
       initialUserEmail={user?.email ?? ''}
-      initialUserFirstName={profile.data?.first_name ?? ''}
+      initialUserFirstName={userProfile?.first_name ?? ''}
       initialCats={cats}
       initialBookings={bookings}
+      isProfileComplete={!!isProfileComplete}
     />
   )
 }
