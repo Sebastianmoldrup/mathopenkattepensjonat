@@ -43,8 +43,16 @@ const SECTIONS = [
   },
   {
     key: 'outdoor',
-    label: 'Utebur (1–5)',
-    cages: ['Utebur 1', 'Utebur 2', 'Utebur 3', 'Utebur 4', 'Utebur 5'],
+    label: 'Utebur (1–7)',
+    cages: [
+      'Utebur 1',
+      'Utebur 2',
+      'Utebur 3',
+      'Utebur 4',
+      'Utebur 5',
+      'Utebur 6',
+      'Utebur 7',
+    ],
     headerClass: 'bg-teal-50 text-teal-700',
   },
   {
