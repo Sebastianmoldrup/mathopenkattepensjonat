@@ -1,44 +1,46 @@
-"use client";
+'use client'
 
-import React from "react";
-import { readUser } from "@/lib/supabase/utils";
-import { createClient } from "@/lib/supabase/client";
-import { User } from "@/types";
-import { ProfileForm } from "@/components/profile-form";
+import React from 'react'
+import { readUser } from '@/lib/supabase/utils'
+import { createClient } from '@/lib/supabase/client'
+import { User } from '@/types'
+import { ProfileForm } from '@/components/profile-form'
 
 const getUserId = async () => {
-  const supabase = createClient();
-
-  const { data, error } = await supabase.auth.getClaims();
+  const supabase = createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
   if (error) {
-    console.error("Error getting user claims:", error.message);
-    return null;
+    console.error('Error getting user:', error.message)
+    return null
   }
-  return data?.claims.sub || null;
-};
+  return user?.id || null
+}
 
 const Page = () => {
-  const [user, setUser] = React.useState<User | null>(null);
+  const [user, setUser] = React.useState<User | null>(null)
 
   React.useEffect(() => {
     const fetchUser = async () => {
-      const userId = await getUserId();
+      const userId = await getUserId()
       if (userId) {
-        const user = await readUser(userId);
+        const user = await readUser(userId)
         // userProfileIncomplete(user) && setOnboarding(true);
-        setUser(user);
+        setUser(user)
       } else {
-        setUser(null);
+        setUser(null)
       }
-    };
-    fetchUser();
-  }, []);
+    }
+    fetchUser()
+  }, [])
 
   return (
-    <div className="flex justify-center items-center h-full flex-col gap-4 p-4 md:p-8">
+    <div className="flex h-full flex-col items-center justify-center gap-4 p-4 md:p-8">
       <ProfileForm user={user} />
     </div>
-  );
-};
+  )
+}
 
-export default Page;
+export default Page
