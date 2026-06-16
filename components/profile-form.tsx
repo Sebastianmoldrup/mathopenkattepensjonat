@@ -1,12 +1,14 @@
-"use client";
+'use client'
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { redirect } from "next/navigation";
-import { Spinner } from "@/components/ui/spinner";
+import * as z from 'zod'
+import { toast } from 'sonner'
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { redirect } from 'next/navigation'
+import { Spinner } from '@/components/ui/spinner'
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Field,
   FieldDescription,
@@ -16,63 +18,83 @@ import {
   FieldLegend,
   FieldSeparator,
   FieldSet,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 
-import { ProfileSchema, type ProfileInput } from "@/lib/validation/profile";
-import { updateUser } from "@/actions/user/updateUser";
-import { User } from "@/types";
+import { updateUser } from '@/actions/user/updateUser'
+import { User } from '@/types'
+
+const profileSchema = z.object({
+  first_name: z
+    .string()
+    .min(1, 'Fornavn er påkrevd')
+    .max(18, 'Fornavn er for langt')
+    .toLowerCase(),
+  last_name: z
+    .string()
+    .min(1, 'Etternavn er påkrevd')
+    .max(18, 'Etternavn er for langt')
+    .toLowerCase(),
+  address: z.string().trim().toLowerCase(),
+  phone: z
+    .string()
+    .trim()
+    .min(1, 'Telefonnummer er påkrevd')
+    .regex(/^\+?\d{7,15}$/, 'Ugyldig telefonnummer'),
+  emergency_contact: z
+    .string()
+    .trim()
+    .min(1, 'Nødkontakt er påkrev')
+    .regex(/^\+?\d{7,15}$/, 'Ugyldig telefonnummer'),
+  notes: z.string().optional(),
+})
 
 export function ProfileForm({ user }: { user: User | null }) {
-  const [loading, setLoading] = React.useState(false);
-
-  const form = useForm<ProfileInput>({
-    resolver: zodResolver(ProfileSchema),
+  const [loading, setLoading] = useState(false)
+  const form = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
     defaultValues: {
-      first_name: "",
-      last_name: "",
-      address: "",
-      phone: "",
-      emergency_contact: "",
-      notes: "",
+      first_name: '',
+      last_name: '',
+      address: '',
+      phone: '',
+      emergency_contact: '',
+      notes: '',
     },
-  });
+  })
 
-  // Sync form when user loads or changes
-  React.useEffect(() => {
-    if (!user) return;
-
+  useEffect(() => {
+    if (!user) return
     form.reset({
-      first_name: user.first_name ?? "",
-      last_name: user.last_name ?? "",
-      address: user.address ?? "",
-      phone: user.phone ?? "",
-      emergency_contact: user.emergency_contact ?? "",
-      notes: user.notes ?? "",
-    });
-  }, [user, form]);
+      first_name: user.first_name ?? '',
+      last_name: user.last_name ?? '',
+      address: user.address ?? '',
+      phone: user.phone?.replace(/^\+47/, '') ?? '',
+      emergency_contact: user.emergency_contact?.replace(/^\+47/, '') ?? '',
+      notes: user.notes ?? '',
+    })
+  }, [user, form])
 
-  const onSubmit = async (values: ProfileInput) => {
-    if (!user) return;
-    setLoading(true);
+  const onSubmit = async (data: z.infer<typeof profileSchema>) => {
+    if (!user) return
+    setLoading(true)
 
-    // Scroll to top immediately when submitting
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' })
 
-    await updateUser(user.id, values);
-    form.reset(values);
-    setLoading(false);
-    redirect("/minside");
-  };
+    await updateUser(user.id, data)
+    form.reset(data)
+    setLoading(false)
+    redirect('/minside')
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <Spinner className="size-6" />{" "}
+      <div className="flex h-32 items-center justify-center">
+        <Spinner className="size-6" />{' '}
         <p className="text-muted-foreground">Lagrer profil...</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -96,7 +118,8 @@ export function ProfileForm({ user }: { user: User | null }) {
             <Input
               id="first_name"
               placeholder="Fornavn"
-              {...form.register("first_name")}
+              className="capitalize"
+              {...form.register('first_name')}
             />
             <FieldError errors={[form.formState.errors.first_name]} />
           </Field>
@@ -106,7 +129,8 @@ export function ProfileForm({ user }: { user: User | null }) {
             <Input
               id="last_name"
               placeholder="Etternavn"
-              {...form.register("last_name")}
+              className="capitalize"
+              {...form.register('last_name')}
             />
             <FieldError errors={[form.formState.errors.last_name]} />
           </Field>
@@ -116,7 +140,8 @@ export function ProfileForm({ user }: { user: User | null }) {
             <Input
               id="address"
               placeholder="Adresse"
-              {...form.register("address")}
+              className="capitalize"
+              {...form.register('address')}
             />
             <FieldError errors={[form.formState.errors.address]} />
           </Field>
@@ -125,8 +150,8 @@ export function ProfileForm({ user }: { user: User | null }) {
             <FieldLabel htmlFor="phone">Telefonnummer *</FieldLabel>
             <Input
               id="phone"
-              placeholder="+47 12345678"
-              {...form.register("phone")}
+              placeholder="12345678"
+              {...form.register('phone')}
             />
             <FieldError errors={[form.formState.errors.phone]} />
           </Field>
@@ -136,14 +161,14 @@ export function ProfileForm({ user }: { user: User | null }) {
 
         <FieldGroup>
           <Field data-invalid={!!form.formState.errors.emergency_contact}>
-            <FieldLabel htmlFor="emergency_contact">Nødtelefon</FieldLabel>
+            <FieldLabel htmlFor="emergency_contact">Nødtelefon *</FieldLabel>
             <FieldDescription>
               Legg ved en nødkontakt vi kan ringe hvis vi ikke får tak i deg
             </FieldDescription>
             <Input
               id="emergency_contact"
-              placeholder="+47 12345678"
-              {...form.register("emergency_contact")}
+              placeholder="12345678"
+              {...form.register('emergency_contact')}
             />
             <FieldError errors={[form.formState.errors.emergency_contact]} />
           </Field>
@@ -154,7 +179,7 @@ export function ProfileForm({ user }: { user: User | null }) {
               id="notes"
               rows={3}
               placeholder="Annen relevant informasjon om deg"
-              {...form.register("notes")}
+              {...form.register('notes')}
             />
             <FieldError errors={[form.formState.errors.notes]} />
           </Field>
@@ -167,10 +192,13 @@ export function ProfileForm({ user }: { user: User | null }) {
           size="lg"
           className="px-8"
           disabled={form.formState.isSubmitting}
+          onClick={() =>
+            toast.info('Profil oppdatert', { position: 'bottom-center' })
+          }
         >
           Lagre profil
         </Button>
       </div>
     </form>
-  );
+  )
 }

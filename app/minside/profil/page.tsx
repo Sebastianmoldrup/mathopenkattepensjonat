@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import { useState, useEffect } from 'react'
 import { readUser } from '@/lib/supabase/utils'
 import { createClient } from '@/lib/supabase/client'
 import { User } from '@/types'
@@ -20,9 +20,9 @@ const getUserId = async () => {
 }
 
 const Page = () => {
-  const [user, setUser] = React.useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchUser = async () => {
       const userId = await getUserId()
       if (userId) {
