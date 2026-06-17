@@ -1,4 +1,12 @@
-const Page = () => {
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Kontakt oss',
+  description:
+    'Ta kontakt med Mathopen Kattepensjonat i Bergen. Vi holder til på Storingavika 2, 5174 Mathopen – send oss en e-post eller finn oss på kart.',
+}
+
+export default function Page() {
   return (
     <div className="flex min-h-screen flex-wrap items-center justify-center gap-20 bg-gray-50 px-4">
       <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 text-center shadow-sm">
@@ -40,5 +48,3 @@ const Page = () => {
     </div>
   )
 }
-
-export default Page

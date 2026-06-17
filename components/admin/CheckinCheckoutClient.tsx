@@ -688,6 +688,16 @@ function EntryCard({
             ? 'Start innsjekk'
             : 'Start utsjekk'}
       </Button>
+
+      <Button
+        size="sm"
+        className={cn(
+          'w-full gap-1.5 text-white',
+          true ? 'bg-red-400' : 'bg-green-400'
+        )}
+      >
+        Print label
+      </Button>
     </div>
   )
 }

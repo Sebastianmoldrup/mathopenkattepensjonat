@@ -1,6 +1,13 @@
 import CatMasonry from '@/components/CatMasonry'
+import type { Metadata } from 'next'
 
-const Page = () => {
+export const metadata: Metadata = {
+  title: 'Galleri',
+  description:
+    'Se bilder av katter som har vært på kattepass hos Mathopen Kattepensjonat. Et innblikk i trygge og glade katter under opphold i Bergen.',
+}
+
+export default function Page() {
   return (
     <main className="min-h-screen bg-muted px-4 py-12">
       <div className="mx-auto mb-12 max-w-4xl">
@@ -24,5 +31,3 @@ const Page = () => {
     </main>
   )
 }
-
-export default Page

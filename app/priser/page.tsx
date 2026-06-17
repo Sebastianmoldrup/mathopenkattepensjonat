@@ -1,6 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Priser & betingelser',
+  description:
+    'Se priser for kattepensjonat i Bergen – lavsesong fra 220 kr/døgn, høysesong fra 250 kr/døgn. Les om vaksinekrav, avbestilling og betingelser hos Mathopen Kattepensjonat.',
+}
 
 export default function Page() {
   return (

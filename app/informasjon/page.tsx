@@ -4,6 +4,13 @@ import phoneDisplay from '@/public/illustration/phone-display.webp'
 import petting from '@/public/illustration/petting.webp'
 import handoverCat from '@/public/illustration/handover-cat.webp'
 import surveillance from '@/public/illustration/surveillance-v2.webp'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Informasjon',
+  description:
+    'Hos Mathopen Kattepensjonat i Bergen får katten din eget rom, daglige oppdateringer og tett individuell oppfølging. Les mer om hvordan vi tar vare på katten din.',
+}
 
 export default function Page() {
   return (
