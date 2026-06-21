@@ -2,7 +2,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Om oss',
+  title: 'Om oss – Erfarent kattepensjonat i Mathopen, Bergen',
   description:
     'Møt Anja og Martin bak Mathopen Kattepensjonat i Bergen. Med over syv års erfaring innen kattepass tilbyr vi et trygt, rolig og omsorgsfullt opphold for katten din.',
 }

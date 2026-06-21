@@ -10,7 +10,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: 'Mathopen Kattepensjonat',
+  title: 'Kattepensjonat i Bergen | Mathopen Kattepensjonat',
   description:
     'Mathopen Kattepensjonat i Bergen – et trygt, rolig og moderne kattepensjonat med store rom, kattegård, tett oppfølging og omsorg. Perfekt for katter i alle aldre.',
 }

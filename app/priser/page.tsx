@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Priser & betingelser',
+  title: 'Priser – Kattepensjonat i Bergen | Mathopen',
   description:
     'Se priser for kattepensjonat i Bergen – lavsesong fra 220 kr/døgn, høysesong fra 250 kr/døgn. Les om vaksinekrav, avbestilling og betingelser hos Mathopen Kattepensjonat.',
 }

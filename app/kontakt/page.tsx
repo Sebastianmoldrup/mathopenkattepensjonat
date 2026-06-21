@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Kontakt oss',
+  title: 'Kontakt – Kattepensjonat i Bergen, Mathopen',
   description:
     'Ta kontakt med Mathopen Kattepensjonat i Bergen. Vi holder til på Storingavika 2, 5174 Mathopen – send oss en e-post eller finn oss på kart.',
 }
