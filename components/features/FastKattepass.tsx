@@ -70,13 +70,22 @@ export default function FastKattepass() {
             <p className="mb-3 text-sm font-medium text-slate-700">
               Høres dette interessant ut?
             </p>
-            <Link
-              href="/kontakt"
-              className="flex items-center gap-3 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-slate-700 transition-colors hover:bg-muted"
-            >
-              <span>✉️</span>
-              Ta kontakt for en fast avtale
-            </Link>
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/guider/fast-kattepass"
+                className="flex items-center gap-3 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-slate-700 transition-colors hover:bg-muted"
+              >
+                <span>📖</span>
+                Les mer om fast kattepass
+              </Link>
+              <Link
+                href="/kontakt"
+                className="flex items-center gap-3 rounded-lg border bg-muted/40 px-4 py-3 text-sm text-slate-700 transition-colors hover:bg-muted"
+              >
+                <span>✉️</span>
+                Ta kontakt for en fast avtale
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -5,6 +5,6 @@ export default function robots() {
       allow: '/',
       disallow: ['/login', '/minside', '/registrering', '/admin', '/booking'],
     },
-    sitemap: 'https://mathopenkattepensjonat.no/sitemap.xml',
+    sitemap: 'https://www.mathopenkattepensjonat.no/sitemap.xml',
   }
 }

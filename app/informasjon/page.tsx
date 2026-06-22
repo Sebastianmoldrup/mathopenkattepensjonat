@@ -7,7 +7,7 @@ import surveillance from '@/public/illustration/surveillance-v2.webp'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Informasjon',
+  title: 'Informasjon – Kattepensjonat i Bergen | Mathopen',
   description:
     'Hos Mathopen Kattepensjonat i Bergen får katten din eget rom, daglige oppdateringer og tett individuell oppfølging. Les mer om hvordan vi tar vare på katten din.',
 }
