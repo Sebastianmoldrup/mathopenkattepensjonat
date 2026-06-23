@@ -5,6 +5,7 @@ import './globals.css'
 import { NavbarWrapper } from '@/components/NavbarWrapper'
 import { Suspense } from 'react'
 import Footer from '@/components/Footer'
+import { ConditionalShell } from '@/components/ConditionalShell'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
@@ -104,15 +105,20 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Suspense
-            fallback={
-              <nav className="h-[104px] border-b border-border bg-accent/95" />
+          <ConditionalShell
+            navbar={
+              <Suspense
+                fallback={
+                  <nav className="h-[104px] border-b border-border bg-accent/95" />
+                }
+              >
+                <NavbarWrapper />
+              </Suspense>
             }
+            footer={<Footer />}
           >
-            <NavbarWrapper />
-          </Suspense>
-          <main className="flex-1">{children}</main>
-          <Footer />
+            {children}
+          </ConditionalShell>
         </ThemeProvider>
       </body>
     </html>

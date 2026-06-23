@@ -425,6 +425,7 @@ export interface CheckinCheckoutEntry {
   checked_out_at: string | null
   checked_in_by: string | null
   checked_out_by: string | null
+  label_printed: boolean
   cage_assignments: { cage_label: string; date_from: string; date_to: string }[]
 }
 
@@ -486,3 +487,70 @@ export async function adminUpsertCheckout(
   }
   return { success: true }
 }
+
+// ─── Printing ─────────────────────────────────────────────────────────
+
+export interface BookingLabelCat {
+  name: string
+  image_url: string | null
+  id_chip: string | null
+  insurance_number: string | null
+  gets_medication: boolean | null
+  medication_details: string | null
+  diet: string | null
+}
+
+export interface BookingLabelData {
+  booking: {
+    id: string
+    date_from: string
+    date_to: string
+    label_printed: boolean
+  }
+  owner: {
+    first_name: string | null
+    last_name: string | null
+    phone: string | null
+    emergency_contact: string | null
+  }
+  cats: BookingLabelCat[]
+}
+
+export async function adminGetBookingLabelData(
+  bookingId: string
+): Promise<BookingLabelData | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_booking_label_data', {
+    p_booking_id: bookingId,
+  })
+  if (error) {
+    console.error('[adminGetBookingLabelData]', error.message)
+    return null
+  }
+  return data as BookingLabelData
+}
+
+export async function adminGetDailyLabelData(
+  date: string
+): Promise<BookingLabelData[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_daily_label_data', {
+    p_date: date,
+  })
+  if (error) {
+    console.error('[adminGetDailyLabelData]', error.message)
+    return []
+  }
+  return (data ?? []) as BookingLabelData[]
+}
+
+export async function adminMarkLabelPrinted(bookingId: string): Promise<void> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('admin_mark_label_printed', {
+    p_booking_id: bookingId,
+  })
+  if (error) {
+    console.error('[adminMarkLabelPrinted]', error.message)
+  }
+}
+
