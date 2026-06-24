@@ -3,5 +3,10 @@ export default function PrintLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <>{children}</>
+  return (
+    <>
+      <link rel="stylesheet" href="/print/label.css" />
+      {children}
+    </>
+  )
 }

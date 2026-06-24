@@ -18,8 +18,6 @@ async function DailyLabelsContent({ date }: { date: string }) {
 
   return (
     <>
-      <style>{`@import url('/print/label.css');`}</style>
-
       <div className="print-toolbar no-print">
         <PrintToolbar
           title={`Innsjekk ${dateLabel} — ${labels.length} labels`}

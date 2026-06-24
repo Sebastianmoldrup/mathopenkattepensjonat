@@ -19,8 +19,6 @@ async function LabelContent({ bookingId }: { bookingId: string }) {
 
   return (
     <>
-      <style>{`@import url('/print/label.css');`}</style>
-
       <div className="print-toolbar no-print">
         <PrintToolbar
           title={`${data.owner.first_name} ${data.owner.last_name} — ${data.cats.map((c) => c.name).join(', ')}`}
