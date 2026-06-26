@@ -19,11 +19,9 @@ async function LabelContent({ bookingId }: { bookingId: string }) {
 
   return (
     <>
-      <div className="print-toolbar no-print">
-        <PrintToolbar
-          title={`${data.owner.first_name} ${data.owner.last_name} — ${data.cats.map((c) => c.name).join(', ')}`}
-        />
-      </div>
+      <PrintToolbar
+        title={`${data.owner.first_name} ${data.owner.last_name} — ${data.cats.map((c) => c.name).join(', ')}`}
+      />
 
       <div className="print-container">
         <BookingLabel data={data} />

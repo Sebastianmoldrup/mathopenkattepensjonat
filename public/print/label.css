@@ -2,13 +2,12 @@
   background: #faf7f4;
   border-radius: 12px;
   border: 1.5px solid #c9b99a;
-  padding: 8mm;
+  padding: 5mm 6mm;
   font-family: 'Geist', sans-serif;
   display: flex;
   flex-direction: column;
-  gap: 5mm;
+  gap: 3mm;
   box-sizing: border-box;
-  page-break-after: always;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
@@ -35,10 +34,7 @@
 /* Cats grid */
 .cats-grid {
   display: grid;
-  gap: 4mm;
-  flex: 1;
-  min-height: 0;
-  grid-template-rows: 1fr;
+  gap: 3mm;
 }
 .cats-1 {
   grid-template-columns: 1fr;
@@ -67,17 +63,6 @@
   gap: 2mm;
   border-bottom: 1px solid #e8ddd0;
   padding-bottom: 2mm;
-}
-.cat-icon {
-  width: 7mm;
-  height: 7mm;
-  background: #f0e8dc;
-  border: 1px solid #c9b99a;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 9pt;
-  line-height: 1;
 }
 .cat-title {
   font-size: 8pt;
@@ -127,11 +112,6 @@
   align-items: flex-start;
   gap: 1.5mm;
 }
-.info-icon {
-  font-size: 7pt;
-  margin-top: 0.5mm;
-  flex-shrink: 0;
-}
 .info-label {
   display: block;
   font-size: 6pt;
@@ -149,14 +129,8 @@
   min-height: 4mm;
 }
 
-/* 1 cat — fill available space dynamically */
-.cats-1 {
-  flex: 1;
-  min-height: 0;
-}
+/* 1 cat — romslig layout */
 .cats-1 .cat-card {
-  flex: 1;
-  min-height: 0;
   padding: 5mm 6mm;
   gap: 3mm;
 }
@@ -174,8 +148,6 @@
   letter-spacing: 0.06em;
 }
 .cats-1 .cat-body {
-  flex: 1;
-  min-height: 0;
   gap: 5mm;
 }
 .cats-1 .cat-image-wrapper {
@@ -195,10 +167,6 @@
 .cats-1 .info-value {
   font-size: 9pt;
   min-height: 5mm;
-}
-.cats-1 .info-icon {
-  font-size: 9pt;
-  margin-top: 1mm;
 }
 /* reduce outer gap slightly for 1-cat to give eierinformasjon room */
 .label-page:has(.cats-1) {
@@ -234,41 +202,37 @@
 .owner-header {
   display: flex;
   align-items: center;
-  gap: 2mm;
-  margin-bottom: 3mm;
-}
-.owner-icon {
-  width: 6mm;
-  height: 6mm;
-  background: #3d2e1e;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 8pt;
-  color: white;
-  line-height: 1;
+  justify-content: space-between;
+  margin-bottom: 2mm;
 }
 .owner-title {
-  font-size: 8pt;
+  font-size: 7pt;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #3d2e1e;
 }
 
+.owner-dates {
+  font-size: 7pt;
+  color: #7a6652;
+}
+
 .owner-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 2mm 4mm;
+  display: flex;
+  flex-direction: row;
+  gap: 4mm;
 }
 .owner-row {
+  flex: 1;
   display: flex;
   align-items: flex-start;
   gap: 1.5mm;
+  min-width: 0;
 }
 
 /* Page setup — must be top-level, not inside @media print */
 @page {
-  size: A5 landscape;
+  size: A4 portrait;
   margin: 0;
 }
 
@@ -280,9 +244,15 @@
   }
 
   body {
+    display: block !important;
     background: white;
     margin: 0;
     padding: 0;
+    min-height: unset !important;
+  }
+
+  .print-container {
+    display: block !important;
   }
 
   .no-print {
@@ -290,13 +260,25 @@
   }
 
   .label-page {
-    width: 100vw;
-    height: 100vh;
-    padding: 8mm;
+    width: 100%;
+    height: 148.5mm;
+    padding: 6mm 8mm;
     overflow: hidden;
     border-radius: 0;
+    border: none;
+    border-bottom: 0.5px dashed #c9b99a;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .label-page:nth-child(even) {
     page-break-after: always;
     break-after: page;
+    border-bottom: none;
+  }
+
+  .label-page:last-child {
+    border-bottom: none;
   }
 }
 
@@ -304,7 +286,7 @@
 @media screen {
   .label-page {
     width: 210mm;
-    height: 148mm;
+    height: 148.5mm;
     overflow: hidden;
     border: 1.5px solid #c9b99a;
   }

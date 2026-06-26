@@ -7,7 +7,6 @@ function CatCard({ cat }: { cat: BookingLabelCat }) {
   return (
     <div className="cat-card">
       <div className="cat-header">
-        <div className="cat-icon">🐱</div>
         <span className="cat-title">{cat.name}</span>
       </div>
 
@@ -29,7 +28,6 @@ function CatCard({ cat }: { cat: BookingLabelCat }) {
         <div className="cat-info">
           {cat.id_chip && (
             <div className="info-row">
-              <span className="info-icon">📋</span>
               <div>
                 <span className="info-label">ID-CHIP</span>
                 <span className="info-value">{cat.id_chip}</span>
@@ -39,7 +37,6 @@ function CatCard({ cat }: { cat: BookingLabelCat }) {
 
           {cat.insurance_number && (
             <div className="info-row">
-              <span className="info-icon">🛡️</span>
               <div>
                 <span className="info-label">FORSIKRING</span>
                 <span className="info-value">{cat.insurance_number}</span>
@@ -48,7 +45,6 @@ function CatCard({ cat }: { cat: BookingLabelCat }) {
           )}
 
           <div className="info-row">
-            <span className="info-icon">💊</span>
             <div>
               <span className="info-label">MEDISINERING</span>
               <span className="info-value">
@@ -60,7 +56,6 @@ function CatCard({ cat }: { cat: BookingLabelCat }) {
           </div>
 
           <div className="info-row">
-            <span className="info-icon">⭐</span>
             <div>
               <span className="info-label">SPESIALFÔR</span>
               <span className="info-value">{cat.diet ?? 'Ingen'}</span>
@@ -85,14 +80,6 @@ export function BookingLabel({ data }: { data: BookingLabelData }) {
 
   return (
     <div className="label-page">
-      {/* Header */}
-      <div className="label-header">
-        <span className="label-header-title">MATHOPEN KATTEPENSJONAT</span>
-        <span className="label-header-dates">
-          Innsjekk: {dateFrom} — Utsjekk: {dateTo}
-        </span>
-      </div>
-
       {/* Katter */}
       <div className={`cats-grid cats-${Math.min(cats.length, 3)}`}>
         {cats.slice(0, 3).map((cat, i) => (
@@ -103,13 +90,14 @@ export function BookingLabel({ data }: { data: BookingLabelData }) {
       {/* Eierinformasjon */}
       <div className="owner-section">
         <div className="owner-header">
-          <span className="owner-icon">👤</span>
           <span className="owner-title">EIERINFORMASJON</span>
+          <span className="owner-dates">
+            Innsjekk: {dateFrom} — Utsjekk: {dateTo}
+          </span>
         </div>
 
         <div className="owner-grid">
           <div className="owner-row">
-            <span className="info-icon">👤</span>
             <div>
               <span className="info-label">EIERS NAVN</span>
               <span className="info-value">{ownerName}</span>
@@ -117,7 +105,6 @@ export function BookingLabel({ data }: { data: BookingLabelData }) {
           </div>
 
           <div className="owner-row">
-            <span className="info-icon">📞</span>
             <div>
               <span className="info-label">KONTAKTINFORMASJON</span>
               <span className="info-value">{owner.phone ?? '—'}</span>
@@ -125,7 +112,6 @@ export function BookingLabel({ data }: { data: BookingLabelData }) {
           </div>
 
           <div className="owner-row">
-            <span className="info-icon">📞</span>
             <div>
               <span className="info-label">NØDKONTAKT</span>
               <span className="info-value">

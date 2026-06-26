@@ -18,11 +18,9 @@ async function DailyLabelsContent({ date }: { date: string }) {
 
   return (
     <>
-      <div className="print-toolbar no-print">
-        <PrintToolbar
-          title={`Innsjekk ${dateLabel} — ${labels.length} labels`}
-        />
-      </div>
+      <PrintToolbar
+        title={`Innsjekk ${dateLabel} — ${labels.length} labels`}
+      />
 
       <div className="print-container">
         {labels.map((data) => (
