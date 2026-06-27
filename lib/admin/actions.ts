@@ -493,11 +493,15 @@ export async function adminUpsertCheckout(
 export interface BookingLabelCat {
   name: string
   image_url: string | null
+  age: number | null
+  breed: string | null
+  is_sterilized: boolean | null
   id_chip: string | null
   insurance_number: string | null
   gets_medication: boolean | null
   medication_details: string | null
   diet: string | null
+  medical_notes: string | null
 }
 
 export interface BookingLabelData {

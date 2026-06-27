@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
+import { Suspense } from 'react'
+import { NavbarWrapper } from '@/components/NavbarWrapper'
+import Footer from '@/components/Footer'
 import './globals.css'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
@@ -101,7 +104,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <Suspense
+            fallback={
+              <nav className="h-[104px] border-b border-border bg-accent/95" />
+            }
+          >
+            <NavbarWrapper />
+          </Suspense>
+          <main className="flex-1">{children}</main>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>

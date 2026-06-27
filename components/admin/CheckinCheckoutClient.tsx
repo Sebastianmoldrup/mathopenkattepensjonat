@@ -309,10 +309,10 @@ export default function CheckinCheckoutClient({
                 size="sm"
                 variant="outline"
                 className="w-full gap-1.5"
-                onClick={() => router.push(`/print/label/daily/${date}`)}
+                onClick={() => { window.location.href = `/api/admin/pdf/daily/${date}` }}
               >
                 <Printer className="h-3.5 w-3.5" />
-                Skriv ut alle labels for i dag ({checkins.length})
+                Last ned alle labels for i dag ({checkins.length})
               </Button>
             )}
 
@@ -737,7 +737,7 @@ function EntryCard({
             : 'border-border/40 text-muted-foreground hover:bg-muted'
         )}
         onClick={() => {
-          router.push(`/print/label/${entry.booking_id}`)
+          window.location.href = `/api/admin/pdf/booking/${entry.booking_id}`
           onLabelPrinted()
         }}
       >
