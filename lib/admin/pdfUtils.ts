@@ -21,9 +21,11 @@ export async function resolveImagesToBase64(
           return
         }
         const buffer = Buffer.from(await res.arrayBuffer())
-        // Re-encode via jimp — normalises progressive JPEGs and non-standard
-        // JPEG variants that react-pdf's parser rejects ("Unknown version")
+        // Resize to thumbnail and re-encode as baseline JPEG — full-res phone
+        // photos (3–4 MB) embedded as base64 crash the browser with OOM.
+        // 200px covers the 65pt PDF display size at ~2× print density.
         const image = await Jimp.read(buffer)
+        image.cover({ w: 200, h: 200 })
         const normalized = await image.getBuffer('image/jpeg')
         base64Map.set(url, `data:image/jpeg;base64,${normalized.toString('base64')}`)
       } catch (err) {
