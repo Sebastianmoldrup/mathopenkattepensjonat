@@ -23,8 +23,13 @@ export async function resolveImagesToBase64(
         const buffer = Buffer.from(await res.arrayBuffer())
         // Normalize to baseline JPEG — react-pdf's parser rejects progressive
         // JPEGs and other non-standard JPEG variants with "Unknown version"
-        const normalized = await sharp(buffer).jpeg({ quality: 90, progressive: false }).toBuffer()
-        base64Map.set(url, `data:image/jpeg;base64,${normalized.toString('base64')}`)
+        let outBuffer: Buffer
+        try {
+          outBuffer = await sharp(buffer).jpeg({ quality: 90, progressive: false }).toBuffer()
+        } catch {
+          outBuffer = buffer
+        }
+        base64Map.set(url, `data:image/jpeg;base64,${outBuffer.toString('base64')}`)
       } catch (err) {
         console.error(`[pdfUtils] failed to process ${url}:`, err)
       }
