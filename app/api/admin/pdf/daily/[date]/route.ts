@@ -3,6 +3,7 @@ import { createElement, type ReactElement } from 'react'
 import type { DocumentProps } from '@react-pdf/renderer'
 import { adminGetDailyLabelData, getIsAdmin } from '@/lib/admin/actions'
 import { LabelDocument } from '@/components/admin/pdf/LabelDocument'
+import { resolveImagesToBase64 } from '@/lib/admin/pdfUtils'
 
 export async function GET(
   _req: Request,
@@ -15,9 +16,11 @@ export async function GET(
   const bookings = await adminGetDailyLabelData(date)
   if (!bookings.length) return new Response('Not found', { status: 404 })
 
+  const resolved = await resolveImagesToBase64(bookings)
+
   const buffer = await renderToBuffer(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createElement(LabelDocument, { bookings }) as unknown as ReactElement<DocumentProps>
+    createElement(LabelDocument, { bookings: resolved }) as unknown as ReactElement<DocumentProps>
   )
 
   const blob = new Blob([new Uint8Array(buffer)], { type: 'application/pdf' })

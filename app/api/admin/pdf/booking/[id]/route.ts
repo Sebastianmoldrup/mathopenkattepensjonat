@@ -7,6 +7,7 @@ import {
   getIsAdmin,
 } from '@/lib/admin/actions'
 import { LabelDocument } from '@/components/admin/pdf/LabelDocument'
+import { resolveImagesToBase64 } from '@/lib/admin/pdfUtils'
 
 export async function GET(
   _req: Request,
@@ -21,9 +22,11 @@ export async function GET(
 
   await adminMarkLabelPrinted(id)
 
+  const [resolved] = await resolveImagesToBase64([booking])
+
   const buffer = await renderToBuffer(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createElement(LabelDocument, { bookings: [booking] }) as unknown as ReactElement<DocumentProps>
+    createElement(LabelDocument, { bookings: [resolved] }) as unknown as ReactElement<DocumentProps>
   )
 
   const blob = new Blob([new Uint8Array(buffer)], { type: 'application/pdf' })
