@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
-import { AuthButton } from '@/components/auth-button'
+import { Button } from '@/components/ui/button'
 
 const LIST_ITEMS = [
   { url: '/', text: 'Hjem' },
@@ -16,7 +16,13 @@ const LIST_ITEMS = [
   { url: '/kontakt', text: 'Kontakt oss' },
 ]
 
-export function MobileMenuButton() {
+export function MobileMenuButton({
+  isAdmin,
+  isLoggedIn,
+}: {
+  isAdmin: boolean
+  isLoggedIn: boolean
+}) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -29,21 +35,12 @@ export function MobileMenuButton() {
         <Menu size={28} />
       </button>
 
-      <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9999,
-          backgroundColor: 'red',
-          display: isOpen ? 'block' : 'none',
-        }}
-      >
+      {isOpen && (
         <div
-          className={`flex h-full transform flex-col transition-transform duration-300 ease-out ${
-            isOpen ? 'translate-y-0' : '-translate-y-4'
-          }`}
+          className="fixed inset-0 z-[9999] flex flex-col"
+          style={{ backgroundColor: '#f5f0eb' }}
         >
-          <div className="flex items-center justify-between border-b border-border px-6 py-4">
+          <div className="flex items-center justify-between border-b border-border px-6 py-2">
             <Image
               src="/img/cropped.webp"
               width={160}
@@ -63,16 +60,8 @@ export function MobileMenuButton() {
 
           <nav className="flex flex-1 items-center justify-center">
             <ul className="flex flex-col gap-8 text-center">
-              {LIST_ITEMS.map(({ url, text }, index) => (
-                <li
-                  key={url}
-                  style={{ transitionDelay: `${index * 40}ms` }}
-                  className={`transform transition-all duration-300 ease-out ${
-                    isOpen
-                      ? 'translate-y-0 opacity-100'
-                      : 'translate-y-2 opacity-0'
-                  }`}
-                >
+              {LIST_ITEMS.map(({ url, text }) => (
+                <li key={url}>
                   <Link
                     href={url}
                     onClick={() => setIsOpen(false)}
@@ -85,14 +74,38 @@ export function MobileMenuButton() {
             </ul>
           </nav>
 
-          <div
-            className="flex justify-center border-t border-border p-4"
-            onClick={() => setIsOpen(false)}
-          >
-            <AuthButton fullWidth mobile />
+          <div className="flex flex-col gap-3 border-t border-border p-4">
+            {isAdmin && (
+              <Button
+                asChild
+                variant="outline"
+                className="w-full max-w-lg py-8"
+                onClick={() => setIsOpen(false)}
+              >
+                <Link href="/admin">Admin</Link>
+              </Button>
+            )}
+            {isLoggedIn ? (
+              <Button
+                asChild
+                variant="outline"
+                className="w-full max-w-lg py-8"
+                onClick={() => setIsOpen(false)}
+              >
+                <Link href="/minside">Min side</Link>
+              </Button>
+            ) : (
+              <Button
+                asChild
+                className="w-full max-w-lg py-8"
+                onClick={() => setIsOpen(false)}
+              >
+                <Link href="/login">Logg inn</Link>
+              </Button>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </>
   )
 }

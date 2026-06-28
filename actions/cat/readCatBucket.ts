@@ -1,7 +1,7 @@
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 
 export const readCatBucket = async (url: string) => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   if (url === "") {
     return null;

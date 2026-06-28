@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { Button } from './ui/button'
-import { createClient } from '@/lib/supabase/client'
 
 const LIST_ITEMS = [
   { url: '/', text: 'Hjem' },
@@ -18,31 +17,13 @@ const LIST_ITEMS = [
 ]
 
 export default function Navbar({
-  isAdmin: initialIsAdmin,
-  isLoggedIn: initialIsLoggedIn,
+  isAdmin,
+  isLoggedIn,
 }: {
   isAdmin: boolean
   isLoggedIn: boolean
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(initialIsLoggedIn)
-  const [isAdmin, setIsAdmin] = useState(initialIsAdmin)
-
-  useEffect(() => {
-    const supabase = createClient()
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setIsLoggedIn(!!session)
-      if (session?.user) {
-        const { data } = await supabase.rpc('is_admin')
-        setIsAdmin(!!data)
-      } else {
-        setIsAdmin(false)
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [])
 
   return (
     <>
