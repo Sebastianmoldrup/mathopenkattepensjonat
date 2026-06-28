@@ -1,4 +1,4 @@
-import sharp from 'sharp'
+import { Jimp } from 'jimp'
 import { BookingLabelData } from './actions'
 
 export async function resolveImagesToBase64(
@@ -17,19 +17,15 @@ export async function resolveImagesToBase64(
       try {
         const res = await fetch(url)
         if (!res.ok) {
-          console.error(`[pdfUtils] fetch failed for ${url}: ${res.status} ${res.statusText}`)
+          console.error(`[pdfUtils] fetch failed for ${url}: ${res.status}`)
           return
         }
         const buffer = Buffer.from(await res.arrayBuffer())
-        // Normalize to baseline JPEG — react-pdf's parser rejects progressive
-        // JPEGs and other non-standard JPEG variants with "Unknown version"
-        let outBuffer: Buffer
-        try {
-          outBuffer = await sharp(buffer).jpeg({ quality: 90, progressive: false }).toBuffer()
-        } catch {
-          outBuffer = buffer
-        }
-        base64Map.set(url, `data:image/jpeg;base64,${outBuffer.toString('base64')}`)
+        // Re-encode via jimp — normalises progressive JPEGs and non-standard
+        // JPEG variants that react-pdf's parser rejects ("Unknown version")
+        const image = await Jimp.read(buffer)
+        const normalized = await image.getBuffer('image/jpeg')
+        base64Map.set(url, `data:image/jpeg;base64,${normalized.toString('base64')}`)
       } catch (err) {
         console.error(`[pdfUtils] failed to process ${url}:`, err)
       }
