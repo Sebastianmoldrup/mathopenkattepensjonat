@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MapPin, Shield, Heart, House } from 'lucide-react'
 import Image from 'next/image'
@@ -139,13 +140,12 @@ export function FacilitiesSection() {
                 nye omgivelser enklere.
               </p>
               <div className="flex items-center gap-3 pt-2">
-                <Button className="gap-2" disabled>
-                  <House className="h-4 w-4" />
-                  Utforsk pensjonatet
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                  Kommer snart
-                </span>
+                <Link href="/guider/utforsk-pensjonatet">
+                  <Button className="gap-2">
+                    <House className="h-4 w-4" />
+                    Utforsk pensjonatet
+                  </Button>
+                </Link>
               </div>
             </div>
             <div className="shrink-0">

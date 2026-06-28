@@ -90,7 +90,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
-      url: `${baseUrl}/guider/p-piller-katt`,
+      url: `${baseUrl}/guider/utforsk-pensjonatet`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/guider/hva-koster-kattepensjonat`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/guider/hva-er-kattepensjonat`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/guider/kattehotell-bergen`,
+      lastModified: now,
+      changeFrequency: 'yearly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/guider/hvor-lenge-kan-katt-vaere-paa-kattepensjonat`,
       lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.6,
