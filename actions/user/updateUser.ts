@@ -25,7 +25,8 @@ export const updateUser = async (
     return null;
   }
 
-  revalidatePath("/minside"); // Update the minside header with new name immediately
+  revalidatePath("/minside")
+  revalidatePath("/booking")
 
   return data;
 };

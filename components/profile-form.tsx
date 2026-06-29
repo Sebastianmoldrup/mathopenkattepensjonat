@@ -36,7 +36,7 @@ const profileSchema = z.object({
     .min(1, 'Etternavn er påkrevd')
     .max(18, 'Etternavn er for langt')
     .toLowerCase(),
-  address: z.string().trim().toLowerCase(),
+  address: z.string().trim().min(1, 'Adresse er påkrevd').toLowerCase(),
   phone: z
     .string()
     .trim()
@@ -79,12 +79,14 @@ export function ProfileForm({ user }: { user: User | null }) {
   const onSubmit = async (data: z.infer<typeof profileSchema>) => {
     if (!user) return
     setLoading(true)
-
     window.scrollTo({ top: 0, behavior: 'smooth' })
-
-    await updateUser(user.id, data)
-    form.reset(data)
+    const result = await updateUser(user.id, data)
     setLoading(false)
+    if (!result) {
+      toast.error('Noe gikk galt. Prøv igjen.', { position: 'bottom-center' })
+      return
+    }
+    toast.success('Profil oppdatert', { position: 'bottom-center' })
     redirect('/minside')
   }
 
@@ -191,10 +193,7 @@ export function ProfileForm({ user }: { user: User | null }) {
           type="submit"
           size="lg"
           className="px-8"
-          disabled={form.formState.isSubmitting}
-          onClick={() =>
-            toast.info('Profil oppdatert', { position: 'bottom-center' })
-          }
+          disabled={form.formState.isSubmitting || loading}
         >
           Lagre profil
         </Button>

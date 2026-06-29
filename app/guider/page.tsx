@@ -4,10 +4,40 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Guider og tips om kattepensjonat i Bergen | Mathopen',
   description:
-    'Nyttige guider fra Mathopen Kattepensjonat i Bergen – om forberedelse, priser, p-piller og kattepensjonat nær Askøy.',
+    'Nyttige guider fra Mathopen Kattepensjonat i Bergen – priser, hva et kattepensjonat er, kattehotell i Bergen, og mer.',
 }
 
 const GUIDES = [
+  {
+    title: 'Utforsk pensjonatet',
+    description:
+      'Se bilder av kattegård, fellesarealer og individuelle rom – standard, senior & comfort og suite.',
+    href: '/guider/utforsk-pensjonatet',
+  },
+  {
+    title: 'Hva koster kattepensjonat?',
+    description:
+      'Oversikt over priser i lav- og høysesong, hva som er inkludert, og hva som påvirker totalkostnaden.',
+    href: '/guider/hva-koster-kattepensjonat',
+  },
+  {
+    title: 'Hva er et kattepensjonat?',
+    description:
+      'Vi forklarer hva et kattepensjonat er, hva som skiller det fra hjemmepass, og hva du kan forvente av et godt opphold.',
+    href: '/guider/hva-er-kattepensjonat',
+  },
+  {
+    title: 'Kattehotell i Bergen',
+    description:
+      'Leter du etter kattehotell eller kattepass i Bergen? Mathopen holder til i Bergen vest og tar imot katter fra hele regionen.',
+    href: '/guider/kattehotell-bergen',
+  },
+  {
+    title: 'Hvor lenge kan en katt være på kattepensjonat?',
+    description:
+      'Minimumsoppholdet er 2 dager – det er ingen øvre grense. Les om korte helgeopphold og lengre ferieopphold.',
+    href: '/guider/hvor-lenge-kan-katt-vaere-paa-kattepensjonat',
+  },
   {
     title: 'Slik forbereder du katten til pensjonat',
     description:
@@ -26,12 +56,6 @@ const GUIDES = [
       'Bor du på Askøy? Mathopen Kattepensjonat ligger bare noen minutter over Askøybroen i Bergen vest.',
     href: '/guider/kattepensjonat-askoy',
   },
-  {
-    title: 'P-piller til katt – hva koster det og når er det nødvendig?',
-    description:
-      'Alt du trenger å vite om p-piller til katt, inkludert hva som gjelder ved opphold hos oss.',
-    href: '/guider/p-piller-katt',
-  },
 ]
 
 export default function Page() {
@@ -42,7 +66,7 @@ export default function Page() {
           Guider
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Nyttige tips og råd fra Mathopen Kattepensjonat i Bergen
+          Nyttig informasjon, tips og råd fra Mathopen Kattepensjonat i Bergen
         </p>
       </div>
 
