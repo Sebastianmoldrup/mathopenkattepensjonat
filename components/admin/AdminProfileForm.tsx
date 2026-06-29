@@ -6,11 +6,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { Spinner } from '@/components/ui/spinner'
-
 import { Button } from '@/components/ui/button'
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -20,11 +18,9 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { updateAdminUser } from '@/actions/admin/updateAdminUser'
 
-import { updateUser } from '@/actions/user/updateUser'
-import { User } from '@/types'
-
-const profileSchema = z.object({
+const adminProfileSchema = z.object({
   first_name: z
     .string()
     .min(1, 'Fornavn er påkrevd')
@@ -49,6 +45,15 @@ const profileSchema = z.object({
   notes: z.string().optional(),
 })
 
+type AdminProfileData = {
+  first_name?: string | null
+  last_name?: string | null
+  address?: string | null
+  phone?: string | null
+  emergency_contact?: string | null
+  notes?: string | null
+}
+
 function stripCountryCode(phone: string | null | undefined): string {
   return phone?.replace(/^\+47/, '') ?? ''
 }
@@ -57,26 +62,23 @@ function normalizePhone(phone: string): string {
   return phone.startsWith('+') ? phone : `+47${phone}`
 }
 
-export function ProfileForm({ user }: { user: User | null }) {
+export function AdminProfileForm({ adminUser }: { adminUser: AdminProfileData | null }) {
   const router = useRouter()
-  const form = useForm<z.infer<typeof profileSchema>>({
-    resolver: zodResolver(profileSchema),
+
+  const form = useForm<z.infer<typeof adminProfileSchema>>({
+    resolver: zodResolver(adminProfileSchema),
     defaultValues: {
-      first_name: user?.first_name ?? '',
-      last_name: user?.last_name ?? '',
-      address: user?.address ?? '',
-      phone: stripCountryCode(user?.phone),
-      emergency_contact: stripCountryCode(user?.emergency_contact),
-      notes: user?.notes ?? '',
+      first_name: adminUser?.first_name ?? '',
+      last_name: adminUser?.last_name ?? '',
+      address: adminUser?.address ?? '',
+      phone: stripCountryCode(adminUser?.phone),
+      emergency_contact: stripCountryCode(adminUser?.emergency_contact),
+      notes: adminUser?.notes ?? '',
     },
   })
 
-  const onSubmit = async (data: z.infer<typeof profileSchema>) => {
-    if (!user) {
-      toast.error('Noe gikk galt. Prøv igjen.', { position: 'bottom-center' })
-      return
-    }
-    const result = await updateUser({
+  const onSubmit = async (data: z.infer<typeof adminProfileSchema>) => {
+    const result = await updateAdminUser({
       ...data,
       phone: normalizePhone(data.phone),
       emergency_contact: normalizePhone(data.emergency_contact),
@@ -86,14 +88,14 @@ export function ProfileForm({ user }: { user: User | null }) {
       return
     }
     toast.success('Profil oppdatert', { position: 'bottom-center' })
-    router.push('/minside')
+    router.push('/admin')
   }
 
   if (form.formState.isSubmitting) {
     return (
       <div className="flex h-32 items-center justify-center">
-        <Spinner className="size-6" />{' '}
-        <p className="text-muted-foreground">Lagrer profil...</p>
+        <Spinner className="size-6" />
+        <p className="ml-2 text-muted-foreground">Lagrer profil...</p>
       </div>
     )
   }
@@ -104,7 +106,7 @@ export function ProfileForm({ user }: { user: User | null }) {
       className="mx-auto max-w-3xl space-y-8 rounded-2xl"
     >
       <div className="space-y-1">
-        <h2 className="text-2xl font-semibold">Oppdater din profil</h2>
+        <h2 className="text-2xl font-semibold">Min profil</h2>
         <p className="text-sm text-muted-foreground">
           Felter merket med * er obligatoriske.
         </p>
@@ -163,9 +165,6 @@ export function ProfileForm({ user }: { user: User | null }) {
         <FieldGroup>
           <Field data-invalid={!!form.formState.errors.emergency_contact}>
             <FieldLabel htmlFor="emergency_contact">Nødtelefon *</FieldLabel>
-            <FieldDescription>
-              Legg ved en nødkontakt vi kan ringe hvis vi ikke får tak i deg
-            </FieldDescription>
             <Input
               id="emergency_contact"
               placeholder="12345678"
@@ -179,7 +178,7 @@ export function ProfileForm({ user }: { user: User | null }) {
             <Textarea
               id="notes"
               rows={3}
-              placeholder="Annen relevant informasjon om deg"
+              placeholder="Annen relevant informasjon"
               {...form.register('notes')}
             />
             <FieldError errors={[form.formState.errors.notes]} />

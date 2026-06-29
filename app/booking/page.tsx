@@ -6,7 +6,6 @@ import { BookingWizard } from '@/components/booking/BookingWizard'
 import { Loader2 } from 'lucide-react'
 
 async function BookingLoader() {
-  await connection()
   const supabase = await createClient()
   const {
     data: { user },
@@ -45,7 +44,8 @@ async function BookingLoader() {
   )
 }
 
-export default function BookingPage() {
+export default async function BookingPage() {
+  await connection()
   return (
     <Suspense
       fallback={
