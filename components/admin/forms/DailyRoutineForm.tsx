@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import {
   DailyRoutine,
   DailyRoutineFields,
@@ -20,6 +20,8 @@ interface DailyRoutineFormProps {
   date: string
   period: RoutinePeriod
   existing: DailyRoutine | null
+  onDirtyChange?: (dirty: boolean) => void
+  onSaved?: (fields: DailyRoutineFields) => void
 }
 
 type CheckKey = keyof DailyRoutineFields
@@ -85,13 +87,23 @@ export function DailyRoutineForm({
   date,
   period,
   existing,
+  onDirtyChange,
+  onSaved,
 }: DailyRoutineFormProps) {
   const [fields, setFields] = useState<DailyRoutineFields>(
     fromExisting(existing)
   )
+  const savedFieldsRef = useRef<DailyRoutineFields>(fromExisting(existing))
   const [isPending, startTransition] = useTransition()
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const dirty =
+      JSON.stringify(fields) !== JSON.stringify(savedFieldsRef.current)
+    onDirtyChange?.(dirty)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fields])
 
   const isMorgen = period === 'morgen'
   const periodLabel = isMorgen ? 'Morgen' : 'Dag / Kveld'
@@ -115,8 +127,14 @@ export function DailyRoutineForm({
     setSaved(false)
     startTransition(async () => {
       const result = await adminUpsertDailyRoutine(date, period, fields as any)
-      if (result.success) setSaved(true)
-      else setError(result.error ?? 'Noe gikk galt.')
+      if (result.success) {
+        setSaved(true)
+        savedFieldsRef.current = fields
+        onDirtyChange?.(false)
+        onSaved?.(fields)
+      } else {
+        setError(result.error ?? 'Noe gikk galt.')
+      }
     })
   }
 

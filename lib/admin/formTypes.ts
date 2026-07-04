@@ -36,6 +36,18 @@ export type DailyRoutineFields = Omit<
   'id' | 'date' | 'period' | 'updated_at'
 >
 
+export function isRoutineComplete(r: DailyRoutine): boolean {
+  return (
+    r.visuell_sjekk &&
+    r.atferd_kontroll &&
+    r.vann_gitt &&
+    r.fôr_gitt &&
+    r.kattedo_sjekk &&
+    r.temperatur_ventilasjon &&
+    r.aktivisering
+  )
+}
+
 export function emptyRoutine(): DailyRoutineFields {
   return {
     visuell_sjekk: false,

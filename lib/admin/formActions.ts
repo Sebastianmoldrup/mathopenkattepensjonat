@@ -9,7 +9,7 @@ import { DailyRoutine, CheckinLog, HealthLog, RoutinePeriod } from './formTypes'
 export async function adminGetDailyRoutines(
   from?: string,
   to?: string
-): Promise<DailyRoutine[]> {
+): Promise<{ data: DailyRoutine[]; error: boolean }> {
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('admin_get_daily_routines', {
     p_from: from,
@@ -17,9 +17,9 @@ export async function adminGetDailyRoutines(
   })
   if (error) {
     console.error('[adminGetDailyRoutines]', error.message)
-    return []
+    return { data: [], error: true }
   }
-  return data ?? []
+  return { data: data ?? [], error: false }
 }
 
 export async function adminUpsertDailyRoutine(
