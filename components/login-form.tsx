@@ -4,7 +4,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Spinner } from '@/components/ui/spinner'
-import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -34,7 +33,6 @@ import { LoginSchema, type LoginInput } from '@/lib/validation/login'
 const LoginForm = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -69,7 +67,11 @@ const LoginForm = () => {
         return
       }
 
-      router.push('/minside')
+      // Hard navigation, not router.push(): guarantees the root layout
+      // (navbar) re-renders with the fresh session, no client-router
+      // edge cases to chase. This tab only, by design -- other open
+      // tabs pick up the real session state next time they navigate.
+      window.location.href = '/minside'
     } catch (err) {
       console.error(err)
       setError('Noe gikk galt ved innlogging. Prøv igjen.')

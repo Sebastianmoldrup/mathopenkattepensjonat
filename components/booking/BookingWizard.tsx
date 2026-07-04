@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Cat, BookingWithCats } from '@/lib/booking/types'
 import { GuestBookingWizard } from './GuestBookingWizard'
 import { AuthedBookingWizard } from './AuthedBookingWizard'
@@ -22,9 +21,9 @@ export function BookingWizard({
   initialBookings,
   isProfileComplete,
 }: Props) {
-  const [userId] = useState(initialUserId)
-  const [bookings] = useState(initialBookings)
-  const [cats] = useState(initialCats)
+  const userId = initialUserId
+  const bookings = initialBookings
+  const cats = initialCats
 
   if (userId && !isProfileComplete) {
     return (

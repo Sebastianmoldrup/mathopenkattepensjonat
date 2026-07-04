@@ -44,8 +44,19 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  //
+  // getClaims() can throw if the session cookie is mid-transition (e.g. a
+  // client-side sign-out clearing cookies while a request is in flight).
+  // Treat that as "no user" instead of letting it propagate unhandled --
+  // an unhandled rejection here would leave the page load hanging rather
+  // than failing cleanly.
+  let user;
+  try {
+    const { data } = await supabase.auth.getClaims();
+    user = data?.claims;
+  } catch {
+    user = null;
+  }
   const isAuthPages = request.nextUrl.pathname.startsWith("/minside");
 
   // Only redirect if we're on an auth page AND there's no user
@@ -61,6 +72,10 @@ export async function updateSession(request: NextRequest) {
   if (user && request.nextUrl.pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/minside";
+    // Clear query params (e.g. a leftover ?redirectedFrom=... from the
+    // /minside -> /login redirect) -- they describe the /login request,
+    // not the /minside destination.
+    url.search = "";
     return NextResponse.redirect(url);
   }
 
