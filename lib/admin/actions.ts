@@ -3,12 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import {
-  AdminBooking,
-  AdminBookingStatus,
-  DailyChecklist,
-  RevenueStats,
-} from './utils'
+import { AdminBooking, AdminBookingStatus, RevenueStats } from './utils'
 import {
   sendBookingConfirmedEmail,
   sendBookingCancelledByAdminEmail,
@@ -222,57 +217,6 @@ export async function adminUpdateBookingNotes(
   }
 
   revalidatePath('/admin/bookinger')
-  return { success: true }
-}
-
-// ─── Checklists ────────────────────────────────────────────────────────────────
-
-export async function adminGetChecklists(
-  from?: string,
-  to?: string
-): Promise<DailyChecklist[]> {
-  const supabase = await createClient()
-
-  const { data, error } = await supabase.rpc('admin_get_checklists', {
-    p_from: from,
-    p_to: to,
-  })
-
-  if (error) {
-    console.error('[adminGetChecklists]', error.message)
-    return []
-  }
-
-  return data ?? []
-}
-
-export async function adminUpsertChecklist(
-  date: string,
-  fields: {
-    feeding_done: boolean
-    medication_done: boolean
-    litter_cleaned: boolean
-    cage_inspection_done: boolean
-    notes?: string
-  }
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-
-  const { error } = await supabase.rpc('admin_upsert_checklist', {
-    p_date: date,
-    p_feeding_done: fields.feeding_done,
-    p_medication_done: fields.medication_done,
-    p_litter_cleaned: fields.litter_cleaned,
-    p_cage_inspection_done: fields.cage_inspection_done,
-    p_notes: fields.notes ?? null,
-  })
-
-  if (error) {
-    console.error('[adminUpsertChecklist]', error.message)
-    return { success: false, error: 'Kunne ikke lagre sjekkliste.' }
-  }
-
-  revalidatePath('/admin/sjekkliste')
   return { success: true }
 }
 

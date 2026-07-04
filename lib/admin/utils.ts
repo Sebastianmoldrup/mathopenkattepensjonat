@@ -40,18 +40,6 @@ export interface AdminCat {
   age: string | null
 }
 
-export interface DailyChecklist {
-  id: string
-  date: string
-  feeding_done: boolean
-  medication_done: boolean
-  litter_cleaned: boolean
-  cage_inspection_done: boolean
-  notes: string | null
-  completed_by: string | null
-  updated_at: string
-}
-
 export interface RevenueStats {
   month: string
   revenue: number
