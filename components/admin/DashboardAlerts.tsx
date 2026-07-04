@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils'
 
 interface DashboardAlertsProps {
   lastHms: string | null // ISO timestamp of last HMS log
-  todayMorgen: boolean // whether morgen routine exists today
-  todayDagKveld: boolean // whether dag/kveld routine exists today
+  todayMorgen: boolean // whether morgen routine is fully checked off today
+  todayDagKveld: boolean // whether dag/kveld routine is fully checked off today
   pendingCount: number
 }
 

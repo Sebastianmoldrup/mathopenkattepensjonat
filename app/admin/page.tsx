@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import { connection } from 'next/server'
 import { adminGetAllBookings, adminGetRevenueStats } from '@/lib/admin/actions'
+import { adminGetDailyRoutines } from '@/lib/admin/formActions'
+import { isRoutineComplete } from '@/lib/admin/formTypes'
 import { StatsCards } from '@/components/admin/StatsCards'
 import { RevenueChart } from '@/components/admin/RevenueChart'
 import { DashboardAlerts } from '@/components/admin/DashboardAlerts'
@@ -25,18 +27,13 @@ async function AdminStats() {
   const today = localDateStr(new Date())
   const supabase = await createClient()
 
-  const [bookings, revenueStats, hmsData, routineData] = await Promise.all([
+  const [bookings, revenueStats, hmsData, routineResult] = await Promise.all([
     adminGetAllBookings(),
     adminGetRevenueStats(),
     // Latest HMS log
     supabase.rpc('admin_get_latest_hms_log').then((r) => r.data?.[0] ?? null),
     // Today's daily routines
-    supabase
-      .rpc('admin_get_daily_routines', {
-        p_from: today,
-        p_to: today,
-      })
-      .then((r) => r.data ?? []),
+    adminGetDailyRoutines(today, today),
   ])
 
   const pending = bookings.filter((b) => b.status === 'pending').length
@@ -46,12 +43,18 @@ async function AdminStats() {
   const totalRevenueExVat = Math.round(totalRevenue * 0.75)
   const totalVat = Math.round(totalRevenue * 0.25)
 
-  const todayMorgen = (routineData as any[]).find(
-    (r: any) => r.period === 'morgen'
+  const todayMorgenRow = routineResult.data.find(
+    (r) => r.period === 'morgen'
   )
-  const todayDagKveld = (routineData as any[]).find(
-    (r: any) => r.period === 'dag_kveld'
+  const todayDagKveldRow = routineResult.data.find(
+    (r) => r.period === 'dag_kveld'
   )
+  const todayMorgenDone = todayMorgenRow
+    ? isRoutineComplete(todayMorgenRow)
+    : false
+  const todayDagKveldDone = todayDagKveldRow
+    ? isRoutineComplete(todayDagKveldRow)
+    : false
 
   return (
     <>
@@ -63,8 +66,8 @@ async function AdminStats() {
       />
       <DashboardAlerts
         lastHms={hmsData ? (hmsData as any).created_at : null}
-        todayMorgen={!!todayMorgen}
-        todayDagKveld={!!todayDagKveld}
+        todayMorgen={todayMorgenDone}
+        todayDagKveld={todayDagKveldDone}
         pendingCount={pending}
       />
       <RevenueChart data={revenueStats} />
