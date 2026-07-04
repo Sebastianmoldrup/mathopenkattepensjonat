@@ -27,6 +27,7 @@ import {
   Loader2,
   CheckCircle2,
   ClipboardList,
+  Printer,
 } from 'lucide-react'
 import {
   adminGetCheckinCheckoutByDate,
@@ -146,6 +147,14 @@ export default function CheckinCheckoutClient({
 
   const checkins = entries.filter((e) => e.event_type === 'checkin')
   const checkouts = entries.filter((e) => e.event_type === 'checkout')
+
+  function handleLabelPrinted(bookingId: string) {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.booking_id === bookingId ? { ...e, label_printed: true } : e
+      )
+    )
+  }
 
   function handleDateChange(newDate: string) {
     setDate(newDate)
@@ -294,6 +303,19 @@ export default function CheckinCheckoutClient({
 
         <TabsContent value="checkin" className="mt-4">
           <div className="space-y-4">
+            {/* Batch print-knapp */}
+            {checkins.length > 0 && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full gap-1.5"
+                onClick={() => { window.location.href = `/api/admin/pdf/daily/${date}` }}
+              >
+                <Printer className="h-3.5 w-3.5" />
+                Last ned alle labels for i dag ({checkins.length})
+              </Button>
+            )}
+
             {checkins.length === 0 ? (
               <EmptyState label="Ingen innsjekk denne dagen" />
             ) : (
@@ -314,6 +336,9 @@ export default function CheckinCheckoutClient({
                           onOpenChecklist={() =>
                             openChecklist(entry, 'checkin')
                           }
+                          onLabelPrinted={() =>
+                            handleLabelPrinted(entry.booking_id)
+                          }
                         />
                       ))}
                   </div>
@@ -333,6 +358,9 @@ export default function CheckinCheckoutClient({
                           type="checkin"
                           onOpenChecklist={() =>
                             openChecklist(entry, 'checkin')
+                          }
+                          onLabelPrinted={() =>
+                            handleLabelPrinted(entry.booking_id)
                           }
                         />
                       ))}
@@ -361,9 +389,12 @@ export default function CheckinCheckoutClient({
                         <EntryCard
                           key={entry.booking_id}
                           entry={entry}
-                          type="checkout"
+                          type="checkin"
                           onOpenChecklist={() =>
-                            openChecklist(entry, 'checkout')
+                            openChecklist(entry, 'checkin')
+                          }
+                          onLabelPrinted={() =>
+                            handleLabelPrinted(entry.booking_id)
                           }
                         />
                       ))}
@@ -381,9 +412,12 @@ export default function CheckinCheckoutClient({
                         <EntryCard
                           key={entry.booking_id}
                           entry={entry}
-                          type="checkout"
+                          type="checkin"
                           onOpenChecklist={() =>
-                            openChecklist(entry, 'checkout')
+                            openChecklist(entry, 'checkin')
+                          }
+                          onLabelPrinted={() =>
+                            handleLabelPrinted(entry.booking_id)
                           }
                         />
                       ))}
@@ -513,15 +547,17 @@ function EntryCard({
   entry,
   type,
   onOpenChecklist,
+  onLabelPrinted,
 }: {
   entry: CheckinCheckoutEntry
   type: 'checkin' | 'checkout'
   onOpenChecklist: () => void
+  onLabelPrinted: () => void
 }) {
-  const cageLabel =
-    entry.cage_count === 2
-      ? '2x Standard (splitt)'
-      : (CAGE_LABELS[entry.cage_type] ?? entry.cage_type)
+  // const cageLabel =
+  //   entry.cage_count === 2
+  //     ? '2x Standard (splitt)'
+  //     : (CAGE_LABELS[entry.cage_type] ?? entry.cage_type)
 
   const ownerName =
     ((entry.owner_first ?? '') + ' ' + (entry.owner_last ?? '')).trim() || '—'
@@ -537,6 +573,8 @@ function EntryCard({
     type === 'checkin' ? entry.checked_in_at : entry.checked_out_at
   const mailtoHref = 'mailto:' + entry.owner_email
   const telHref = entry.owner_phone ? 'tel:' + entry.owner_phone : null
+
+  const router = useRouter()
 
   return (
     <div
@@ -691,12 +729,20 @@ function EntryCard({
 
       <Button
         size="sm"
+        variant="outline"
         className={cn(
-          'w-full gap-1.5 text-white',
-          true ? 'bg-red-400' : 'bg-green-400'
+          'w-full gap-1.5',
+          entry.label_printed
+            ? 'border-green-200 bg-green-50 text-green-700 hover:bg-green-100'
+            : 'border-border/40 text-muted-foreground hover:bg-muted'
         )}
+        onClick={() => {
+          window.location.href = `/api/admin/pdf/booking/${entry.booking_id}`
+          onLabelPrinted()
+        }}
       >
-        Print label
+        <Printer className="h-3.5 w-3.5" />
+        {entry.label_printed ? '✓ Label skrevet ut' : 'Skriv ut label'}
       </Button>
     </div>
   )

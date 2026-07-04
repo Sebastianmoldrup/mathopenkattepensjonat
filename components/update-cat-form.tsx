@@ -588,7 +588,7 @@ export default function UpdateCatForm({ cat }: { cat: Cat }) {
 
       <div className="flex justify-end pt-2">
         <Button type="submit" size="lg" className="px-8">
-          Lagre katt
+          Rediger katt
         </Button>
       </div>
     </form>

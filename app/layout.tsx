@@ -1,10 +1,10 @@
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
-import './globals.css'
-import { NavbarWrapper } from '@/components/NavbarWrapper'
 import { Suspense } from 'react'
+import { NavbarWrapper } from '@/components/NavbarWrapper'
 import Footer from '@/components/Footer'
+import './globals.css'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 

@@ -1,70 +1,70 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
-import { createClient } from "@/lib/supabase/client";
-import { signUpSchema } from "@/schemas/signUpSchema";
+import { createClient } from '@/lib/supabase/client'
+import { signUpSchema } from '@/schemas/signUpSchema'
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 type FieldErrors = {
-  email?: string;
-  password?: string;
-  repeatPassword?: string;
-  privacyAccepted?: string;
-};
+  email?: string
+  password?: string
+  repeatPassword?: string
+  privacyAccepted?: string
+}
 
 const SignUpForm = () => {
-  const router = useRouter();
-  const supabase = createClient();
+  const router = useRouter()
+  const supabase = createClient()
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [repeatPassword, setRepeatPassword] = useState('')
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
 
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [formError, setFormError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    setIsLoading(true);
-    setFormError(null);
-    setFieldErrors({});
+    setIsLoading(true)
+    setFormError(null)
+    setFieldErrors({})
 
     const result = signUpSchema.safeParse({
       email,
       password,
       repeatPassword,
       privacyAccepted,
-    });
+    })
 
     if (!result.success) {
-      const errors: FieldErrors = {};
+      const errors: FieldErrors = {}
 
       result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof FieldErrors;
+        const field = issue.path[0] as keyof FieldErrors
         if (field && !errors[field]) {
-          errors[field] = issue.message;
+          errors[field] = issue.message
         }
-      });
+      })
 
-      setFieldErrors(errors);
-      setIsLoading(false);
-      return;
+      setFieldErrors(errors)
+      setIsLoading(false)
+      return
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -76,22 +76,22 @@ const SignUpForm = () => {
           privacy_accepted_at: new Date().toISOString(),
         },
       },
-    });
+    })
 
     if (error) {
-      setFormError(error.message);
-      setIsLoading(false);
-      return;
+      setFormError(error.message)
+      setIsLoading(false)
+      return
     }
 
     if (!data.user) {
-      setFormError("Noe gikk galt. Prøv igjen.");
-      setIsLoading(false);
-      return;
+      setFormError('Noe gikk galt. Prøv igjen.')
+      setIsLoading(false)
+      return
     }
 
-    router.push("/registrering-bekreftet");
-  };
+    router.push('/registrering-bekreftet')
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -160,15 +160,15 @@ const SignUpForm = () => {
                   className="mt-1"
                 />
                 <label htmlFor="privacy" className="leading-snug">
-                  Jeg har lest og godtar{" "}
+                  Jeg har lest og godtar{' '}
                   <Link
                     href="/personvern"
                     target="_blank"
                     className="underline underline-offset-4"
                   >
                     personvernerklæringen
-                  </Link>{" "}
-                  og{" "}
+                  </Link>{' '}
+                  og{' '}
                   <Link
                     href="/vilkar"
                     target="_blank"
@@ -189,12 +189,12 @@ const SignUpForm = () => {
               {formError && <p className="text-sm text-red-500">{formError}</p>}
 
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Oppretter konto..." : "Opprett konto"}
+                {isLoading ? 'Oppretter konto...' : 'Opprett konto'}
               </Button>
             </div>
 
             <div className="mt-4 text-center text-sm">
-              Har du allerede en konto?{" "}
+              Har du allerede en konto?{' '}
               <Link href="/login" className="underline underline-offset-4">
                 Logg inn
               </Link>
@@ -203,7 +203,7 @@ const SignUpForm = () => {
         </CardContent>
       </Card>
     </div>
-  );
-};
+  )
+}
 
-export default SignUpForm;
+export default SignUpForm
