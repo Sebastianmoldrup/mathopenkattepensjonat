@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { connection } from 'next/server'
 import { adminGetDailyRoutines } from '@/lib/admin/formActions'
+import { adminGetCurrentUserName } from '@/lib/admin/actions'
 import { SjekklisteClient } from '@/components/admin/SjekklisteClient'
 import { Loader2 } from 'lucide-react'
 
@@ -29,9 +30,10 @@ async function SjekklisteContent({
   )
   const selectedDate = resolveDate(params.dato, today)
 
-  const [selectedResult, historyResult] = await Promise.all([
+  const [selectedResult, historyResult, adminName] = await Promise.all([
     adminGetDailyRoutines(selectedDate, selectedDate),
     adminGetDailyRoutines(thirtyDaysAgo, today),
+    adminGetCurrentUserName(),
   ])
 
   const initialMorgen =
@@ -48,6 +50,7 @@ async function SjekklisteContent({
       history={historyResult.data}
       today={today}
       thirtyDaysAgo={thirtyDaysAgo}
+      adminName={adminName}
     />
   )
 }

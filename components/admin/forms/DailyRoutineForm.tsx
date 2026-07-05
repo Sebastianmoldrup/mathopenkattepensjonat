@@ -13,15 +13,30 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Loader2, CheckCircle2, Sun, Sunset } from 'lucide-react'
+import { Loader2, CheckCircle2, CheckCheck, Sun, Sunset } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface DailyRoutineFormProps {
   date: string
   period: RoutinePeriod
   existing: DailyRoutine | null
+  adminName: string | null
   onDirtyChange?: (dirty: boolean) => void
   onSaved?: (fields: DailyRoutineFields) => void
+}
+
+// Current time in Norway's timezone (handles CET/CEST automatically),
+// independent of the device's own locale/timezone setting.
+function getOsloTimeHHMM(): string {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Oslo',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(new Date())
+  const hour = parts.find((p) => p.type === 'hour')?.value ?? '00'
+  const minute = parts.find((p) => p.type === 'minute')?.value ?? '00'
+  return `${hour === '24' ? '00' : hour}:${minute}`
 }
 
 type CheckKey = keyof DailyRoutineFields
@@ -87,6 +102,7 @@ export function DailyRoutineForm({
   date,
   period,
   existing,
+  adminName,
   onDirtyChange,
   onSaved,
 }: DailyRoutineFormProps) {
@@ -114,6 +130,25 @@ export function DailyRoutineForm({
 
   function toggle(key: CheckKey) {
     setFields((p) => ({ ...p, [key]: !p[key] }))
+    setSaved(false)
+  }
+
+  function autoFill() {
+    setFields((p) => {
+      const next = { ...p } as any
+      for (const item of mainItems) {
+        // "hvis aktuelt" — conditional on whether meds were actually due,
+        // shouldn't be defaulted to true
+        if (item.key === 'medisiner_gitt') continue
+        next[item.key] = true
+      }
+      if (!isMorgen) {
+        for (const item of RENHOLD) next[item.key] = true
+      }
+      if (!next.bekreftet_navn && adminName) next.bekreftet_navn = adminName
+      if (!next.klokkeslett) next.klokkeslett = getOsloTimeHHMM()
+      return next as DailyRoutineFields
+    })
     setSaved(false)
   }
 
@@ -158,9 +193,21 @@ export function DailyRoutineForm({
             {checkedMain} av {totalMain} oppgaver fullført
           </p>
         </div>
-        {checkedMain === totalMain && (
-          <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={autoFill}
+            className="h-7 gap-1 px-2 text-xs"
+          >
+            <CheckCheck className="h-3.5 w-3.5" />
+            Merk alt
+          </Button>
+          {checkedMain === totalMain && (
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+          )}
+        </div>
       </div>
 
       <div className="space-y-6 p-5">

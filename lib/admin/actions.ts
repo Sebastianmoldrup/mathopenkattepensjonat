@@ -27,6 +27,32 @@ export async function getIsAdmin(): Promise<boolean> {
   return !!data
 }
 
+// Resolves a display name for the logged-in admin (first + last name from
+// admin_users, falling back to their auth email). Used to auto-fill
+// signature-style fields — never throws, so a lookup failure just leaves the
+// field blank for manual entry instead of breaking the page.
+export async function adminGetCurrentUserName(): Promise<string | null> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const { data, error } = await supabase
+    .from('admin_users')
+    .select('first_name, last_name')
+    .eq('id', user.id)
+    .single()
+
+  if (error) {
+    console.error('[adminGetCurrentUserName]', error.message)
+    return user.email ?? null
+  }
+
+  const name = [data?.first_name, data?.last_name].filter(Boolean).join(' ').trim()
+  return name || user.email || null
+}
+
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 
 export async function adminGetAllBookings(): Promise<AdminBooking[]> {

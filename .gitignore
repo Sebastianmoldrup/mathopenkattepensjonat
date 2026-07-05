@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# internal security/vulnerability writeups and unapplied DB fixes -- these
+# narrate exact exploit mechanisms against the production database and must
+# never be committed until the fixes they describe are applied
+/supabase/SECURITY_FIXES.md
+/supabase/manual-migrations/

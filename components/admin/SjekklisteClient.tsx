@@ -43,6 +43,7 @@ interface SjekklisteClientProps {
   history: DailyRoutine[]
   today: string
   thirtyDaysAgo: string
+  adminName: string | null
 }
 
 function localDateStr(d: Date): string {
@@ -57,6 +58,7 @@ export function SjekklisteClient({
   history: initialHistory,
   today,
   thirtyDaysAgo,
+  adminName,
 }: SjekklisteClientProps) {
   const router = useRouter()
 
@@ -241,6 +243,7 @@ export function SjekklisteClient({
             date={selectedDate}
             period="morgen"
             existing={morgen}
+            adminName={adminName}
             onDirtyChange={(d) =>
               setDirty((prev) => ({ ...prev, morgen: d }))
             }
@@ -251,6 +254,7 @@ export function SjekklisteClient({
             date={selectedDate}
             period="dag_kveld"
             existing={dagKveld}
+            adminName={adminName}
             onDirtyChange={(d) =>
               setDirty((prev) => ({ ...prev, dagKveld: d }))
             }
