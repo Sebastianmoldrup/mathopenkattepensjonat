@@ -389,9 +389,9 @@ export default function CheckinCheckoutClient({
                         <EntryCard
                           key={entry.booking_id}
                           entry={entry}
-                          type="checkin"
+                          type="checkout"
                           onOpenChecklist={() =>
-                            openChecklist(entry, 'checkin')
+                            openChecklist(entry, 'checkout')
                           }
                           onLabelPrinted={() =>
                             handleLabelPrinted(entry.booking_id)
@@ -412,9 +412,9 @@ export default function CheckinCheckoutClient({
                         <EntryCard
                           key={entry.booking_id}
                           entry={entry}
-                          type="checkin"
+                          type="checkout"
                           onOpenChecklist={() =>
-                            openChecklist(entry, 'checkin')
+                            openChecklist(entry, 'checkout')
                           }
                           onLabelPrinted={() =>
                             handleLabelPrinted(entry.booking_id)

@@ -8,6 +8,7 @@ import {
   bookingRequestReceivedTemplate,
   bookingUpdatedTemplate,
   bookingWaitlistTemplate,
+  bookingCompletedTemplate,
 } from './templates/booking'
 
 const FROM_EMAIL = 'Mathopen Kattepensjonat <post@mathopenkattepensjonat.no>'
@@ -113,6 +114,20 @@ export async function sendBookingUpdatedEmail(
   })
   if (error) {
     console.error('[sendBookingUpdatedEmail]', error)
+    return { success: false, error }
+  }
+  return { success: true }
+}
+
+export async function sendBookingCompletedEmail(booking: AdminBooking) {
+  const { error } = await getResend().emails.send({
+    from: FROM_EMAIL,
+    to: booking.user_email,
+    subject: 'Takk for besøket! – Mathopen Kattepensjonat',
+    html: bookingCompletedTemplate(booking),
+  })
+  if (error) {
+    console.error('[sendBookingCompletedEmail]', error)
     return { success: false, error }
   }
   return { success: true }
