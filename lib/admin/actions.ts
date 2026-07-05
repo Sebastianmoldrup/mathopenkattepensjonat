@@ -8,6 +8,7 @@ import {
   sendBookingConfirmedEmail,
   sendBookingCancelledByAdminEmail,
   sendCancellationFeeReminderEmail,
+  sendBookingCompletedEmail,
 } from '@/lib/email/resend'
 
 import { sendBookingWaitlistEmail } from '@/lib/email/resend'
@@ -106,6 +107,34 @@ export async function adminUpdateBookingStatus(
         return { success: false, error: 'Kunne ikke oppdatere status.' }
       }
       await sendBookingConfirmedEmail({ ...booking, status })
+      break
+    }
+
+    case 'completed': {
+      // Only a confirmed booking can be marked completed. Re-check against the
+      // database rather than trusting `booking.status` from the caller — the
+      // sheet this is called from doesn't refetch after a mutation, so a
+      // double-click (or a retried request) would otherwise see the same
+      // stale "confirmed" argument twice and send the email again.
+      const current = (await adminGetAllBookings()).find(
+        (b) => b.id === bookingId
+      )
+      if (!current || current.status !== 'confirmed') {
+        return { success: false, error: 'Bookingen er ikke bekreftet.' }
+      }
+      const { error } = await supabase.rpc('admin_update_booking_status', {
+        p_booking_id: bookingId,
+        p_status: status,
+      })
+      if (error) {
+        console.error('[adminUpdateBookingStatus completed]', error.message)
+        return { success: false, error: 'Kunne ikke oppdatere status.' }
+      }
+      try {
+        await sendBookingCompletedEmail({ ...booking, status })
+      } catch (e) {
+        console.error('[adminUpdateBookingStatus completed email]', e)
+      }
       break
     }
 
@@ -429,7 +458,47 @@ export async function adminUpsertCheckout(
     console.error('[adminUpsertCheckout]', error.message)
     return { success: false, error: 'Kunne ikke lagre utsjekk.' }
   }
+
+  // Checklist is saved at this point regardless of what happens below —
+  // status/email are a side effect and must never turn a successful
+  // checkout save into a reported failure.
+  await completeBookingAfterCheckout(bookingId)
+
   return { success: true }
+}
+
+// Marks a booking completed once its checkout checklist is saved, and sends
+// the "thank you" email. Only fires for bookings currently `confirmed`:
+// - skips cancelled/pending/waitlist bookings, so re-running a checkout on
+//   them (e.g. stale UI, mis-scheduled entry) can't resurrect/misclassify them
+// - skips already-`completed` bookings, so re-opening and re-saving the
+//   checklist after the fact never re-sends the email
+async function completeBookingAfterCheckout(bookingId: string): Promise<void> {
+  try {
+    const bookings = await adminGetAllBookings()
+    const booking = bookings.find((b) => b.id === bookingId)
+    if (!booking || booking.status !== 'confirmed') return
+
+    const supabase = await createClient()
+    const { error } = await supabase.rpc('admin_update_booking_status', {
+      p_booking_id: bookingId,
+      p_status: 'completed',
+    })
+    if (error) {
+      console.error(
+        '[completeBookingAfterCheckout] status update failed',
+        error.message
+      )
+      return
+    }
+
+    revalidatePath('/admin/bookinger')
+    revalidatePath('/admin')
+
+    await sendBookingCompletedEmail({ ...booking, status: 'completed' })
+  } catch (e) {
+    console.error('[completeBookingAfterCheckout]', e)
+  }
 }
 
 // ─── Printing ─────────────────────────────────────────────────────────

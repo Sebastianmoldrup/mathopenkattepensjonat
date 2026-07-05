@@ -5,6 +5,20 @@ import {
   nightsBetween,
 } from '@/lib/admin/utils'
 
+// ─── Social / review links ─────────────────────────────────────────────────────
+// TODO: replace with the real page URLs once available.
+const GOOGLE_REVIEW_URL = 'https://g.page/r/CaOJDBFt8hKoEBM/review'
+const FACEBOOK_URL =
+  'https://www.facebook.com/people/Mathopen-kattepensjonat/61586273038973/'
+const INSTAGRAM_URL = 'https://www.instagram.com/mathopenkattepensjonat/'
+
+// QR codes: upload a .webp with the exact same filename to the `logo` storage
+// bucket to replace the placeholder image.
+const GOOGLE_REVIEW_QR_URL =
+  'https://cccacsaixeqraulymlwo.supabase.co/storage/v1/object/public/qr-codes/google-review-qr.webp'
+const SNAPCHAT_QR_URL =
+  'https://cccacsaixeqraulymlwo.supabase.co/storage/v1/object/public/qr-codes/snapchat-qr-code.webp'
+
 // ─── Base template ────────────────────────────────────────────────────────────
 
 function baseTemplate(content: string): string {
@@ -450,6 +464,97 @@ export function bookingWaitlistTemplate(booking: AdminBooking): string {
       Spørsmål? Ta kontakt på
       <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
       eller ring <a href="tel:+4747322279" style="color:#c8b49a;">+47 473 22 279</a>
+    </p>
+  `)
+}
+
+// ─── Completed template ───────────────────────────────────────────────────────
+
+export function bookingCompletedTemplate(booking: AdminBooking): string {
+  const firstName = booking.user_first_name ?? 'der'
+  const cats = booking.cats ?? []
+  const catNames =
+    cats.length > 0 ? cats.map((c) => c.name).join(', ') : 'katten din'
+
+  return baseTemplate(`
+    <h2 style="color:#2C3E50;margin-top:0;text-transform:capitalize;">Hei ${firstName}! 🐾</h2>
+
+    <p style="font-size:15px;">
+      Nå er oppholdet for <strong>${catNames}</strong> hos
+      <strong>Mathopen Kattepensjonat</strong> avsluttet. Tusen takk for tilliten!
+    </p>
+
+    ${bookingDetailsBlock(booking)}
+
+    <!-- Review request -->
+    <div style="border:1px solid #e8e0d8;border-radius:8px;overflow:hidden;margin:24px 0;">
+      <div style="background:#f9f6f2;padding:12px 20px;border-bottom:1px solid #e8e0d8;">
+        <p style="margin:0;font-size:13px;font-weight:bold;color:#888;text-transform:uppercase;letter-spacing:0.5px;">
+          Del opplevelsen din
+        </p>
+      </div>
+      <div style="padding:20px;text-align:center;">
+        <p style="margin:0 0 16px;font-size:14px;color:#444;">
+          Vi setter utrolig stor pris på en vurdering på Google — det betyr
+          mye for oss og hjelper andre å finne frem til oss.
+        </p>
+        <img
+          src="${GOOGLE_REVIEW_QR_URL}"
+          alt="QR-kode for Google-vurdering"
+          width="160"
+          height="160"
+          style="display:block;margin:0 auto 16px;border-radius:8px;"
+        />
+        <a
+          href="${GOOGLE_REVIEW_URL}"
+          style="display:inline-block;background:#2C3E50;color:#fff;text-decoration:none;font-size:14px;font-weight:bold;padding:12px 24px;border-radius:6px;"
+        >
+          ⭐ Skriv en vurdering på Google
+        </a>
+      </div>
+    </div>
+
+    <!-- Social follow -->
+    <div style="border:1px solid #e8e0d8;border-radius:8px;overflow:hidden;margin-bottom:24px;">
+      <div style="background:#f9f6f2;padding:12px 20px;border-bottom:1px solid #e8e0d8;">
+        <p style="margin:0;font-size:13px;font-weight:bold;color:#888;text-transform:uppercase;letter-spacing:0.5px;">
+          Følg oss for oppdateringer
+        </p>
+      </div>
+      <div style="padding:20px;">
+        <p style="margin:0 0 16px;font-size:14px;color:#444;">
+          Vi legger jevnlig ut bilder og oppdateringer fra kattepensjonatet på
+          Facebook, Instagram og Snapchat.
+        </p>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:6px 0;font-size:14px;">
+              📘 <a href="${FACEBOOK_URL}" style="color:#c8b49a;font-weight:bold;">Følg oss på Facebook</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:6px 0;font-size:14px;">
+              📷 <a href="${INSTAGRAM_URL}" style="color:#c8b49a;font-weight:bold;">Følg oss på Instagram</a>
+            </td>
+          </tr>
+        </table>
+        <div style="text-align:center;margin-top:16px;">
+          <img
+            src="${SNAPCHAT_QR_URL}"
+            alt="QR-kode for Snapchat"
+            width="160"
+            height="200"
+            style="display:block;margin:0 auto 8px;border-radius:8px;object-fit:cover;"
+          />
+          <p style="margin:0;font-size:13px;color:#666;">👻 Legg oss til på Snapchat</p>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-size:14px;color:#555;">
+      Vi håper å se dere igjen snart! Har du spørsmål? Ta gjerne kontakt på
+      <a href="mailto:post@mathopenkattepensjonat.no" style="color:#c8b49a;">post@mathopenkattepensjonat.no</a>
+      eller ring <a href="tel:+4747322279" style="color:#c8b49a;">+47 473 22 279</a> 😊
     </p>
   `)
 }
