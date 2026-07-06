@@ -1,7 +1,17 @@
-export const catImages = Array.from({ length: 48 }, (_, i) => {
-  const num = String(i + 1).padStart(3, '0')
-  return {
-    src: `/katter/cat-${num}.webp`,
-    alt: `Katt ${num} hos Mathopen Kattepensjonat`,
-  }
-})
+export const catImages = [
+  { src: '/kattegalleri/katt-001.webp', alt: 'Langhåret katt på kattetårn inne på Mathopen Kattepensjonat', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-002.webp', alt: 'Katt som slapper av i fellesarealet på pensjonatet', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-003.webp', alt: 'Katt hos Mathopen Kattepensjonat', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-004.webp', alt: 'Katt under opphold på pensjonatet i Bergen', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-005.webp', alt: 'Katt som utforsker rommet sitt på Mathopen Kattepensjonat', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-006.webp', alt: 'Katt som koser seg under oppholdet hos oss', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-007.webp', alt: 'Katt hos Mathopen Kattepensjonat', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-008.webp', alt: 'Katt som hviler trygt på pensjonatet', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-009.webp', alt: 'Katt som soler seg i kattegården på Mathopen Kattepensjonat', width: 2048, height: 1152 },
+  { src: '/kattegalleri/katt-010.webp', alt: 'Katt hos Mathopen Kattepensjonat', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-011.webp', alt: 'Katt under opphold på pensjonatet i Bergen', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-012.webp', alt: 'Katt som koser seg under oppholdet hos oss', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-013.webp', alt: 'Katt hos Mathopen Kattepensjonat', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-014.webp', alt: 'Katt som utforsker fellesarealet på pensjonatet', width: 1152, height: 2048 },
+  { src: '/kattegalleri/katt-015.webp', alt: 'Katt som trives på Mathopen Kattepensjonat', width: 1152, height: 2048 },
+]
