@@ -220,7 +220,7 @@ export function bookingCancelledTemplate(
           <p style="margin:0 0 12px;color:#666;font-size:13px;">Merk betalingen med ditt navn og «avbestillingsgebyr».</p>
           <div style="background:#ff5b24;border-radius:10px;padding:12px 20px;display:inline-block;">
             <p style="margin:0;color:#fff;font-size:11px;opacity:0.85;">Vipps bedriftsnummer</p>
-            <p style="margin:4px 0 0;color:#fff;font-size:30px;font-weight:bold;letter-spacing:2px;">46867</p>
+            <p style="margin:4px 0 0;color:#fff;font-size:30px;font-weight:bold;letter-spacing:2px;">58823</p>
             <p style="margin:6px 0 0;color:rgba(255,255,255,0.9);font-size:11px;">Søk opp nummeret i Vipps-appen</p>
           </div>
           <p style="margin:10px 0 0;color:#666;font-size:13px;">⏰ Betalingsfrist: 14 dager fra denne e-posten.</p>
@@ -310,7 +310,7 @@ export function cancellationFeeReminderTemplate(
         <p style="margin:0 0 12px;color:#666;font-size:13px;">Merk betalingen med ditt navn og «avbestillingsgebyr».</p>
         <div style="background:#ff5b24;border-radius:10px;padding:12px 20px;display:inline-block;">
           <p style="margin:0;color:#fff;font-size:11px;opacity:0.85;">Vipps bedriftsnummer</p>
-          <p style="margin:4px 0 0;color:#fff;font-size:30px;font-weight:bold;letter-spacing:2px;">46867</p>
+          <p style="margin:4px 0 0;color:#fff;font-size:30px;font-weight:bold;letter-spacing:2px;">58823</p>
           <p style="margin:6px 0 0;color:rgba(255,255,255,0.9);font-size:11px;">Søk opp nummeret i Vipps-appen</p>
         </div>
         <p style="margin:10px 0 0;color:#666;font-size:13px;">⏰ Betalingsfrist: 14 dager fra opprinnelig avbestillingsbekreftelse.</p>

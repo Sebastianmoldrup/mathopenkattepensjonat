@@ -90,7 +90,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="no" suppressHydrationWarning>
+    <html lang="no" suppressHydrationWarning className="scroll-smooth">
       <body
         className={`${geistSans.className} flex min-h-screen flex-col antialiased`}
       >

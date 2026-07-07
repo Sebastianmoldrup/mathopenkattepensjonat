@@ -119,4 +119,4 @@ Høysesong: 15. juni–15. august, 20. desember–2. januar, påske
 - **E-post:** <post@mathopenkattepensjonat.no>
 - **Telefon:** 473 22 279
 - **Adresse:** Storingavika 2, 5174 Mathopen
-- **Vipps bedrift:** 46867
+- **Vipps bedrift:** 58823

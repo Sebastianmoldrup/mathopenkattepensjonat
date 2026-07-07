@@ -43,7 +43,7 @@ export default function Page() {
       </div>
 
       <div className="mx-auto max-w-6xl space-y-16">
-        <section id="pensjonatet" className="scroll-mt-24">
+        <section id="pensjonatet" className="scroll-mt-32">
           <div className="mx-auto mb-8 max-w-3xl text-center">
             <h2 className="mb-2 text-2xl font-semibold tracking-tight text-foreground">
               Pensjonatet
@@ -58,7 +58,7 @@ export default function Page() {
 
         <hr className="border-border" />
 
-        <section id="kattene" className="scroll-mt-24">
+        <section id="kattene" className="scroll-mt-32">
           <div className="mx-auto mb-8 max-w-3xl text-center">
             <h2 className="mb-2 text-2xl font-semibold tracking-tight text-foreground">
               Kattene
