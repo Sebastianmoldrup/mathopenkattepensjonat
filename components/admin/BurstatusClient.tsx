@@ -110,17 +110,22 @@ function buildCageEvents(
 
   for (const e of entries) {
     const owner = ownerLabel(e.owner_first, e.owner_last)
-    const cages =
-      e.cage_assignments.length > 0
-        ? e.cage_assignments
-        : [{ cage_label: 'Ikke tildelt', date_from: e.date_from, date_to: e.date_to }]
-    for (const ca of cages) {
+    // e.cage_assignments spans the whole stay (can include segments from a
+    // later mid-stay swap) -- only the segment(s) covering the selected day
+    // are actually relevant to a checkin/checkout event on that day.
+    const activeCageLabels = new Set(
+      e.cage_assignments
+        .filter((ca) => date >= ca.date_from && date <= ca.date_to)
+        .map((ca) => ca.cage_label)
+    )
+    const cages = activeCageLabels.size > 0 ? Array.from(activeCageLabels) : ['Ikke tildelt']
+    for (const cageLabel of cages) {
       events.push({
-        key: `${e.booking_id}-${e.event_type}-${ca.cage_label}`,
+        key: `${e.booking_id}-${e.event_type}-${cageLabel}`,
         bookingId: e.booking_id,
         transitionType: e.event_type,
         kind: e.event_type,
-        cageLabel: ca.cage_label,
+        cageLabel,
         ownerName: owner,
         catNames: e.cat_names ?? '',
         otherCageLabel: null,
@@ -287,10 +292,15 @@ export default function BurstatusClient({
   const cageEvents = buildCageEvents(entries, assignments, date)
   const cageGroups = groupEventsByCage(cageEvents, cageOrder)
 
+  function countDistinctBookings(kind: CageEventKind): number {
+    return new Set(
+      cageEvents.filter((e) => e.kind === kind).map((e) => e.bookingId)
+    ).size
+  }
   const counts = {
-    checkin: cageEvents.filter((e) => e.kind === 'checkin').length,
-    checkout: cageEvents.filter((e) => e.kind === 'checkout').length,
-    swap: cageEvents.filter((e) => e.kind === 'swap-in').length,
+    checkin: countDistinctBookings('checkin'),
+    checkout: countDistinctBookings('checkout'),
+    swap: countDistinctBookings('swap-in'),
   }
 
   const occupantByCageLabel = new Map<string, CageAssignment>()
