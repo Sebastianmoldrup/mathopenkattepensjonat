@@ -14,6 +14,7 @@ import {
   Grid3X3,
   LogIn,
   User,
+  BedDouble,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { href: '/admin/bookinger', label: 'Bookinger', icon: BookOpen },
   { href: '/admin/avbestillinger', label: 'Avbestillinger', icon: XCircle },
   { href: '/admin/burplassering', label: 'Burplassering', icon: Grid3X3 },
+  { href: '/admin/burstatus', label: 'Burstatus', icon: BedDouble },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarDays },
   { href: '/admin/sjekkliste', label: 'Daglige rutiner', icon: ClipboardCheck },
   { href: '/admin/guide', label: 'Guide', icon: BookMarked },
