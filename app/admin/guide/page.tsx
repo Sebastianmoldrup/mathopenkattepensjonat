@@ -1,139 +1,174 @@
 import {
   BookOpen,
-  CalendarDays,
   ClipboardCheck,
   FileText,
   ShieldCheck,
   LayoutDashboard,
   LogIn,
-  Heart,
+  BedDouble,
+  Users,
+  XCircle,
+  Grid3X3,
+  User,
 } from 'lucide-react'
 
-interface GuideCardProps {
+interface GuideItemProps {
   icon: React.ReactNode
   title: string
   where: string
-  what: string
-  when: string
-  tip: string
+  children: React.ReactNode
 }
 
-function GuideCard({ icon, title, where, what, when, tip }: GuideCardProps) {
+function GuideItem({ icon, title, where, children }: GuideItemProps) {
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
-      <div className="flex items-center gap-3 border-b bg-muted/30 px-5 py-4">
-        <span className="text-muted-foreground">{icon}</span>
-        <div>
+    <div className="flex gap-3 rounded-xl border bg-card px-4 py-3.5">
+      <span className="mt-0.5 shrink-0 text-muted-foreground">{icon}</span>
+      <div className="min-w-0 space-y-0.5">
+        <div className="flex flex-wrap items-baseline gap-x-2">
           <p className="text-sm font-semibold">{title}</p>
           <p className="text-xs text-muted-foreground">{where}</p>
         </div>
+        <p className="text-sm text-muted-foreground">{children}</p>
       </div>
-      <div className="space-y-3 px-5 py-4 text-sm">
-        <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Hva er det
-          </p>
-          <p>{what}</p>
-        </div>
-        <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Når bruker du det
-          </p>
-          <p>{when}</p>
-        </div>
-        <div className="rounded-lg bg-muted/50 px-3 py-2 text-xs">
-          <span className="font-semibold">💡 Tips: </span>
-          {tip}
-        </div>
-      </div>
+    </div>
+  )
+}
+
+function GuideSection({
+  title,
+  children,
+}: {
+  title?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-2">
+      {title && (
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+          {title}
+        </p>
+      )}
+      <div className="space-y-2">{children}</div>
     </div>
   )
 }
 
 export default function GuidePage() {
   return (
-    <div className="max-w-3xl space-y-8">
+    <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Guide</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Kort oversikt over hva hver del av adminpanelet gjør og når du bruker
-          det.
+          Kort forklaring på hva hver side gjør og hvordan du bruker den.
+          Rekkefølgen matcher menyen til venstre.
         </p>
       </div>
 
-      <div className="space-y-4">
-        <GuideCard
+      <GuideSection>
+        <GuideItem
           icon={<LayoutDashboard className="h-5 w-5" />}
           title="Oversikt"
           where="/admin"
-          what="Viser et øyeblikksbilde av driften — antall bookinger som venter på bekreftelse, totale bookinger, inntekt og avbestillingsrate. Grafen viser inntekt, bookinger og avbestillinger per måned."
-          when="Start her hver dag for å se om det er noe som krever oppmerksomhet. Sjekk spesielt om det er bookinger som venter på bekreftelse."
-          tip="Bruk årsvelgeren i grafen for å sammenligne inntekt år for år."
-        />
+        >
+          Startsiden. Viser ventende bookinger, inntekt og en graf over
+          bookinger/inntekt per måned. Sjekk denne først hver dag.
+        </GuideItem>
+      </GuideSection>
 
-        <GuideCard
-          icon={<BookOpen className="h-5 w-5" />}
-          title="Bookinger"
-          where="/admin/bookinger"
-          what="Full liste over alle bookinger med søk, statusfiltrering og sortering. Klikk på en booking for å se alle detaljer, endre status, legge til interne notater, fylle inn innsjekk/utsjekk og registrere helseavvik."
-          when="Bruk denne siden når en kunde har sendt en bookingforespørsel og du skal bekrefte den, eller når en katt ankommer eller forlater pensjonatet."
-          tip="Når du bekrefter eller avbestiller en booking sendes det automatisk e-post til kunden. Du trenger ikke gjøre noe ekstra."
-        />
-
-        <GuideCard
+      <GuideSection title="I dag">
+        <GuideItem
+          icon={<BedDouble className="h-5 w-5" />}
+          title="Burstatus"
+          where="/admin/burstatus"
+        >
+          Dagens burliste: hvem sjekker inn, hvem sjekker ut, og hvilke bur
+          som bytter beboer akkurat i dag. Kryss av hver hendelse etter hvert
+          som du har gjort den fysisk, så vet du hva som gjenstår. Bla mellom
+          dager med pilene øverst.
+        </GuideItem>
+        <GuideItem
           icon={<LogIn className="h-5 w-5" />}
-          title="Innsjekk / Utsjekk (inne i booking)"
-          where="/admin/bookinger → åpne booking → Inn/Ut-fanen"
-          what="Et strukturert skjema for å dokumentere at katten er sjekket inn og ut korrekt. Dekker dokumentasjonskontroll, helsesjekk, burklargjøring og informasjon til eier."
-          when="Fyll inn innsjekk-delen når katten ankommer. Fyll inn utsjekk-delen når katten hentes. Husk signatur og dato på begge."
-          tip="Eierens navn, kattenes navn og datoer er forhåndsutfylt automatisk fra bookingen."
-        />
-
-        <GuideCard
-          icon={<Heart className="h-5 w-5" />}
-          title="Helse og avvik (inne i booking)"
-          where="/admin/bookinger → åpne booking → Helse-fanen"
-          what="Loggfører helseavvik, atferdsendringer, skader eller veterinærbesøk for en spesifikk katt under et opphold. Hvert avvik lagres separat og vises i §5-dokumentasjonen."
-          when="Registrer et avvik så snart du observerer noe unormalt — ikke vent til utsjekk. Du kan logge flere avvik per katt per opphold."
-          tip="Selv om avviket er lite bør det registreres her. Det beskytter deg juridisk og dokumenterer at du fulgte opp."
-        />
-
-        <GuideCard
-          icon={<CalendarDays className="h-5 w-5" />}
-          title="Kalender"
-          where="/admin/kalender"
-          what="Visuell månedsoversikt som viser hvor mange bur som er i bruk per dag. Fargen på dagene indikerer beleggsnivå — jo mørkere, jo mer opptatt. Klikk på en dag for å se hvilke bookinger som er aktive."
-          when="Bruk kalenderen for å planlegge kapasitet, se om det er travle perioder og sjekke hvem som er innom på en bestemt dato."
-          tip="Kun bekreftede og ventende bookinger vises. Avbestilte bookinger er ikke med i tellingen."
-        />
-
-        <GuideCard
+          title="Innsjekk / Utsjekk"
+          where="/admin/innsjekk"
+        >
+          Samme dagsvisning som Burstatus, men med de fulle sjekklistene:
+          dokumentasjon fra eier, helsesjekk av katten og burklargjøring.
+          Velg dato øverst, finn katten i lista, og fyll ut sjekklisten når
+          den ankommer eller hentes.
+        </GuideItem>
+        <GuideItem
           icon={<ClipboardCheck className="h-5 w-5" />}
           title="Daglige rutiner"
           where="/admin/sjekkliste"
-          what="To daglige sjekklister — én for morgen og én for dag/kveld. Dekker tilsyn og helse, aktivitet, kattedo, mat og vann, miljø, medisinering og avvik. Dag/kveld-listen inkluderer også daglig renhold."
-          when="Fyll inn morgenlisten etter første tilsyn, og dag/kveld-listen på slutten av arbeidsdagen. Historikk over siste 30 dager vises under for referanse til Mattilsynet."
-          tip="Klokkeslett og navn er valgfritt men anbefales — spesielt hvis flere ansatte jobber på samme dag."
-        />
+        >
+          To sjekklister per dag — morgen og dag/kveld — for tilsyn, mat,
+          kattedo og renhold. Fyll inn etter hvert tilsyn. Historikk for
+          siste 30 dager vises under, til bruk hvis Mattilsynet spør.
+        </GuideItem>
+      </GuideSection>
 
-        <GuideCard
-          icon={<FileText className="h-5 w-5" />}
-          title="Dokumentasjon"
-          where="/admin/dokumentasjon"
-          what="Genererer lovpålagt §5-dokumentasjon som PDF. Enkeltbooking-PDF lastes ned direkte fra en booking og inneholder alle §5-punkter på én side. Årseksport gir én PDF med alle bekreftede og gjennomførte bookinger for et valgt år."
-          when="Last ned enkeltbooking-PDF ved behov for dokumentasjon på ett opphold. Lag årseksport en gang per år og lagre den sikkert — du er lovpålagt å oppbevare dette i 3 år."
-          tip="Husk å fylle inn org.nr i koden før du bruker PDF-ene offisielt — det står [fyll inn] i bunnteksten."
-        />
+      <GuideSection title="Bookinger">
+        <GuideItem
+          icon={<BookOpen className="h-5 w-5" />}
+          title="Bookinger"
+          where="/admin/bookinger"
+        >
+          Full liste over alle bookinger. Åpne en for å bekrefte eller
+          avvise den, legge til interne notater, fylle inn innsjekk/utsjekk
+          for akkurat den bookingen, eller registrere et helseavvik.
+          E-post til kunden sendes automatisk når du endrer status.
+        </GuideItem>
+        <GuideItem icon={<Users className="h-5 w-5" />} title="Brukere" where="/admin/brukere">
+          Liste over alle registrerte kunder og kattene deres. Bruk søk og
+          filter for å finne noen med ufullstendig profil eller uten
+          registrerte katter.
+        </GuideItem>
+        <GuideItem
+          icon={<XCircle className="h-5 w-5" />}
+          title="Avbestillinger"
+          where="/admin/avbestillinger"
+        >
+          Oversikt over avbestilte bookinger — om det påløper gebyr og om
+          det er betalt. Marker gebyr som betalt eller send en purring
+          direkte herfra.
+        </GuideItem>
+        <GuideItem
+          icon={<Grid3X3 className="h-5 w-5" />}
+          title="Burplassering"
+          where="/admin/burplassering"
+        >
+          Planleggingsverktøy for å bestemme hvor en katt skal bo før den
+          ankommer. Dra bekreftede bookinger uten fast bur inn i et ledig
+          bur i oversikten.
+        </GuideItem>
+      </GuideSection>
 
-        <GuideCard
+      <GuideSection title="Dokumentasjon">
+        <GuideItem
           icon={<ShieldCheck className="h-5 w-5" />}
           title="HMS & Beredskap"
           where="/admin/hms"
-          what="Digitalt HMS-kontrollskjema som dekker brannvern, beredskapsplan, veterinærberedskap, teknisk svikt og smittevern. Hver lagring oppretter en ny registrering med dato og signatur — alle er bevart som historikk."
-          when="Fyll ut og lagre et nytt HMS-skjema jevnlig — anbefalt månedlig eller kvartalsvis, eller når noe endres (nytt utstyr, ny rutine, ny ansatt)."
-          tip="Navn og dato er påkrevd. Historikken vises under og kan klikkes på for å se alle avkrysninger fra en tidligere registrering."
-        />
-      </div>
+        >
+          Skjema for brannvern, beredskapsplan og smittevern. Fyll ut og
+          lagre jevnlig (f.eks. månedlig) — hver lagring blir en ny
+          registrering med dato og signatur i historikken under.
+        </GuideItem>
+        <GuideItem
+          icon={<FileText className="h-5 w-5" />}
+          title="Dokumentasjon"
+          where="/admin/dokumentasjon"
+        >
+          Lovpålagt §5-dokumentasjon som PDF. Enkeltbooking-PDF lastes ned
+          fra bookingen selv (i Bookinger); årseksport samler alle
+          bookinger for et valgt år i én PDF. Oppbevares i minst 3 år.
+        </GuideItem>
+      </GuideSection>
+
+      <GuideSection>
+        <GuideItem icon={<User className="h-5 w-5" />} title="Min profil" where="/admin/profil">
+          Dine egne kontaktopplysninger som ansatt/admin.
+        </GuideItem>
+      </GuideSection>
     </div>
   )
 }

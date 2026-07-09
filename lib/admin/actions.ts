@@ -311,10 +311,6 @@ export async function adminGetRevenueStats(): Promise<RevenueStats[]> {
   return data ?? []
 }
 
-export async function adminGetOccupancyData(): Promise<AdminBooking[]> {
-  return adminGetAllBookings()
-}
-
 // ─── Update cage ───────────────────────────────────────────────────────────────
 
 export async function adminUpdateBookingCage(
