@@ -40,6 +40,36 @@ export interface AdminCat {
   age: string | null
 }
 
+export interface AdminUserCat {
+  id: string
+  name: string
+  gender: 'hann' | 'hunn' | null
+  breed: string | null
+  age: string | null
+  is_sterilized: boolean | null
+  last_vaccine_date: string | null
+  image_url: string | null
+  medical_notes: string | null
+  diet: string | null
+  behavior_notes: string | null
+  gets_medication: boolean | null
+  medication_details: string | null
+}
+
+export interface AdminUser {
+  id: string
+  email: string
+  first_name: string | null
+  last_name: string | null
+  phone: string | null
+  address: string | null
+  emergency_contact: string | null
+  profile_completed: boolean | null
+  created_at: string
+  booking_count: number
+  cats: AdminUserCat[]
+}
+
 export interface RevenueStats {
   month: string
   revenue: number

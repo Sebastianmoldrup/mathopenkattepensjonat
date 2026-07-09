@@ -15,12 +15,14 @@ import {
   LogIn,
   User,
   BedDouble,
+  Users,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Oversikt', icon: LayoutDashboard, exact: true },
   { href: '/admin/bookinger', label: 'Bookinger', icon: BookOpen },
+  { href: '/admin/brukere', label: 'Brukere', icon: Users },
   { href: '/admin/avbestillinger', label: 'Avbestillinger', icon: XCircle },
   { href: '/admin/burplassering', label: 'Burplassering', icon: Grid3X3 },
   { href: '/admin/burstatus', label: 'Burstatus', icon: BedDouble },
