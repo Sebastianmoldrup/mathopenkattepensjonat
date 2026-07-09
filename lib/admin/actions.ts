@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { AdminBooking, AdminBookingStatus, RevenueStats } from './utils'
+import { AdminBooking, AdminBookingStatus, AdminUser, RevenueStats } from './utils'
 import {
   sendBookingConfirmedEmail,
   sendBookingCancelledByAdminEmail,
@@ -83,6 +83,27 @@ export async function adminGetAllBookings(): Promise<AdminBooking[]> {
   return (data ?? []).map((row: any) => ({
     ...row,
     cats: catMap.get(row.id) ?? [],
+  }))
+}
+
+// ─── Users ─────────────────────────────────────────────────────────────────────
+
+export async function adminGetAllUsers(): Promise<AdminUser[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase.rpc('admin_get_users_with_cats')
+
+  if (error) {
+    console.error('[adminGetAllUsers]', error.message)
+    return []
+  }
+
+  // Defensive normalization: the RPC always returns `cats` as a jsonb array
+  // (COALESCE'd to '[]' server-side), but guard against a malformed/null
+  // value reaching the client anyway rather than letting the table crash.
+  return (data ?? []).map((row: any) => ({
+    ...row,
+    cats: Array.isArray(row.cats) ? row.cats : [],
   }))
 }
 
