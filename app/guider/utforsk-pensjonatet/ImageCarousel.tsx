@@ -20,11 +20,7 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
   const n = images.length
   if (n === 0) return null
 
-  const items = [
-    ...images.slice(-CLONE),
-    ...images,
-    ...images.slice(0, CLONE),
-  ]
+  const items = [...images.slice(-CLONE), ...images, ...images.slice(0, CLONE)]
 
   const wrapRef = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLDivElement>(null)
@@ -95,12 +91,20 @@ export function ImageCarousel({ images }: ImageCarouselProps) {
       >
         {items.map((img, i) => (
           <div key={i} className="w-full shrink-0 px-1 sm:w-1/2 lg:w-1/3">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted">
+              <Image
+                src={img.src}
+                alt=""
+                aria-hidden="true"
+                fill
+                className="scale-110 object-cover opacity-60 blur-2xl"
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              />
               <Image
                 src={img.src}
                 alt={img.alt}
                 fill
-                className="object-cover"
+                className="relative object-contain drop-shadow-lg"
                 sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               />
             </div>
