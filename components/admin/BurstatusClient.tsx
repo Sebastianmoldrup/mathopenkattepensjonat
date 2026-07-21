@@ -58,161 +58,152 @@ const SECTION_LABELS: Record<CageSection, string> = {
   outdoor: 'Utebur',
 }
 
-type CageEventKind = 'checkin' | 'checkout' | 'swap-out' | 'swap-in'
+type CardKind = CageTransitionType
 
-const KIND_META: Record<
-  CageEventKind,
-  { label: string; order: number; className: string }
-> = {
+const KIND_META: Record<CardKind, { label: string; className: string }> = {
   checkout: {
     label: 'UT',
-    order: 0,
     className: 'border-blue-300 bg-blue-50 text-blue-800',
-  },
-  'swap-out': {
-    label: 'UT · bytte',
-    order: 0,
-    className: 'border-orange-300 bg-orange-50 text-orange-800',
   },
   checkin: {
     label: 'INN',
-    order: 1,
     className: 'border-green-300 bg-green-50 text-green-800',
   },
-  'swap-in': {
-    label: 'INN · bytte',
-    order: 1,
+  swap: {
+    label: 'BYTTE',
     className: 'border-orange-300 bg-orange-50 text-orange-800',
   },
 }
 
-type CageEvent = {
-  key: string
+const KIND_ORDER: CardKind[] = ['checkout', 'checkin', 'swap']
+
+type BookingRow =
+  | { kind: 'checkin'; cages: string[] }
+  | { kind: 'checkout'; cages: string[] }
+  | { kind: 'swap'; from: string[]; to: string[] }
+
+type BookingCard = {
   bookingId: string
-  transitionType: CageTransitionType
-  kind: CageEventKind
-  cageLabel: string
   ownerName: string
   catNames: string
-  otherCageLabel: string | null
+  rows: BookingRow[]
 }
 
 function ownerLabel(first: string | null, last: string | null): string {
   return [last, first].filter(Boolean).join(', ') || '—'
 }
 
-function buildCageEvents(
+// One card per booking per day, with one row per transition type
+// (checkin/checkout/swap) that actually happens that day -- a booking
+// swapping between two cages produces a single "swap" row instead of a
+// separate card per cage, and a booking split across multiple cages lists
+// all of them on the same card instead of duplicating it.
+function buildBookingCards(
   entries: CheckinCheckoutEntry[],
   assignments: CageAssignment[],
   date: string
-): CageEvent[] {
-  const events: CageEvent[] = []
+): BookingCard[] {
+  const cards = new Map<string, BookingCard>()
+
+  function getCard(
+    bookingId: string,
+    ownerName: string,
+    catNames: string
+  ): BookingCard {
+    let card = cards.get(bookingId)
+    if (!card) {
+      card = { bookingId, ownerName, catNames, rows: [] }
+      cards.set(bookingId, card)
+    }
+    return card
+  }
 
   for (const e of entries) {
-    const owner = ownerLabel(e.owner_first, e.owner_last)
     // e.cage_assignments spans the whole stay (can include segments from a
     // later mid-stay swap) -- only the segment(s) covering the selected day
     // are actually relevant to a checkin/checkout event on that day.
-    const activeCageLabels = new Set(
-      e.cage_assignments
-        .filter((ca) => date >= ca.date_from && date <= ca.date_to)
-        .map((ca) => ca.cage_label)
+    const activeCageLabels = Array.from(
+      new Set(
+        e.cage_assignments
+          .filter((ca) => date >= ca.date_from && date <= ca.date_to)
+          .map((ca) => ca.cage_label)
+      )
     )
-    const cages = activeCageLabels.size > 0 ? Array.from(activeCageLabels) : ['Ikke tildelt']
-    for (const cageLabel of cages) {
-      events.push({
-        key: `${e.booking_id}-${e.event_type}-${cageLabel}`,
-        bookingId: e.booking_id,
-        transitionType: e.event_type,
-        kind: e.event_type,
-        cageLabel,
-        ownerName: owner,
-        catNames: e.cat_names ?? '',
-        otherCageLabel: null,
-      })
-    }
+    const cages =
+      activeCageLabels.length > 0 ? activeCageLabels : ['Ikke tildelt']
+    const card = getCard(
+      e.booking_id,
+      ownerLabel(e.owner_first, e.owner_last),
+      e.cat_names ?? ''
+    )
+    card.rows.push({ kind: e.event_type, cages })
   }
 
+  const byBooking = new Map<string, CageAssignment[]>()
   for (const a of assignments) {
-    const owner = ownerLabel(a.owner_first, a.owner_last)
+    const arr = byBooking.get(a.booking_id) ?? []
+    arr.push(a)
+    byBooking.set(a.booking_id, arr)
+  }
 
-    if (a.date_from === date) {
-      const prev = assignments.find(
-        (o) =>
-          o.booking_id === a.booking_id &&
-          o.assignment_id !== a.assignment_id &&
-          o.cage_id !== a.cage_id &&
-          o.date_from < a.date_from
+  for (const [bookingId, list] of byBooking) {
+    // Use the set difference of cages vacated vs. cages newly occupied on
+    // this date, rather than pairing individual segments 1:1 -- the data
+    // doesn't link a specific cat to a specific new cage, so a positional
+    // pairing (end[0]<->start[0]) can misattribute or silently drop a cage
+    // when a booking splits into (or consolidates from) multiple cages on
+    // the swap day. A cage present in both sets didn't actually change and
+    // is excluded, which also prevents a same-day multi-cage booking (both
+    // date_from and date_to equal to `date` for more than one cage) from
+    // being misread as a swap.
+    const endingLabels = new Set(
+      list.filter((a) => a.date_to === date).map((a) => a.cage_label)
+    )
+    const startingLabels = new Set(
+      list.filter((a) => a.date_from === date).map((a) => a.cage_label)
+    )
+    const from = [...endingLabels].filter((l) => !startingLabels.has(l))
+    const to = [...startingLabels].filter((l) => !endingLabels.has(l))
+    if (from.length > 0 && to.length > 0) {
+      const first = list[0]
+      const card = getCard(
+        bookingId,
+        ownerLabel(first.owner_first, first.owner_last),
+        first.cat_names
       )
-      if (prev) {
-        events.push({
-          key: `${a.assignment_id}-swap-in`,
-          bookingId: a.booking_id,
-          transitionType: 'swap',
-          kind: 'swap-in',
-          cageLabel: a.cage_label,
-          ownerName: owner,
-          catNames: a.cat_names,
-          otherCageLabel: prev.cage_label,
-        })
-      }
-    }
-
-    if (a.date_to === date) {
-      const next = assignments.find(
-        (o) =>
-          o.booking_id === a.booking_id &&
-          o.assignment_id !== a.assignment_id &&
-          o.cage_id !== a.cage_id &&
-          o.date_from > a.date_from
-      )
-      if (next) {
-        events.push({
-          key: `${a.assignment_id}-swap-out`,
-          bookingId: a.booking_id,
-          transitionType: 'swap',
-          kind: 'swap-out',
-          cageLabel: a.cage_label,
-          ownerName: owner,
-          catNames: a.cat_names,
-          otherCageLabel: next.cage_label,
-        })
-      }
+      card.rows.push({ kind: 'swap', from, to })
     }
   }
 
-  return events
+  return Array.from(cards.values())
 }
 
-function groupEventsByCage(
-  events: CageEvent[],
+function primaryCageLabel(card: BookingCard): string | null {
+  const row = card.rows[0]
+  if (!row) return null
+  return row.kind === 'swap' ? (row.from[0] ?? null) : row.cages[0]
+}
+
+function sortBookingCards(
+  cards: BookingCard[],
   cageOrder: Map<string, { section: CageSection; number: number }>
-): { cageLabel: string; events: CageEvent[] }[] {
-  const groups = new Map<string, CageEvent[]>()
-  for (const ev of events) {
-    const arr = groups.get(ev.cageLabel) ?? []
-    arr.push(ev)
-    groups.set(ev.cageLabel, arr)
-  }
+): BookingCard[] {
+  return [...cards].sort((a, b) => {
+    const ka = Math.min(...a.rows.map((r) => KIND_ORDER.indexOf(r.kind)))
+    const kb = Math.min(...b.rows.map((r) => KIND_ORDER.indexOf(r.kind)))
+    if (ka !== kb) return ka - kb
 
-  const result = Array.from(groups.entries()).map(([cageLabel, evs]) => ({
-    cageLabel,
-    events: [...evs].sort(
-      (x, y) => KIND_META[x.kind].order - KIND_META[y.kind].order
-    ),
-  }))
-
-  result.sort((a, b) => {
-    const oa = cageOrder.get(a.cageLabel)
-    const ob = cageOrder.get(b.cageLabel)
-    if (!oa || !ob) return a.cageLabel.localeCompare(b.cageLabel)
-    if (oa.section !== ob.section) {
-      return SECTION_ORDER.indexOf(oa.section) - SECTION_ORDER.indexOf(ob.section)
+    const oa = cageOrder.get(primaryCageLabel(a) ?? '')
+    const ob = cageOrder.get(primaryCageLabel(b) ?? '')
+    if (oa && ob) {
+      if (oa.section !== ob.section) {
+        return SECTION_ORDER.indexOf(oa.section) - SECTION_ORDER.indexOf(ob.section)
+      }
+      if (oa.number !== ob.number) return oa.number - ob.number
     }
-    return oa.number - ob.number
-  })
 
-  return result
+    return a.ownerName.localeCompare(b.ownerName)
+  })
 }
 
 export default function BurstatusClient({
@@ -289,18 +280,18 @@ export default function BurstatusClient({
   const cageOrder = new Map(
     allCages.map((c) => [c.cage_label, { section: c.cage_section, number: c.cage_number }])
   )
-  const cageEvents = buildCageEvents(entries, assignments, date)
-  const cageGroups = groupEventsByCage(cageEvents, cageOrder)
+  const bookingCards = sortBookingCards(
+    buildBookingCards(entries, assignments, date),
+    cageOrder
+  )
 
-  function countDistinctBookings(kind: CageEventKind): number {
-    return new Set(
-      cageEvents.filter((e) => e.kind === kind).map((e) => e.bookingId)
-    ).size
+  function countCards(kind: CardKind): number {
+    return bookingCards.filter((c) => c.rows.some((r) => r.kind === kind)).length
   }
   const counts = {
-    checkin: countDistinctBookings('checkin'),
-    checkout: countDistinctBookings('checkout'),
-    swap: countDistinctBookings('swap-in'),
+    checkin: countCards('checkin'),
+    checkout: countCards('checkout'),
+    swap: countCards('swap'),
   }
 
   const occupantByCageLabel = new Map<string, CageAssignment>()
@@ -384,30 +375,35 @@ export default function BurstatusClient({
 
       <div className="space-y-3">
         <h2 className="text-sm font-medium text-foreground">Bur-hendelser i dag</h2>
-        {cageGroups.length === 0 ? (
+        {bookingCards.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-border/40 py-12 text-sm text-muted-foreground">
             Ingen innsjekk, utsjekk eller burbytte denne dagen
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {cageGroups.map((group) => (
+            {bookingCards.map((card) => (
               <div
-                key={group.cageLabel}
+                key={card.bookingId}
                 className="space-y-2 rounded-lg border border-border/40 p-3"
               >
-                <p className="text-xs font-semibold text-foreground">
-                  {group.cageLabel}
-                </p>
-                {group.events.map((ev) => {
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-semibold text-foreground">
+                    {card.ownerName}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {card.catNames}
+                  </p>
+                </div>
+                {card.rows.map((row) => {
                   const confirmed = confirmations.some(
                     (c) =>
-                      c.booking_id === ev.bookingId &&
-                      c.transition_type === ev.transitionType
+                      c.booking_id === card.bookingId &&
+                      c.transition_type === row.kind
                   )
-                  const meta = KIND_META[ev.kind]
+                  const meta = KIND_META[row.kind]
                   return (
                     <div
-                      key={ev.key}
+                      key={row.kind}
                       className={cn(
                         'flex items-start gap-2 rounded-md border p-2 text-xs',
                         meta.className,
@@ -417,28 +413,19 @@ export default function BurstatusClient({
                       <Checkbox
                         checked={confirmed}
                         onCheckedChange={() =>
-                          handleToggle(ev.bookingId, ev.transitionType)
+                          handleToggle(card.bookingId, row.kind)
                         }
                         className="mt-0.5"
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="rounded bg-black/10 px-1 py-0.5 text-[9px] font-semibold">
-                            {meta.label}
-                          </span>
-                          <span className="truncate font-medium">
-                            {ev.ownerName}
-                          </span>
-                        </div>
-                        <p className="truncate text-muted-foreground">
-                          {ev.catNames}
+                        <span className="rounded bg-black/10 px-1 py-0.5 text-[9px] font-semibold">
+                          {meta.label}
+                        </span>
+                        <p className="mt-1 font-medium">
+                          {row.kind === 'swap'
+                            ? `${row.from.join(', ')} → ${row.to.join(', ')}`
+                            : row.cages.join(', ')}
                         </p>
-                        {ev.otherCageLabel && (
-                          <p className="mt-0.5 font-medium">
-                            {ev.kind === 'swap-out' ? '→ ' : '← '}
-                            {ev.otherCageLabel}
-                          </p>
-                        )}
                       </div>
                     </div>
                   )
