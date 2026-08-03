@@ -623,6 +623,9 @@ function EntryCard({
           <span className="text-xs text-muted-foreground">
             {entry.num_cats} {entry.num_cats === 1 ? 'katt' : 'katter'}
           </span>
+          <span className="text-xs font-semibold">
+            {entry.price != null ? `${entry.price.toLocaleString('nb-NO')} kr` : '–'}
+          </span>
         </div>
       </div>
 

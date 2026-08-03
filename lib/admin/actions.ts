@@ -432,6 +432,7 @@ export interface CheckinCheckoutEntry {
   cage_type: string
   cage_count: number
   num_cats: number
+  price: number
   special_instructions: string | null
   wants_outdoor_cage: boolean
   admin_notes: string | null

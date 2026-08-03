@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DatePicker } from '@/components/admin/DatePicker'
 import { Loader2, CheckCircle2, LogIn, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { formatDateNO } from '@/lib/admin/utils'
+import { formatDateNO, nightsBetween } from '@/lib/admin/utils'
 
 interface CheckinFormProps {
   booking: AdminBooking
@@ -127,6 +127,12 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
         <div className="flex justify-between">
           <span className="text-muted-foreground">Utsjekk</span>
           <span className="font-medium">{formatDateNO(booking.date_to)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Netter</span>
+          <span className="font-medium">
+            {nightsBetween(booking.date_from, booking.date_to)} netter
+          </span>
         </div>
       </div>
 
