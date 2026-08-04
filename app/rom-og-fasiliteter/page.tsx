@@ -67,13 +67,10 @@ const CAGE_TYPES = [
   },
   {
     name: 'suite',
-    lowSeasonPrice: 350,
+    lowSeasonPrice: 400,
     highSeasonPrice: 450,
     img: 'suite',
-    lowSeasonPrices: [
-      { amount: '1-2', price: 350 },
-      { amount: '3', price: 400 },
-    ],
+    lowSeasonPrices: [{ amount: 'Standard pris per døgn', price: 400 }],
     highSeasonPrices: [{ amount: 'Standard pris per døgn', price: 450 }],
     list: [
       'Eget rom på L85, D100, H240',
@@ -183,22 +180,22 @@ export default function Page() {
                               key={index}
                               className="flex items-center gap-2 text-base font-semibold"
                             >
-                              <span className="flex items-center gap-0.5">
-                                {Array.from({
-                                  length:
-                                    price.amount === '1-2'
-                                      ? 2
-                                      : Number(price.amount),
-                                }).map((_, i) => (
-                                  <Cat key={i} className="h-3.5 w-3.5" />
-                                ))}
-                                {price.amount === '1-2' && (
-                                  <span className="ml-0.5 text-xs font-normal opacity-60">
-                                    1-2
+                              {/^\d+$/.test(price.amount) ? (
+                                <>
+                                  <span className="flex items-center gap-0.5">
+                                    {Array.from({
+                                      length: Number(price.amount),
+                                    }).map((_, i) => (
+                                      <Cat key={i} className="h-3.5 w-3.5" />
+                                    ))}
                                   </span>
-                                )}
-                              </span>
-                              <span className="opacity-30">·</span>
+                                  <span className="opacity-30">·</span>
+                                </>
+                              ) : (
+                                <span className="text-xs font-normal opacity-80">
+                                  {price.amount}
+                                </span>
+                              )}
                               {price.price} kr
                             </p>
                           ))}

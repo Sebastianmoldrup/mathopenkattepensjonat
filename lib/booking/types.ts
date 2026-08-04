@@ -67,7 +67,7 @@ export const PRICING: Record<CageType, PriceTable> = {
     high: { 1: 250, 2: 350 },
   },
   suite: {
-    low: { 1: 350, 2: 350, 3: 400 },
+    low: { 1: 400, 2: 400, 3: 400 },
     high: { 1: 450, 2: 450, 3: 450 },
   },
 }
