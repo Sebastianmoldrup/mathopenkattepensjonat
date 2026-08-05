@@ -1,7 +1,8 @@
 'use server'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { Booking, BookingWithCats, Cat } from './types'
-import { calculatePriceBreakdown } from './pricing'
+import { calculatePriceBreakdown, parseDateStr } from './pricing'
+import { isLowSeasonSaturday } from './availability'
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 
@@ -139,6 +140,18 @@ export async function createBooking(
   payload: CreateBookingPayload
 ): Promise<void> {
   const supabase = await createServerClient()
+
+  // Saturday closure outside high season -- the wizard's calendar already
+  // blocks this client-side, but createBooking is a server action callable
+  // directly, so it needs the same guard rather than trusting the client.
+  if (
+    isLowSeasonSaturday(parseDateStr(payload.dateFrom)) ||
+    isLowSeasonSaturday(parseDateStr(payload.dateTo))
+  ) {
+    throw new Error(
+      'Vi er stengt på lørdager utenom høysesong for inn- og utsjekk. Velg fredag eller søndag i stedet.'
+    )
+  }
 
   // Cat conflict check
   const { data: hasConflict, error: conflictError } = await supabase.rpc(

@@ -2,7 +2,10 @@
 
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { BookingWithCats } from '@/lib/booking/types'
-import { getCatBlockedDates } from '@/lib/booking/availability'
+import {
+  getCatBlockedDates,
+  isLowSeasonSaturday,
+} from '@/lib/booking/availability'
 import {
   getSeason,
   addDays,
@@ -214,13 +217,23 @@ function MonthGrid({
           const inHoverRange =
             !!lo && !hi && !!effHover && date > lo && date < effHover
           const disabled = isPast || isBlocked
+          // Closed Saturdays stay clickable (not folded into `disabled`) so
+          // onDayClick still fires and can show the "we're closed" notice --
+          // and so they still render normally when they fall mid-stay
+          // (e.g. Thu-Mon), since only the boundary days are actually closed.
+          const isClosedSaturday =
+            !isPast && !isBlocked && isLowSeasonSaturday(date)
 
           return (
             <div
               key={d}
               role="button"
               tabIndex={disabled ? -1 : 0}
-              aria-label={fmtFull(date)}
+              aria-label={
+                isClosedSaturday
+                  ? `${fmtFull(date)}, stengt for inn- og utsjekk utenom høysesong`
+                  : fmtFull(date)
+              }
               aria-disabled={disabled}
               onMouseEnter={() => !disabled && onDayHover(date)}
               onClick={() => !disabled && onDayClick(date)}
@@ -231,6 +244,7 @@ function MonthGrid({
                 'relative flex h-9 select-none items-center justify-center text-[13px]',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 !disabled &&
+                  !isClosedSaturday &&
                   !isStart &&
                   !isEnd &&
                   !inRange &&
@@ -238,6 +252,11 @@ function MonthGrid({
                 isPast && 'cursor-not-allowed text-muted-foreground opacity-35',
                 isBlocked &&
                   'cursor-not-allowed rounded-lg bg-red-100 text-red-400 line-through opacity-70',
+                isClosedSaturday &&
+                  !isStart &&
+                  !isEnd &&
+                  !inRange &&
+                  'cursor-not-allowed rounded-lg bg-muted text-muted-foreground/70 line-through',
                 !disabled &&
                   isHigh &&
                   !isStart &&
@@ -248,6 +267,7 @@ function MonthGrid({
                   'rounded-lg border-2 border-amber-400 bg-amber-100 font-medium text-amber-900',
                 !disabled &&
                   !isBlocked &&
+                  !isClosedSaturday &&
                   !isStart &&
                   !isEnd &&
                   !inRange &&
@@ -319,6 +339,7 @@ export function DateRangeSelection({
   const [leftMonth, setLeftMonth] = useState(minDate.getMonth())
   const [focus, setFocus] = useState<FocusField>('start')
   const [hoverDate, setHoverDate] = useState<Date | null>(null)
+  const [closedSaturdayNotice, setClosedSaturdayNotice] = useState(false)
 
   useEffect(() => {
     setLeftYear(minDate.getFullYear())
@@ -346,6 +367,11 @@ export function DateRangeSelection({
 
   const handleDayClick = useCallback(
     (date: Date) => {
+      if (isLowSeasonSaturday(date)) {
+        setClosedSaturdayNotice(true)
+        return
+      }
+      setClosedSaturdayNotice(false)
       if (focus === 'start' || (!dateFromDate && !dateToDate)) {
         onChange(toLocalDateStr(date), null)
         setFocus('end')
@@ -442,6 +468,13 @@ export function DateRangeSelection({
         </div>
       )}
 
+      {closedSaturdayNotice && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+          <span className="font-medium">Vi er stengt på lørdager utenom høysesong</span>{' '}
+          for inn- og utsjekk. Velg fredag eller søndag i stedet.
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span className="h-4 w-4 shrink-0 rounded border-2 border-amber-400 bg-amber-100" />
@@ -454,6 +487,10 @@ export function DateRangeSelection({
         <span className="flex items-center gap-1.5">
           <span className="h-4 w-4 shrink-0 rounded bg-primary" />
           Valgt
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-4 w-4 shrink-0 rounded bg-muted" />
+          Stengt for inn-/utsjekk (lørdag utenom høysesong)
         </span>
         {hasCatConflict && (
           <span className="flex items-center gap-1.5">
