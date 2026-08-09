@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { connection } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getUpcomingYearBookings, getUserCats } from '@/lib/booking/actions'
+import { getUpcomingBookings, getUserCats } from '@/lib/booking/actions'
 import { BookingWizard } from '@/components/booking/BookingWizard'
 import { Loader2 } from 'lucide-react'
 
@@ -13,7 +13,7 @@ async function BookingLoader() {
   } = await supabase.auth.getUser()
 
   const [bookings, cats, profile] = await Promise.all([
-    getUpcomingYearBookings(),
+    getUpcomingBookings(),
     user ? getUserCats(user.id) : Promise.resolve([]),
     user
       ? supabase

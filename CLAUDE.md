@@ -56,7 +56,7 @@ Key modules:
 - `lib/booking/availability.ts` — date-range availability logic, cage usage, cat conflict detection
 - `lib/booking/pricing.ts` — day-by-day price breakdown, easter high-season calculation, minimum 2-night floor
 - `lib/booking/cancellation.ts` — fee calculation (low: 24h free window, high: 7 days; 50% after)
-- `lib/booking/actions.ts` — server actions: `createBooking` (RPC `create_booking_with_cats`), `getUpcomingYearBookings` (RPC `get_bookings_for_availability`), `sendBookingRequestEmail`
+- `lib/booking/actions.ts` — server actions: `createBooking` (RPC `create_booking_with_cats`), `getUpcomingBookings` (RPC `get_bookings_for_availability`), `sendBookingRequestEmail`
 - `lib/booking/wizardStorage.ts` — `sessionStorage` helpers for wizard state
 
 **Date handling gotcha:** Always use local time (not `toISOString()`) when converting dates to `YYYY-MM-DD` strings — UTC shift causes off-by-one errors in CEST (UTC+2). Use the `localKey()` / `toLocalDateStr()` helpers.

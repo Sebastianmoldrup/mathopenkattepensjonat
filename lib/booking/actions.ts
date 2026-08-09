@@ -38,15 +38,20 @@ export async function getUserCats(userId: string): Promise<Cat[]> {
 
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 
-export async function getUpcomingYearBookings(): Promise<BookingWithCats[]> {
+// Booking window runs through 31 Dec two calendar years from now (e.g. in
+// 2026, bookable through 31 Dec 2028) -- must match DateRangeSelection.tsx's
+// `maxDate`, since this is the data (existing bookings, for cat-conflict
+// blocking) that backs whatever the calendar lets someone pick. Widening one
+// without the other would let the calendar show dates as free that this
+// fetch never actually checked.
+export async function getUpcomingBookings(): Promise<BookingWithCats[]> {
   const supabase = await createServerClient()
 
   const today = new Date()
-  const oneYearAhead = new Date(today)
-  oneYearAhead.setFullYear(today.getFullYear() + 1)
+  const maxDate = new Date(today.getFullYear() + 2, 11, 31)
 
   const fromStr = toLocalDateStr(today)
-  const toStr = toLocalDateStr(oneYearAhead)
+  const toStr = toLocalDateStr(maxDate)
 
   const { data: bookingRows, error: bookingError } = await supabase.rpc(
     'get_bookings_for_availability',
@@ -54,7 +59,7 @@ export async function getUpcomingYearBookings(): Promise<BookingWithCats[]> {
   )
 
   if (bookingError) {
-    console.error('[getUpcomingYearBookings] rpc error:', bookingError.message)
+    console.error('[getUpcomingBookings] rpc error:', bookingError.message)
     return []
   }
 
@@ -68,10 +73,7 @@ export async function getUpcomingYearBookings(): Promise<BookingWithCats[]> {
     .in('booking_id', bookingIds)
 
   if (catError) {
-    console.error(
-      '[getUpcomingYearBookings] booking_cats error:',
-      catError.message
-    )
+    console.error('[getUpcomingBookings] booking_cats error:', catError.message)
   }
 
   const catMap = new Map<string, string[]>()

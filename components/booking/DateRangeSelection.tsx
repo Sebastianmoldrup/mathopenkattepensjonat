@@ -6,12 +6,7 @@ import {
   getCatBlockedDates,
   isLowSeasonSaturday,
 } from '@/lib/booking/availability'
-import {
-  getSeason,
-  addDays,
-  parseDateStr,
-  toLocalDateStr,
-} from '@/lib/booking/pricing'
+import { getSeason, parseDateStr, toLocalDateStr } from '@/lib/booking/pricing'
 import { InfoIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -327,7 +322,14 @@ export function DateRangeSelection({
     () => (today >= OPENING_DATE ? today : OPENING_DATE),
     [today]
   )
-  const maxDate = useMemo(() => addDays(minDate, 365), [minDate])
+  // Bookable through 31 Dec two calendar years out (e.g. in 2026, through
+  // 31 Dec 2028) -- tracks `today`'s year, not `minDate`, and must match
+  // getUpcomingBookings' fetch window in lib/booking/actions.ts, which is
+  // what backs the cat-conflict data this calendar renders.
+  const maxDate = useMemo(
+    () => new Date(today.getFullYear() + 2, 11, 31),
+    [today]
+  )
 
   // Only cat conflict blocking — no capacity check at date selection stage
   const catBlockedSet = useMemo(
