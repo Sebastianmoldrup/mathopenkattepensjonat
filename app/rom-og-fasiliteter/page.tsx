@@ -23,7 +23,7 @@ const CAGE_TYPES = [
     name: 'standard',
     lowSeasonPrice: 220,
     highSeasonPrice: 250,
-    img: 'hd-standard',
+    img: 'standard',
     lowSeasonPrices: [
       { amount: '1', price: 220 },
       { amount: '2', price: 320 },
@@ -42,7 +42,7 @@ const CAGE_TYPES = [
     name: 'senior & comfort',
     lowSeasonPrice: 220,
     highSeasonPrice: 250,
-    img: 'senior-&-comfort',
+    img: 'senior',
     lowSeasonPrices: [
       {
         amount: '1',
@@ -125,7 +125,7 @@ export default function Page() {
                   <DialogTrigger asChild>
                     <button className="mx-auto block">
                       <Image
-                        src={`/illustration/${cage.img}.webp`}
+                        src={`/bur/${cage.img}.webp`}
                         alt={cage.name}
                         width={400}
                         height={300}
@@ -133,16 +133,16 @@ export default function Page() {
                       />
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-3xl">
+                  <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
                     <DialogTitle className="text-center text-2xl font-semibold capitalize">
                       {cage.name}
                     </DialogTitle>
                     <Image
-                      src={`/illustration/${cage.img}.webp`}
+                      src={`/bur/${cage.img}.webp`}
                       alt={cage.name}
                       width={500}
                       height={400}
-                      className="mx-auto rounded-lg object-contain"
+                      className="mx-auto h-auto max-h-[70vh] w-auto max-w-full rounded-lg object-contain"
                     />
 
                     <DialogDescription className="sr-only">
