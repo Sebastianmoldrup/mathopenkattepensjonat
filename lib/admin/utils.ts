@@ -38,6 +38,8 @@ export interface AdminCat {
   diet: string | null
   behavior_notes: string | null
   age: string | null
+  gets_medication: boolean | null
+  medication_details: string | null
 }
 
 export interface AdminUserCat {

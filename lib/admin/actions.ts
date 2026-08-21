@@ -70,7 +70,7 @@ export async function adminGetAllBookings(): Promise<AdminBooking[]> {
   const { data: catRows, error: catError } = await supabase
     .from('booking_cats')
     .select(
-      'booking_id, cats(id, name, breed, image_url, medical_notes, diet, behavior_notes, age)'
+      'booking_id, cats(id, name, breed, image_url, medical_notes, diet, behavior_notes, age, gets_medication, medication_details)'
     )
     .in('booking_id', bookingIds)
 
