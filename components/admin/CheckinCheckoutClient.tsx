@@ -35,7 +35,7 @@ import {
   adminUpsertCheckout,
   CheckinCheckoutEntry,
 } from '@/lib/admin/actions'
-import { CAGE_LABELS } from '@/lib/admin/utils'
+import { CAGE_LABELS, nightsBetween } from '@/lib/admin/utils'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -562,10 +562,12 @@ function EntryCard({
   const ownerName =
     ((entry.owner_first ?? '') + ' ' + (entry.owner_last ?? '')).trim() || '—'
 
+  const stayNights = nightsBetween(entry.date_from, entry.date_to)
   const periodLabel =
     format(parseISO(entry.date_from), 'd. MMM', { locale: nb }) +
     ' – ' +
-    format(parseISO(entry.date_to), 'd. MMM yyyy', { locale: nb })
+    format(parseISO(entry.date_to), 'd. MMM yyyy', { locale: nb }) +
+    ` · ${stayNights} natt${stayNights !== 1 ? 'er' : ''}`
 
   const isCompleted =
     type === 'checkin' ? entry.is_checked_in : entry.is_checked_out
@@ -646,21 +648,26 @@ function EntryCard({
               <BedDouble className="h-3.5 w-3.5 flex-shrink-0" />
               <span className="text-xs font-medium">Burbytte</span>
             </div>
-            {entry.cage_assignments.map((ca, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-1.5 pl-5 text-xs text-muted-foreground"
-              >
-                <span className="font-medium text-foreground">
-                  {ca.cage_label}
-                </span>
-                <span>
-                  {format(parseISO(ca.date_from), 'd. MMM', { locale: nb })}
-                  {' – '}
-                  {format(parseISO(ca.date_to), 'd. MMM', { locale: nb })}
-                </span>
-              </div>
-            ))}
+            {entry.cage_assignments.map((ca, i) => {
+              const segmentNights = nightsBetween(ca.date_from, ca.date_to)
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-1.5 pl-5 text-xs text-muted-foreground"
+                >
+                  <span className="font-medium text-foreground">
+                    {ca.cage_label}
+                  </span>
+                  <span>
+                    {format(parseISO(ca.date_from), 'd. MMM', { locale: nb })}
+                    {' – '}
+                    {format(parseISO(ca.date_to), 'd. MMM', { locale: nb })}
+                    {' · '}
+                    {segmentNights} natt{segmentNights !== 1 ? 'er' : ''}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         )}
         <div className="flex items-center gap-1.5 text-muted-foreground">
