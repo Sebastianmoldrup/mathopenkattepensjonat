@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { OPENING_HOURS, formatRange } from '@/lib/booking/hours'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -180,9 +181,13 @@ export default function Page() {
               <span className="mt-0.5 font-medium text-foreground">2.</span>
               <span>
                 <span className="font-medium text-foreground">Innsjekk</span>{' '}
-                – du leverer katten i innsjekksvinduet (man–fre og søn
-                17:30–19:30). Vi tar imot, sjekker vaksinasjonskort og
-                noterer alt vi trenger å vite.
+                – du leverer katten i innsjekksvinduet (lavsesong: man–fre{' '}
+                {formatRange(OPENING_HOURS.low.weekday)}, søndag{' '}
+                {formatRange(OPENING_HOURS.low.sunday)}. Høysesong, åpent alle
+                dager: man–fre {formatRange(OPENING_HOURS.high.weekday)}, lør–søn{' '}
+                {formatRange(OPENING_HOURS.high.saturday ?? OPENING_HOURS.high.sunday)}
+                ). Vi tar imot, sjekker vaksinasjonskort og noterer alt vi
+                trenger å vite.
               </span>
             </li>
             <li className="flex items-start gap-3">

@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge'
+import { OPENING_HOURS, formatRange } from '@/lib/booking/hours'
 
 const Page = () => {
   return (
@@ -123,11 +124,21 @@ const Page = () => {
               7. Inn- og utsjekk
             </h2>
             <p className="leading-relaxed text-slate-700">
-              Ordinære tider:
+              Lavsesong:
               <br />
-              Man–fre og søndag: 17:30–19:30
+              Man–fre: {formatRange(OPENING_HOURS.low.weekday)}
               <br />
               Lørdag: Stengt
+              <br />
+              Søndag: {formatRange(OPENING_HOURS.low.sunday)}
+            </p>
+            <p className="mt-4 leading-relaxed text-slate-700">
+              Høysesong (åpent alle dager):
+              <br />
+              Man–fre: {formatRange(OPENING_HOURS.high.weekday)}
+              <br />
+              Lør–søn:{' '}
+              {formatRange(OPENING_HOURS.high.saturday ?? OPENING_HOURS.high.sunday)}
             </p>
             <p className="mt-4 leading-relaxed text-slate-700">
               Andre tidspunkt kun etter avtale.

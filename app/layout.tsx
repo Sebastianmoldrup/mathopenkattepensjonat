@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import { Suspense } from 'react'
 import { NavbarWrapper } from '@/components/NavbarWrapper'
 import Footer from '@/components/Footer'
+import { OPENING_HOURS } from '@/lib/booking/hours'
 import './globals.css'
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
@@ -60,19 +61,21 @@ const jsonLd = {
     latitude: 60.3414794,
     longitude: 5.1973496,
   },
+  // Represents low-season hours (most of the year) -- schema.org structured
+  // data doesn't cleanly express the high-season/Easter date-range
+  // exceptions, and Saturday is simply omitted here to indicate closed.
   openingHoursSpecification: [
     {
       '@type': 'OpeningHoursSpecification',
-      dayOfWeek: [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Sunday',
-      ],
-      opens: '17:30',
-      closes: '19:30',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: OPENING_HOURS.low.weekday.opens,
+      closes: OPENING_HOURS.low.weekday.closes,
+    },
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Sunday'],
+      opens: OPENING_HOURS.low.sunday.opens,
+      closes: OPENING_HOURS.low.sunday.closes,
     },
   ],
   priceRange: 'kr',

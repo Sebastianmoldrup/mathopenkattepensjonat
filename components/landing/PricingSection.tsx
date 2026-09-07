@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
+import { OPENING_HOURS, formatRange } from '@/lib/booking/hours'
 
 function useVisible(threshold = 0.1) {
   const ref = useRef<HTMLDivElement>(null)
@@ -104,22 +105,28 @@ export function PricingSection() {
                   <div className="space-y-4 text-slate-700">
                     <div>
                       <p className="text-sm font-medium text-slate-900">
-                        Mandag–fredag og søndag
-                      </p>
-                      <p className="text-sm text-slate-600">Kl. 17:30–19:30</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">
-                        Lørdag
-                      </p>
-                      <p className="text-sm text-slate-600">Stengt</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">
-                        Sommersesong
+                        Lavsesong
                       </p>
                       <p className="text-sm text-slate-600">
-                        Åpent for levering og henting på lørdager
+                        Man–fre kl. {formatRange(OPENING_HOURS.low.weekday)}
+                      </p>
+                      <p className="text-sm text-slate-600">Lørdag: Stengt</p>
+                      <p className="text-sm text-slate-600">
+                        Søndag kl. {formatRange(OPENING_HOURS.low.sunday)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">
+                        Høysesong (åpent alle dager)
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        Man–fre kl. {formatRange(OPENING_HOURS.high.weekday)}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        Lør–søn kl.{' '}
+                        {formatRange(
+                          OPENING_HOURS.high.saturday ?? OPENING_HOURS.high.sunday
+                        )}
                       </p>
                     </div>
                     <p className="text-sm text-slate-500">

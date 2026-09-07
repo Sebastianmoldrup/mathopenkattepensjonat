@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { OPENING_HOURS, formatRange } from '@/lib/booking/hours'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -142,8 +143,17 @@ export default function Page() {
               <p className="mb-1 font-medium text-foreground">
                 Inn- og utsjekktider
               </p>
-              <p>Mandag–fredag og søndag: 17:30–19:30</p>
-              <p>Lørdag: stengt</p>
+              <p>Lavsesong – man–fre: {formatRange(OPENING_HOURS.low.weekday)}</p>
+              <p>Lavsesong – lørdag: stengt</p>
+              <p>Lavsesong – søndag: {formatRange(OPENING_HOURS.low.sunday)}</p>
+              <p>
+                Høysesong (åpent alle dager) – man–fre:{' '}
+                {formatRange(OPENING_HOURS.high.weekday)}
+              </p>
+              <p>
+                Høysesong – lør–søn:{' '}
+                {formatRange(OPENING_HOURS.high.saturday ?? OPENING_HOURS.high.sunday)}
+              </p>
               <p>Andre tidspunkt etter avtale</p>
             </div>
             <div>
