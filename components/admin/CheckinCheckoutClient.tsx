@@ -28,6 +28,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Printer,
+  CheckCheck,
 } from 'lucide-react'
 import {
   adminGetCheckinCheckoutByDate,
@@ -126,6 +127,16 @@ const CHECKOUT_GROUPS = [
   },
 ]
 
+// "Merk alt" skips these -- medication received and a deviation observed
+// both need a real yes/no per stay, not a default check. Checkout has no
+// literal equivalent (medisiner levert / avvik forklart are different
+// questions -- returned, and explained-to-owner, not received/observed),
+// so its "Merk alt" has nothing to exclude.
+const INN_EXCLUDED_FROM_MARK_ALL = new Set([
+  'inn_medisiner_mottatt',
+  'inn_avvik_observert',
+])
+
 export default function CheckinCheckoutClient({
   initialEntries,
   initialDate,
@@ -221,6 +232,22 @@ export default function CheckinCheckoutClient({
     } finally {
       setSaving(false)
     }
+  }
+
+  function markAllChecklist() {
+    if (!dialogType) return
+    const groups = dialogType === 'checkin' ? CHECKIN_GROUPS : CHECKOUT_GROUPS
+    const excluded =
+      dialogType === 'checkin' ? INN_EXCLUDED_FROM_MARK_ALL : new Set<string>()
+    setChecklist((prev) => {
+      const next = { ...prev }
+      groups.forEach((group) =>
+        group.items.forEach((item) => {
+          if (!excluded.has(item.key)) next[item.key] = true
+        })
+      )
+      return next
+    })
   }
 
   const dateLabel = format(parseISO(date), 'EEEE d. MMMM yyyy', { locale: nb })
@@ -452,6 +479,19 @@ export default function CheckinCheckoutClient({
               {dialogEntry?.cat_names}
             </DialogDescription>
           </DialogHeader>
+
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={markAllChecklist}
+            >
+              <CheckCheck className="h-3.5 w-3.5" />
+              Merk alt
+            </Button>
+          </div>
 
           <div className="space-y-5 py-2">
             {(dialogType === 'checkin' ? CHECKIN_GROUPS : CHECKOUT_GROUPS).map(

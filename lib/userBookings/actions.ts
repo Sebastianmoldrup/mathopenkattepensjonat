@@ -29,6 +29,9 @@ export async function getUserBookingsWithCats(): Promise<UserBooking[]> {
       price,
       status,
       special_instructions,
+      checkin_time,
+      checkout_time,
+      time_notes,
       created_at,
       booking_cats (
         cats (
@@ -58,6 +61,9 @@ export async function getUserBookingsWithCats(): Promise<UserBooking[]> {
     price: row.price,
     status: row.status as BookingStatus,
     special_instructions: row.special_instructions,
+    checkin_time: row.checkin_time,
+    checkout_time: row.checkout_time,
+    time_notes: row.time_notes,
     created_at: row.created_at,
     cats: (row.booking_cats ?? []).map((bc: any) => bc.cats).filter(Boolean),
   }))

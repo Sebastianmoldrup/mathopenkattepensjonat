@@ -26,6 +26,9 @@ export interface UserBooking {
   price: number
   status: BookingStatus
   special_instructions: string | null
+  checkin_time: string | null
+  checkout_time: string | null
+  time_notes: string | null
   created_at: string
   cats: BookingCat[]
 }

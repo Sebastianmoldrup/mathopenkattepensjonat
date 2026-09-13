@@ -16,7 +16,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
@@ -53,13 +52,9 @@ import {
 } from '@/lib/booking/hours'
 import { parseDateStr } from '@/lib/booking/pricing'
 import {
-  adminGetHealthLogs,
   adminGetCatBehaviorNotes,
   CatBehaviorNote,
 } from '@/lib/admin/formActions'
-import { HealthLog } from '@/lib/admin/formTypes'
-import { HealthLogForm } from './forms/HealthLogForm'
-import { BookingPDFButton } from './BookingPDFButton'
 import {
   Loader2,
   CalendarDays,
@@ -69,7 +64,6 @@ import {
   Phone,
   MapPin,
   AlertCircle,
-  Heart,
   Edit2,
   Trash2,
   Pill,
@@ -114,7 +108,6 @@ export function BookingDetailDialog({
     type: 'success' | 'error'
     text: string
   } | null>(null)
-  const [healthLogs, setHealthLogs] = useState<HealthLog[]>([])
   const [behaviorNotes, setBehaviorNotes] = useState<CatBehaviorNote[]>([])
   const [logsLoaded, setLogsLoaded] = useState(false)
 
@@ -148,18 +141,13 @@ export function BookingDetailDialog({
   useEffect(() => {
     if (booking && open && !logsLoaded) {
       setNotes(booking.admin_notes ?? '')
-      Promise.all([
-        adminGetHealthLogs(booking.id),
-        adminGetCatBehaviorNotes(booking.id),
-      ]).then(([health, behavior]) => {
-        setHealthLogs(health)
+      adminGetCatBehaviorNotes(booking.id).then((behavior) => {
         setBehaviorNotes(behavior)
         setLogsLoaded(true)
       })
     }
     if (!open) {
       setLogsLoaded(false)
-      setHealthLogs([])
       setBehaviorNotes([])
       setMessage(null)
       setEditMode(false)
@@ -360,16 +348,6 @@ export function BookingDetailDialog({
               >
                 {STATUS_LABELS[currentStatus]}
               </Badge>
-              <div className="ml-auto">
-                <BookingPDFButton
-                  bookingId={booking.id}
-                  ownerName={
-                    `${booking.user_first_name ?? ''} ${booking.user_last_name ?? ''}`.trim() ||
-                    booking.user_email
-                  }
-                  dateFrom={booking.date_from}
-                />
-              </div>
             </DialogTitle>
             <DialogDescription className="sr-only">
               Detaljer og administrasjon av booking
@@ -389,27 +367,7 @@ export function BookingDetailDialog({
             </p>
           )}
 
-          <Tabs defaultValue="detaljer">
-            <TabsList className="w-full">
-              <TabsTrigger value="detaljer" className="flex-1">
-                Detaljer
-              </TabsTrigger>
-              <TabsTrigger value="helse" className="flex-1 gap-1.5">
-                <Heart className="h-3.5 w-3.5" />
-                Helse
-                {healthLogs.length > 0 && (
-                  <Badge
-                    variant="outline"
-                    className="h-4 border-amber-300 px-1 text-[10px] text-amber-700"
-                  >
-                    {healthLogs.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
-
-            {/* ── DETALJER ─────────────────────────────────────────────── */}
-            <TabsContent value="detaljer" className="space-y-5 pt-2">
+          <div className="space-y-5 pt-2">
               {/* Status */}
               <div className="space-y-2">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -941,25 +899,7 @@ export function BookingDetailDialog({
                   </div>
                 )}
               </div>
-            </TabsContent>
-
-            {/* ── HELSE ──────────────────────────────────────────────────── */}
-            <TabsContent value="helse" className="pt-2">
-              {logsLoaded ? (
-                <HealthLogForm
-                  booking={booking}
-                  existingLogs={healthLogs}
-                  onSaved={() =>
-                    adminGetHealthLogs(booking.id).then(setHealthLogs)
-                  }
-                />
-              ) : (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+          </div>
         </DialogContent>
       </Dialog>
 

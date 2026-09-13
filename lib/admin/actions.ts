@@ -83,12 +83,17 @@ export async function adminGetAllBookings(): Promise<AdminBooking[]> {
   // admin_get_all_bookings predates this repo's tracked migrations and its
   // SQL body isn't visible here -- rather than risk a blind CREATE OR
   // REPLACE dropping unseen logic, the drop-off/pickup time fields are
-  // fetched with a second plain query and merged in, the same technique
-  // already used above for cats.
-  const { data: timeRows, error: timeError } = await supabase
-    .from('bookings')
-    .select('id, checkin_time, checkout_time, time_notes')
-    .in('id', bookingIds)
+  // fetched with a second query and merged in, the same technique already
+  // used above for cats. Unlike cats, this can't be a plain `.from()`
+  // table query, though -- bookings has no permissive SELECT policy for
+  // admins, so a direct query runs under RLS and silently returns zero
+  // rows for bookings the admin doesn't own (confirmed directly against
+  // prod: 200 OK, 0 rows). Goes through a SECURITY DEFINER RPC instead,
+  // same as every other admin booking read in this codebase.
+  const { data: timeRows, error: timeError } = await supabase.rpc(
+    'admin_get_booking_times',
+    { p_booking_ids: bookingIds }
+  )
 
   if (timeError) {
     console.error('[adminGetAllBookings] time fields error:', timeError.message)

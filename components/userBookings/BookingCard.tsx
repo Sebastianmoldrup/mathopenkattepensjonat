@@ -81,6 +81,11 @@ export function BookingCard({ booking }: BookingCardProps) {
               <p className="text-sm font-semibold">
                 {formatDateNO(booking.date_from)}
               </p>
+              {booking.checkin_time && (
+                <p className="text-xs text-muted-foreground">
+                  kl. {booking.checkin_time}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -91,6 +96,11 @@ export function BookingCard({ booking }: BookingCardProps) {
               <p className="text-sm font-semibold">
                 {formatDateNO(booking.date_to)}
               </p>
+              {booking.checkout_time && (
+                <p className="text-xs text-muted-foreground">
+                  kl. {booking.checkout_time}
+                </p>
+              )}
             </div>
 
             <div className="space-y-1">
@@ -117,6 +127,16 @@ export function BookingCard({ booking }: BookingCardProps) {
               </p>
             </div>
           </div>
+
+          {/* Time comment */}
+          {booking.time_notes && (
+            <p className="rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">
+                Kommentar om tidspunkt:
+              </span>{' '}
+              {booking.time_notes}
+            </p>
+          )}
 
           {/* Cats */}
           {booking.cats.length > 0 && (
