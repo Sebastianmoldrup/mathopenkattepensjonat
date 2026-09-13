@@ -11,7 +11,7 @@ export interface GuestWizardState {
 }
 
 export interface AuthedWizardState {
-  step: 'cats' | 'dates' | 'cage' | 'summary'
+  step: 'cats' | 'dates' | 'cage' | 'time' | 'summary'
   selectedCatIds: string[]
   dateFrom: string | null
   dateTo: string | null
@@ -20,6 +20,9 @@ export interface AuthedWizardState {
   specialInstructions: string
   wantsOutdoorCage: boolean
   waitlistRequested: boolean
+  checkinTime: string | null
+  checkoutTime: string | null
+  timeNotes: string
 }
 
 export const GUEST_DEFAULTS: GuestWizardState = {
@@ -41,6 +44,9 @@ export const AUTHED_DEFAULTS: AuthedWizardState = {
   specialInstructions: '',
   wantsOutdoorCage: false,
   waitlistRequested: false,
+  checkinTime: null,
+  checkoutTime: null,
+  timeNotes: '',
 }
 
 function safeGet<T>(key: string, defaults: T): T {

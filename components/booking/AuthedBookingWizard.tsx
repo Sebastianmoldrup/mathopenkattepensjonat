@@ -11,6 +11,7 @@ import {
 import { CatSelection } from './CatSelection'
 import { DateRangeSelection } from './DateRangeSelection'
 import { CageSelection } from './CageSelection'
+import { TimeSelection } from './TimeSelection'
 import { BookingSummary } from './BookingSummary'
 import { StepIndicator } from './StepIndicator'
 
@@ -18,6 +19,7 @@ const STEPS = [
   { key: 'cats', label: 'Katter' },
   { key: 'dates', label: 'Periode' },
   { key: 'cage', label: 'Burtype' },
+  { key: 'time', label: 'Tidspunkt' },
   { key: 'summary', label: 'Oppsummering' },
 ] as const
 
@@ -126,7 +128,17 @@ export function AuthedBookingWizard({
             dateFrom={state.dateFrom}
             dateTo={state.dateTo}
             onChange={(from, to) =>
-              update({ dateFrom: from, dateTo: to, cageType: null })
+              // Changing dates can change which day-of-week/season window
+              // applies (e.g. a slot picked for a Sunday no longer makes
+              // sense if the new date is a weekday) -- clear any chosen
+              // time along with the cage type reset already done here.
+              update({
+                dateFrom: from,
+                dateTo: to,
+                cageType: null,
+                checkinTime: null,
+                checkoutTime: null,
+              })
             }
             onNext={() => goTo('cage')}
             onBack={() => goTo('cats')}
@@ -143,12 +155,28 @@ export function AuthedBookingWizard({
             onSelect={(type, count) =>
               update({ cageType: type, cageCount: count })
             }
-            onNext={() => goTo('summary')}
+            onNext={() => goTo('time')}
             onBack={() => goTo('dates')}
           />
         )}
 
-        {/* Step 4: Oppsummering */}
+        {/* Step 4: Tidspunkt */}
+        {state.step === 'time' && state.dateFrom && state.dateTo && (
+          <TimeSelection
+            dateFrom={state.dateFrom}
+            dateTo={state.dateTo}
+            checkinTime={state.checkinTime}
+            checkoutTime={state.checkoutTime}
+            timeNotes={state.timeNotes}
+            onCheckinTimeChange={(v) => update({ checkinTime: v })}
+            onCheckoutTimeChange={(v) => update({ checkoutTime: v })}
+            onNotesChange={(v) => update({ timeNotes: v })}
+            onNext={() => goTo('summary')}
+            onBack={() => goTo('cage')}
+          />
+        )}
+
+        {/* Step 5: Oppsummering */}
         {state.step === 'summary' &&
           state.dateFrom &&
           state.dateTo &&
@@ -165,10 +193,13 @@ export function AuthedBookingWizard({
               bookings={bookings}
               wantsOutdoorCage={state.wantsOutdoorCage}
               waitlistRequested={state.waitlistRequested}
+              checkinTime={state.checkinTime}
+              checkoutTime={state.checkoutTime}
+              timeNotes={state.timeNotes}
               onInstructionsChange={(v) => update({ specialInstructions: v })}
               onOutdoorCageChange={(v) => update({ wantsOutdoorCage: v })}
               onWaitlistChange={(v) => update({ waitlistRequested: v })}
-              onBack={() => goTo('cage')}
+              onBack={() => goTo('time')}
               onConfirmed={handleConfirmed}
               userEmail={userEmail}
               userFirstName={userFirstName}

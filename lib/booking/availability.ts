@@ -1,17 +1,23 @@
 import { Booking, BookingWithCats, CageType, CAGE_CONFIGS } from './types'
 import { getSeason } from './pricing'
+import { isChristmasPeriod } from './hours'
 
 // ─── Saturday closure outside high season ──────────────────────────────────────
 
 /**
- * Saturdays are closed for check-in and check-out unless the date falls in
- * high season (getSeason already covers the fixed ranges and the dynamic
- * Easter week). A low-season Saturday can still be part of a stay (e.g. a
- * Thursday-to-Monday booking) -- it just can't be the arrival or departure
- * day.
+ * Saturdays are closed for check-in and check-out in low season, and during
+ * Christmas -- Christmas is priced as high season but deliberately uses the
+ * ordinary (low season) opening hours (see the comment on isChristmasPeriod
+ * in hours.ts), so its Saturdays need to be blocked the same way a low-season
+ * Saturday is, or the calendar would let someone pick a check-in day that
+ * getOpeningHoursForDate then reports as closed all day. A low-season
+ * Saturday can still be part of a stay (e.g. a Thursday-to-Monday booking)
+ * -- it just can't be the arrival or departure day.
  */
-export function isLowSeasonSaturday(date: Date): boolean {
-  return date.getDay() === 6 && getSeason(date) === 'low'
+export function isClosedSaturday(date: Date): boolean {
+  return (
+    date.getDay() === 6 && (getSeason(date) === 'low' || isChristmasPeriod(date))
+  )
 }
 
 // ─── Count cages used on a specific date ──────────────────────────────────────

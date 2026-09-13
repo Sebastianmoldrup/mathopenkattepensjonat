@@ -26,7 +26,36 @@ export interface AdminBooking {
   user_emergency_contact: string | null
   wants_outdoor_cage: boolean
   waitlist_requested: boolean
+  checkin_time: string | null
+  checkout_time: string | null
+  time_notes: string | null
   cats?: AdminCat[]
+}
+
+export interface Incident {
+  id: string
+  occurred_at: string
+  what_happened: string
+  actions_taken: string | null
+  follow_up: string | null
+  created_at: string
+  cat_names: string | null
+}
+
+export interface IncidentOverview {
+  id: string
+  booking_id: string
+  occurred_at: string
+  what_happened: string
+  actions_taken: string | null
+  follow_up: string | null
+  cat_names: string | null
+  owner_first: string | null
+  owner_last: string | null
+  cage_type: string
+  cage_count: number
+  date_from: string
+  date_to: string
 }
 
 export interface AdminCat {

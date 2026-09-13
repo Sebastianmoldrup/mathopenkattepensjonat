@@ -16,6 +16,7 @@ import {
   BedDouble,
   Users,
   CalendarDays,
+  AlertTriangle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -51,6 +52,7 @@ export const NAV_GROUPS: AdminNavGroup[] = [
     items: [
       { href: '/admin/bookinger', label: 'Bookinger', icon: BookOpen },
       { href: '/admin/brukere', label: 'Brukere', icon: Users },
+      { href: '/admin/avvik', label: 'Avvik', icon: AlertTriangle },
       { href: '/admin/avbestillinger', label: 'Avbestillinger', icon: XCircle },
       { href: '/admin/burplassering', label: 'Burplassering', icon: Grid3X3 },
       { href: '/admin/kalender', label: 'Kalender', icon: CalendarDays },

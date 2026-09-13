@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { DailyRoutine, CheckinLog, HealthLog, RoutinePeriod } from './formTypes'
+import { Incident, IncidentOverview } from './utils'
 
 // ─── Daily Routines ───────────────────────────────────────────────────────────
 
@@ -142,6 +143,58 @@ export async function adminGetCatBehaviorNotes(
   })
   if (error) {
     console.error('[adminGetCatBehaviorNotes]', error.message)
+    return []
+  }
+  return data ?? []
+}
+
+// ─── Incidents (avvik) ──────────────────────────────────────────────────────
+
+export async function adminGetIncidentsForBooking(
+  bookingId: string
+): Promise<Incident[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc(
+    'admin_get_incidents_for_booking',
+    { p_booking_id: bookingId }
+  )
+  if (error) {
+    console.error('[adminGetIncidentsForBooking]', error.message)
+    return []
+  }
+  return data ?? []
+}
+
+export async function adminCreateIncident(
+  bookingId: string,
+  catIds: string[],
+  whatHappened: string,
+  actionsTaken: string,
+  followUp: string,
+  occurredAt: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('admin_create_incident', {
+    p_booking_id: bookingId,
+    p_cat_ids: catIds,
+    p_what_happened: whatHappened,
+    p_actions_taken: actionsTaken || null,
+    p_follow_up: followUp || null,
+    p_occurred_at: occurredAt,
+  })
+  if (error) {
+    console.error('[adminCreateIncident]', error.message)
+    return { success: false, error: 'Kunne ikke lagre avvik.' }
+  }
+  revalidatePath('/admin/avvik')
+  return { success: true }
+}
+
+export async function adminGetAllIncidents(): Promise<IncidentOverview[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_get_all_incidents')
+  if (error) {
+    console.error('[adminGetAllIncidents]', error.message)
     return []
   }
   return data ?? []

@@ -31,11 +31,17 @@ import {
   nightsBetween,
 } from '@/lib/admin/utils'
 import { BookingDetailDialog } from './BookingDetailDialog'
+import { IncidentFormDialog } from './IncidentFormDialog'
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface BookingsTableProps {
   bookings: AdminBooking[]
+  // 'details' (default): row click opens the full booking-edit dialog, as
+  // on /admin/bookinger. 'incidents': row click opens the avvik report
+  // dialog instead, for /admin/avvik -- same list/search/filter/sort, just
+  // a different destination on click.
+  mode?: 'details' | 'incidents'
 }
 
 const STATUS_FILTERS = [
@@ -77,7 +83,7 @@ function SortHeader({ label, column }: { label: string; column: any }) {
   )
 }
 
-export function BookingsTable({ bookings }: BookingsTableProps) {
+export function BookingsTable({ bookings, mode = 'details' }: BookingsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'date_from', desc: true },
   ])
@@ -127,7 +133,10 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
       header: ({ column }) => <SortHeader label="Innsjekk" column={column} />,
       cell: ({ row }) => (
         <div>
-          <p className="text-sm">{formatDateNO(row.original.date_from)}</p>
+          <p className="text-sm">
+            {formatDateNO(row.original.date_from)}
+            {row.original.checkin_time && ` kl. ${row.original.checkin_time}`}
+          </p>
           <p className="text-xs text-muted-foreground">
             {nightsBetween(row.original.date_from, row.original.date_to)} netter
           </p>
@@ -139,7 +148,10 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
       accessorKey: 'date_to',
       header: ({ column }) => <SortHeader label="Utsjekk" column={column} />,
       cell: ({ row }) => (
-        <p className="text-sm">{formatDateNO(row.original.date_to)}</p>
+        <p className="text-sm">
+          {formatDateNO(row.original.date_to)}
+          {row.original.checkout_time && ` kl. ${row.original.checkout_time}`}
+        </p>
       ),
       sortingFn: 'alphanumeric',
     },
@@ -301,15 +313,23 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
         </Table>
       </div>
 
-      <BookingDetailDialog
-        booking={selectedBooking}
-        open={dialogOpen}
-        onOpenChange={(open) => {
-          setDialogOpen(open)
-          if (!open) router.refresh()
-        }}
-        onDeleted={() => router.refresh()}
-      />
+      {mode === 'details' ? (
+        <BookingDetailDialog
+          booking={selectedBooking}
+          open={dialogOpen}
+          onOpenChange={(open) => {
+            setDialogOpen(open)
+            if (!open) router.refresh()
+          }}
+          onDeleted={() => router.refresh()}
+        />
+      ) : (
+        <IncidentFormDialog
+          booking={selectedBooking}
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+        />
+      )}
     </>
   )
 }

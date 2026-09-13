@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DatePicker } from '@/components/admin/DatePicker'
-import { Loader2, CheckCircle2, LogIn, LogOut } from 'lucide-react'
+import { Loader2, CheckCircle2, LogIn, LogOut, CheckCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { formatDateNO, nightsBetween } from '@/lib/admin/utils'
 
@@ -19,6 +19,58 @@ interface CheckinFormProps {
   booking: AdminBooking
   existing: CheckinLog | null
 }
+
+// Checklist items, named so "Merk alt" can compute its key list from the
+// same source the checkboxes render from -- one list, not two to keep in sync.
+const INN_DOKUMENTASJON = [
+  ['inn_eier_identifisert', 'Eier identifisert'],
+  ['inn_kontakt_registrert', 'Kontaktinformasjon registrert'],
+  ['inn_nødkontakt_registrert', 'Nødkontakt registrert'],
+  ['inn_vaksinasjon_kontrollert', 'Gyldig vaksinasjon kontrollert'],
+  ['inn_helseopplysninger_mottatt', 'Helseopplysninger mottatt'],
+  ['inn_medisiner_mottatt', 'Eventuelle medisiner mottatt og merket'],
+  ['inn_fôr_avklart', 'Fôr / spesialbehov avklart'],
+  ['inn_avtale_signert', 'Innsjekkavtale signert'],
+] as const
+
+const INN_HELSE = [
+  ['inn_frisk', 'Katten fremstår frisk'],
+  ['inn_ingen_sår', 'Ingen synlige sår eller skader'],
+  ['inn_øyne_nese_pels', 'Øyne, nese og pels uten unormale funn'],
+  ['inn_normal_atferd', 'Normal atferd'],
+  ['inn_avvik_observert', 'Avvik observert'],
+] as const
+
+const INN_BUR = [
+  ['inn_bur_rengjort', 'Bur / rom rengjort'],
+  ['inn_overflater_desinfisert', 'Overflater desinfisert'],
+  ['inn_kattedo_rengjort', 'Kattedo rengjort og desinfisert'],
+  ['inn_ren_kattesand', 'Ren kattesand lagt i kattedo'],
+  ['inn_skåler_vasket', 'Mat- og vannskåler vasket'],
+  ['inn_rene_tepper', 'Rene tepper / liggeunderlag lagt inn'],
+] as const
+
+const UT_STATUS = [
+  ['ut_frisk', 'Katten fremstår frisk'],
+  ['ut_normal_appetitt', 'Normal appetitt under opphold'],
+  ['ut_ingen_skader', 'Ingen skader oppstått'],
+] as const
+
+const UT_INFO = [
+  ['ut_eier_informert', 'Eier informert om oppholdet'],
+  ['ut_avvik_forklart', 'Eventuelle avvik forklart'],
+  ['ut_medisiner_levert', 'Medisiner levert tilbake'],
+] as const
+
+// "Merk alt" skips these -- medication received and a deviation observed
+// both need a real yes/no per stay, not a default check. Neither has a
+// literal equivalent on the utsjekk side (medisiner levert / avvik forklart
+// are different questions -- returned, and explained-to-owner, not
+// received/observed), so utsjekk's "Merk alt" has nothing to exclude.
+const INN_EXCLUDED_FROM_MARK_ALL = new Set([
+  'inn_medisiner_mottatt',
+  'inn_avvik_observert',
+])
 
 function CheckRow({
   checked,
@@ -92,6 +144,19 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
     return (fields[key] as string) ?? ''
   }
 
+  function markAll(items: readonly (readonly [string, string])[], excluded: Set<string>) {
+    setFields((p) => {
+      const next = { ...p }
+      for (const [key] of items) {
+        if (!excluded.has(key)) next[key] = true
+      }
+      return next
+    })
+    setSaved(false)
+  }
+
+  const NO_EXCLUSIONS = new Set<string>()
+
   function handleSave() {
     setError(null)
     setSaved(false)
@@ -154,20 +219,26 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
 
         {/* ── INNSJEKK ──────────────────────────────────────────────────────── */}
         <TabsContent value="innsjekk" className="space-y-5 pt-4">
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() =>
+                markAll(
+                  [...INN_DOKUMENTASJON, ...INN_HELSE, ...INN_BUR],
+                  INN_EXCLUDED_FROM_MARK_ALL
+                )
+              }
+            >
+              <CheckCheck className="h-3.5 w-3.5" />
+              Merk alt
+            </Button>
+          </div>
+
           <Section title="📋 Dokumentasjon og informasjon">
-            {[
-              ['inn_eier_identifisert', 'Eier identifisert'],
-              ['inn_kontakt_registrert', 'Kontaktinformasjon registrert'],
-              ['inn_nødkontakt_registrert', 'Nødkontakt registrert'],
-              ['inn_vaksinasjon_kontrollert', 'Gyldig vaksinasjon kontrollert'],
-              ['inn_helseopplysninger_mottatt', 'Helseopplysninger mottatt'],
-              [
-                'inn_medisiner_mottatt',
-                'Eventuelle medisiner mottatt og merket',
-              ],
-              ['inn_fôr_avklart', 'Fôr / spesialbehov avklart'],
-              ['inn_avtale_signert', 'Innsjekkavtale signert'],
-            ].map(([key, label]) => (
+            {INN_DOKUMENTASJON.map(([key, label]) => (
               <CheckRow
                 key={key}
                 checked={bool(key)}
@@ -178,13 +249,7 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
           </Section>
 
           <Section title="🐾 Helse- og atferdssjekk">
-            {[
-              ['inn_frisk', 'Katten fremstår frisk'],
-              ['inn_ingen_sår', 'Ingen synlige sår eller skader'],
-              ['inn_øyne_nese_pels', 'Øyne, nese og pels uten unormale funn'],
-              ['inn_normal_atferd', 'Normal atferd'],
-              ['inn_avvik_observert', 'Avvik observert'],
-            ].map(([key, label]) => (
+            {INN_HELSE.map(([key, label]) => (
               <CheckRow
                 key={key}
                 checked={bool(key)}
@@ -195,14 +260,7 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
           </Section>
 
           <Section title="🏠 Klargjøring av bur (før katten settes inn)">
-            {[
-              ['inn_bur_rengjort', 'Bur / rom rengjort'],
-              ['inn_overflater_desinfisert', 'Overflater desinfisert'],
-              ['inn_kattedo_rengjort', 'Kattedo rengjort og desinfisert'],
-              ['inn_ren_kattesand', 'Ren kattesand lagt i kattedo'],
-              ['inn_skåler_vasket', 'Mat- og vannskåler vasket'],
-              ['inn_rene_tepper', 'Rene tepper / liggeunderlag lagt inn'],
-            ].map(([key, label]) => (
+            {INN_BUR.map(([key, label]) => (
               <CheckRow
                 key={key}
                 checked={bool(key)}
@@ -256,12 +314,21 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
 
         {/* ── UTSJEKK ──────────────────────────────────────────────────────── */}
         <TabsContent value="utsjekk" className="space-y-5 pt-4">
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => markAll([...UT_STATUS, ...UT_INFO], NO_EXCLUSIONS)}
+            >
+              <CheckCheck className="h-3.5 w-3.5" />
+              Merk alt
+            </Button>
+          </div>
+
           <Section title="🐾 Kattens status ved utsjekk">
-            {[
-              ['ut_frisk', 'Katten fremstår frisk'],
-              ['ut_normal_appetitt', 'Normal appetitt under opphold'],
-              ['ut_ingen_skader', 'Ingen skader oppstått'],
-            ].map(([key, label]) => (
+            {UT_STATUS.map(([key, label]) => (
               <CheckRow
                 key={key}
                 checked={bool(key)}
@@ -283,11 +350,7 @@ export function CheckinForm({ booking, existing }: CheckinFormProps) {
           </Section>
 
           <Section title="📢 Informasjon til eier">
-            {[
-              ['ut_eier_informert', 'Eier informert om oppholdet'],
-              ['ut_avvik_forklart', 'Eventuelle avvik forklart'],
-              ['ut_medisiner_levert', 'Medisiner levert tilbake'],
-            ].map(([key, label]) => (
+            {UT_INFO.map(([key, label]) => (
               <CheckRow
                 key={key}
                 checked={bool(key)}

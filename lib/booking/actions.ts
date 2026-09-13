@@ -2,7 +2,7 @@
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { Booking, BookingWithCats, Cat } from './types'
 import { calculatePriceBreakdown, parseDateStr } from './pricing'
-import { isLowSeasonSaturday } from './availability'
+import { isClosedSaturday } from './availability'
 
 // ─── User ─────────────────────────────────────────────────────────────────────
 
@@ -134,6 +134,9 @@ export interface CreateBookingPayload {
   specialInstructions?: string
   wantsOutdoorCage?: boolean
   waitlistRequested?: boolean
+  checkinTime?: string
+  checkoutTime?: string
+  timeNotes?: string
   userEmail: string
   userFirstName: string
 }
@@ -143,15 +146,16 @@ export async function createBooking(
 ): Promise<void> {
   const supabase = await createServerClient()
 
-  // Saturday closure outside high season -- the wizard's calendar already
-  // blocks this client-side, but createBooking is a server action callable
+  // Saturday closure (low season, and Christmas despite being priced as high
+  // season -- see isClosedSaturday) -- the wizard's calendar already blocks
+  // this client-side, but createBooking is a server action callable
   // directly, so it needs the same guard rather than trusting the client.
   if (
-    isLowSeasonSaturday(parseDateStr(payload.dateFrom)) ||
-    isLowSeasonSaturday(parseDateStr(payload.dateTo))
+    isClosedSaturday(parseDateStr(payload.dateFrom)) ||
+    isClosedSaturday(parseDateStr(payload.dateTo))
   ) {
     throw new Error(
-      'Vi er stengt på lørdager utenom høysesong for inn- og utsjekk. Velg fredag eller søndag i stedet.'
+      'Vi er stengt på lørdager for inn- og utsjekk denne perioden. Velg fredag eller søndag i stedet.'
     )
   }
 
@@ -206,6 +210,9 @@ export async function createBooking(
       p_special_instructions: payload.specialInstructions ?? null,
       p_wants_outdoor_cage: payload.wantsOutdoorCage ?? false,
       p_waitlist_requested: payload.waitlistRequested ?? false,
+      p_checkin_time: payload.checkinTime ?? null,
+      p_checkout_time: payload.checkoutTime ?? null,
+      p_time_notes: payload.timeNotes ?? null,
     }
   )
 

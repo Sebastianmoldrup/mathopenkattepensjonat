@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, useCallback } from 'react'
 import { BookingWithCats } from '@/lib/booking/types'
 import {
   getCatBlockedDates,
-  isLowSeasonSaturday,
+  isClosedSaturday as isClosedSaturdayDate,
 } from '@/lib/booking/availability'
 import { getSeason, parseDateStr, toLocalDateStr } from '@/lib/booking/pricing'
 import { InfoIcon } from 'lucide-react'
@@ -217,7 +217,7 @@ function MonthGrid({
           // and so they still render normally when they fall mid-stay
           // (e.g. Thu-Mon), since only the boundary days are actually closed.
           const isClosedSaturday =
-            !isPast && !isBlocked && isLowSeasonSaturday(date)
+            !isPast && !isBlocked && isClosedSaturdayDate(date)
 
           return (
             <div
@@ -226,7 +226,7 @@ function MonthGrid({
               tabIndex={disabled ? -1 : 0}
               aria-label={
                 isClosedSaturday
-                  ? `${fmtFull(date)}, stengt for inn- og utsjekk utenom høysesong`
+                  ? `${fmtFull(date)}, stengt for inn- og utsjekk`
                   : fmtFull(date)
               }
               aria-disabled={disabled}
@@ -369,7 +369,7 @@ export function DateRangeSelection({
 
   const handleDayClick = useCallback(
     (date: Date) => {
-      if (isLowSeasonSaturday(date)) {
+      if (isClosedSaturdayDate(date)) {
         setClosedSaturdayNotice(true)
         return
       }
@@ -472,8 +472,8 @@ export function DateRangeSelection({
 
       {closedSaturdayNotice && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
-          <span className="font-medium">Vi er stengt på lørdager utenom høysesong</span>{' '}
-          for inn- og utsjekk. Velg fredag eller søndag i stedet.
+          <span className="font-medium">Vi er stengt på lørdager</span>{' '}
+          for inn- og utsjekk denne perioden. Velg fredag eller søndag i stedet.
         </div>
       )}
 
@@ -492,7 +492,7 @@ export function DateRangeSelection({
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-4 w-4 shrink-0 rounded bg-muted" />
-          Stengt for inn-/utsjekk (lørdag utenom høysesong)
+          Stengt for inn-/utsjekk (lørdag)
         </span>
         {hasCatConflict && (
           <span className="flex items-center gap-1.5">

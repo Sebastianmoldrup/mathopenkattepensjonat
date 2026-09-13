@@ -43,8 +43,15 @@ import {
   adminUpdateBookingStatus,
   adminUpdateBookingNotes,
   adminUpdateBookingDetails,
+  adminUpdateBookingTime,
   adminDeleteBooking,
 } from '@/lib/admin/actions'
+import {
+  formatRange,
+  generateSlots,
+  getOpeningHoursForDate,
+} from '@/lib/booking/hours'
+import { parseDateStr } from '@/lib/booking/pricing'
 import {
   adminGetHealthLogs,
   adminGetCatBehaviorNotes,
@@ -118,6 +125,9 @@ export function BookingDetailDialog({
   const [editPrice, setEditPrice] = useState(0)
   const [editOutdoor, setEditOutdoor] = useState(false)
   const [editInstructions, setEditInstructions] = useState('')
+  const [editCheckinTime, setEditCheckinTime] = useState('')
+  const [editCheckoutTime, setEditCheckoutTime] = useState('')
+  const [editTimeNotes, setEditTimeNotes] = useState('')
 
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [selectedCat, setSelectedCat] = useState<CatBehaviorNote | null>(null)
@@ -177,6 +187,9 @@ export function BookingDetailDialog({
     setEditPrice(booking!.price)
     setEditOutdoor(booking!.wants_outdoor_cage)
     setEditInstructions(booking!.special_instructions ?? '')
+    setEditCheckinTime(booking!.checkin_time ?? '')
+    setEditCheckoutTime(booking!.checkout_time ?? '')
+    setEditTimeNotes(booking!.time_notes ?? '')
     setEditMode(true)
   }
 
@@ -228,26 +241,38 @@ export function BookingDetailDialog({
     setMessage(null)
     const isStandardSplit = editCageType === 'standard_split'
     startTransition(async () => {
-      const result = await adminUpdateBookingDetails(
-        booking!.id,
-        {
-          date_from: editDateFrom,
-          date_to: editDateTo,
-          cage_type: isStandardSplit ? 'standard' : editCageType,
-          cage_count: isStandardSplit ? 2 : 1,
-          price: editPrice,
-          wants_outdoor_cage: editOutdoor,
-          special_instructions: editInstructions || null,
-        },
-        booking!
-      )
+      const [detailsResult, timeResult] = await Promise.all([
+        adminUpdateBookingDetails(
+          booking!.id,
+          {
+            date_from: editDateFrom,
+            date_to: editDateTo,
+            cage_type: isStandardSplit ? 'standard' : editCageType,
+            cage_count: isStandardSplit ? 2 : 1,
+            price: editPrice,
+            wants_outdoor_cage: editOutdoor,
+            special_instructions: editInstructions || null,
+          },
+          booking!
+        ),
+        adminUpdateBookingTime(
+          booking!.id,
+          editCheckinTime || null,
+          editCheckoutTime || null,
+          editTimeNotes || null
+        ),
+      ])
+      const success = detailsResult.success && timeResult.success
       setMessage(
-        result.success
+        success
           ? { type: 'success', text: 'Booking oppdatert.' }
-          : { type: 'error', text: result.error ?? 'Noe gikk galt.' }
+          : {
+              type: 'error',
+              text: detailsResult.error ?? timeResult.error ?? 'Noe gikk galt.',
+            }
       )
       setActiveAction(null)
-      if (result.success) setEditMode(false)
+      if (success) setEditMode(false)
     })
   }
 
@@ -502,6 +527,88 @@ export function BookingDetailDialog({
                       className="resize-none text-sm"
                     />
                   </div>
+
+                  {/* Drop-off / pickup time -- grid of suggested slots for
+                      the (possibly just-edited above) dates, plus a manual
+                      override input since staff sometimes need an
+                      off-grid time ("Andre tidspunkt: Kun etter avtale" is
+                      already promised on the marketing pages). */}
+                  <div className="space-y-3 border-t pt-3">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Leverings- og hentetidspunkt
+                    </p>
+                    {(
+                      [
+                        {
+                          label: 'Innsjekk',
+                          dateStr: editDateFrom,
+                          value: editCheckinTime,
+                          setValue: setEditCheckinTime,
+                        },
+                        {
+                          label: 'Utsjekk',
+                          dateStr: editDateTo,
+                          value: editCheckoutTime,
+                          setValue: setEditCheckoutTime,
+                        },
+                      ] as const
+                    ).map(({ label, dateStr, value, setValue }) => {
+                      const range = dateStr
+                        ? getOpeningHoursForDate(parseDateStr(dateStr))
+                        : null
+                      const slots = range ? generateSlots(range) : []
+                      return (
+                        <div key={label} className="space-y-1.5">
+                          <Label className="text-xs">
+                            {label}
+                            {range && (
+                              <span className="font-normal text-muted-foreground">
+                                {' '}
+                                ({formatRange(range)})
+                              </span>
+                            )}
+                          </Label>
+                          <div className="flex flex-wrap gap-1.5">
+                            {slots.map((slot) => (
+                              <button
+                                key={slot}
+                                type="button"
+                                onClick={() =>
+                                  setValue(value === slot ? '' : slot)
+                                }
+                                className={cn(
+                                  'rounded-md border px-2 py-1 text-xs transition-colors',
+                                  value === slot
+                                    ? 'border-primary bg-primary text-primary-foreground'
+                                    : 'border-border hover:bg-muted/50'
+                                )}
+                              >
+                                {slot}
+                              </button>
+                            ))}
+                          </div>
+                          <Input
+                            type="text"
+                            className="h-8 w-32 text-sm"
+                            placeholder="HH:mm (annet)"
+                            value={value}
+                            onChange={(e) => setValue(e.target.value)}
+                          />
+                        </div>
+                      )
+                    })}
+                    <div className="space-y-1">
+                      <Label className="text-xs">Kommentar om tidspunkt</Label>
+                      <Textarea
+                        value={editTimeNotes}
+                        onChange={(e) => setEditTimeNotes(e.target.value)}
+                        placeholder="Kommentar fra kunde eller notat om tidspunkt..."
+                        rows={2}
+                        className="resize-none text-sm"
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex gap-2">
                     <Button
                       size="sm"
@@ -577,12 +684,18 @@ export function BookingDetailDialog({
                     <Row
                       icon={<CalendarDays className="h-4 w-4" />}
                       label="Innsjekk"
-                      value={formatDateNO(booking.date_from)}
+                      value={
+                        formatDateNO(booking.date_from) +
+                        (booking.checkin_time ? ` kl. ${booking.checkin_time}` : '')
+                      }
                     />
                     <Row
                       icon={<CalendarDays className="h-4 w-4" />}
                       label="Utsjekk"
-                      value={formatDateNO(booking.date_to)}
+                      value={
+                        formatDateNO(booking.date_to) +
+                        (booking.checkout_time ? ` kl. ${booking.checkout_time}` : '')
+                      }
                     />
                     <Row
                       icon={<CalendarDays className="h-4 w-4" />}
@@ -642,6 +755,13 @@ export function BookingDetailDialog({
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
                   <AlertCircle className="mr-1.5 inline h-3.5 w-3.5" />
                   {booking.special_instructions}
+                </div>
+              )}
+
+              {booking.time_notes && !editMode && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+                  <AlertCircle className="mr-1.5 inline h-3.5 w-3.5" />
+                  Kommentar om tidspunkt: {booking.time_notes}
                 </div>
               )}
 

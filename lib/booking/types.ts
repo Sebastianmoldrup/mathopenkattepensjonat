@@ -99,6 +99,12 @@ export interface Booking {
   special_instructions: string | null
   outdoor_cage_requested: boolean
   waitlist_requested: boolean
+  // Optional (not just nullable): existing rows/queries that don't select
+  // these columns simply omit them, rather than every call site needing to
+  // supply an explicit null.
+  checkin_time?: string | null
+  checkout_time?: string | null
+  time_notes?: string | null
   created_at: string
 }
 

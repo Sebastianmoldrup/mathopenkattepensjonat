@@ -80,9 +80,40 @@ export async function adminGetAllBookings(): Promise<AdminBooking[]> {
     if (row.cats) catMap.get(row.booking_id)!.push(row.cats)
   }
 
+  // admin_get_all_bookings predates this repo's tracked migrations and its
+  // SQL body isn't visible here -- rather than risk a blind CREATE OR
+  // REPLACE dropping unseen logic, the drop-off/pickup time fields are
+  // fetched with a second plain query and merged in, the same technique
+  // already used above for cats.
+  const { data: timeRows, error: timeError } = await supabase
+    .from('bookings')
+    .select('id, checkin_time, checkout_time, time_notes')
+    .in('id', bookingIds)
+
+  if (timeError) {
+    console.error('[adminGetAllBookings] time fields error:', timeError.message)
+  }
+
+  const timeMap = new Map<
+    string,
+    { checkin_time: string | null; checkout_time: string | null; time_notes: string | null }
+  >()
+  for (const row of timeRows ?? []) {
+    timeMap.set(row.id, {
+      checkin_time: row.checkin_time,
+      checkout_time: row.checkout_time,
+      time_notes: row.time_notes,
+    })
+  }
+
   return (data ?? []).map((row: any) => ({
     ...row,
     cats: catMap.get(row.id) ?? [],
+    ...(timeMap.get(row.id) ?? {
+      checkin_time: null,
+      checkout_time: null,
+      time_notes: null,
+    }),
   }))
 }
 
@@ -331,6 +362,32 @@ export async function adminUpdateBookingCage(
   if (error) {
     console.error('[adminUpdateBookingCage]', error.message)
     return { success: false, error: 'Kunne ikke oppdatere bur.' }
+  }
+
+  revalidatePath('/admin/bookinger')
+  return { success: true }
+}
+
+// ─── Update drop-off / pickup time ──────────────────────────────────────────────
+
+export async function adminUpdateBookingTime(
+  bookingId: string,
+  checkinTime: string | null,
+  checkoutTime: string | null,
+  timeNotes: string | null
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('admin_update_booking_time', {
+    p_booking_id: bookingId,
+    p_checkin_time: checkinTime,
+    p_checkout_time: checkoutTime,
+    p_time_notes: timeNotes,
+  })
+
+  if (error) {
+    console.error('[adminUpdateBookingTime]', error.message)
+    return { success: false, error: 'Kunne ikke oppdatere tidspunkt.' }
   }
 
   revalidatePath('/admin/bookinger')

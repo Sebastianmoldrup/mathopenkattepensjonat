@@ -25,6 +25,9 @@ interface BookingSummaryProps {
   bookings: Booking[]
   wantsOutdoorCage: boolean
   waitlistRequested: boolean
+  checkinTime: string | null
+  checkoutTime: string | null
+  timeNotes: string
   onInstructionsChange: (v: string) => void
   onOutdoorCageChange: (v: boolean) => void
   onWaitlistChange: (v: boolean) => void
@@ -51,6 +54,9 @@ export function BookingSummary({
   specialInstructions,
   wantsOutdoorCage,
   waitlistRequested,
+  checkinTime,
+  checkoutTime,
+  timeNotes,
   onInstructionsChange,
   onOutdoorCageChange,
   onWaitlistChange,
@@ -94,6 +100,9 @@ export function BookingSummary({
         specialInstructions: specialInstructions || undefined,
         wantsOutdoorCage,
         waitlistRequested,
+        checkinTime: checkinTime ?? undefined,
+        checkoutTime: checkoutTime ?? undefined,
+        timeNotes: timeNotes || undefined,
         userEmail,
         userFirstName: userFirstName,
       })
@@ -132,11 +141,15 @@ export function BookingSummary({
             <p className="text-xs text-muted-foreground">Innsjekk</p>
             <p className="text-sm font-semibold">
               {formatDateNO(dateFromDate)}
+              {checkinTime && ` kl. ${checkinTime}`}
             </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Utsjekk</p>
-            <p className="text-sm font-semibold">{formatDateNO(dateToDate)}</p>
+            <p className="text-sm font-semibold">
+              {formatDateNO(dateToDate)}
+              {checkoutTime && ` kl. ${checkoutTime}`}
+            </p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Burtype</p>
@@ -147,6 +160,15 @@ export function BookingSummary({
             <p className="text-sm font-semibold">{breakdown.totalDays}</p>
           </div>
         </div>
+
+        {timeNotes && (
+          <div className="p-4">
+            <p className="mb-1 text-xs text-muted-foreground">
+              Kommentar om tidspunkt
+            </p>
+            <p className="text-sm">{timeNotes}</p>
+          </div>
+        )}
 
         {/* Cats */}
         <div className="p-4">

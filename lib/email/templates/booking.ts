@@ -82,11 +82,11 @@ function bookingDetailsBlock(booking: AdminBooking): string {
       <table style="width:100%;border-collapse:collapse;">
         <tr>
           <td style="padding:5px 0;color:#666;font-size:14px;width:140px;">Innsjekk</td>
-          <td style="padding:5px 0;font-weight:bold;font-size:14px;">${formatDateNO(booking.date_from)}</td>
+          <td style="padding:5px 0;font-weight:bold;font-size:14px;">${formatDateNO(booking.date_from)}${booking.checkin_time ? ` kl. ${booking.checkin_time}` : ''}</td>
         </tr>
         <tr>
           <td style="padding:5px 0;color:#666;font-size:14px;">Utsjekk</td>
-          <td style="padding:5px 0;font-weight:bold;font-size:14px;">${formatDateNO(booking.date_to)}</td>
+          <td style="padding:5px 0;font-weight:bold;font-size:14px;">${formatDateNO(booking.date_to)}${booking.checkout_time ? ` kl. ${booking.checkout_time}` : ''}</td>
         </tr>
         <tr>
           <td style="padding:5px 0;color:#666;font-size:14px;">Varighet</td>
@@ -107,6 +107,15 @@ function bookingDetailsBlock(booking: AdminBooking): string {
           </td>
         </tr>
       </table>
+      ${
+        booking.time_notes
+          ? `
+        <p style="margin:12px 0 0;font-size:13px;color:#666;">
+          <strong>Kommentar om tidspunkt:</strong> ${booking.time_notes}
+        </p>
+      `
+          : ''
+      }
       <p style="margin:12px 0 0;font-size:15px;font-weight:bold;color:#2C3E50;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:12px 16px;">
         💳 Betaling skjer ved innsjekk.
       </p>
