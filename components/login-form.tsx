@@ -28,11 +28,13 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 import { createClient } from '@/lib/supabase/client'
+import { checkEmailExists } from '@/actions/auth/checkEmailExists'
 import { LoginSchema, type LoginInput } from '@/lib/validation/login'
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailNotFound, setEmailNotFound] = useState<string | null>(null)
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(LoginSchema),
@@ -45,6 +47,7 @@ const LoginForm = () => {
   const onSubmit = async (values: LoginInput) => {
     setLoading(true)
     setError(null)
+    setEmailNotFound(null)
 
     try {
       const supabase = createClient()
@@ -62,7 +65,15 @@ const LoginForm = () => {
       }
 
       if (error) {
-        setError('Feil e-post eller passord. Prøv igjen.')
+        // Login failed -- check whether it's because the account doesn't
+        // exist, so we can point new customers at registration instead of
+        // just telling them the password was wrong.
+        const exists = await checkEmailExists(values.email)
+        if (!exists) {
+          setEmailNotFound(values.email)
+        } else {
+          setError('Feil e-post eller passord. Prøv igjen.')
+        }
         setLoading(false)
         return
       }
@@ -107,7 +118,9 @@ const LoginForm = () => {
                     <Input
                       id="email"
                       type="email"
-                      {...form.register('email')}
+                      {...form.register('email', {
+                        onChange: () => setEmailNotFound(null),
+                      })}
                     />
                     <FieldError errors={[form.formState.errors.email]} />
                   </Field>
@@ -115,12 +128,17 @@ const LoginForm = () => {
                   <Field data-invalid={!!form.formState.errors.password}>
                     <div className="flex items-center">
                       <FieldLabel htmlFor="password">Passord</FieldLabel>
-                      <Link
-                        href="/glemt-passord"
-                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                      >
-                        Glemt passord?
-                      </Link>
+                      {/* Resetting a password only makes sense for an
+                          account that exists -- hide this once we already
+                          know it doesn't. */}
+                      {!emailNotFound && (
+                        <Link
+                          href="/glemt-passord"
+                          className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                        >
+                          Glemt passord?
+                        </Link>
+                      )}
                     </div>
                     <Input
                       id="password"
@@ -133,6 +151,19 @@ const LoginForm = () => {
               </FieldSet>
             </Field>
           </form>
+
+          {emailNotFound && (
+            <div className="mt-4 space-y-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <p>Vi fant ingen konto med denne e-postadressen.</p>
+              <Button asChild size="sm">
+                <Link
+                  href={`/registrering?email=${encodeURIComponent(emailNotFound)}`}
+                >
+                  Opprett konto
+                </Link>
+              </Button>
+            </div>
+          )}
         </CardContent>
 
         <CardFooter className="flex flex-col items-center gap-4">

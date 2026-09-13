@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { checkEmailExists } from '@/actions/auth/checkEmailExists'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,21 +21,42 @@ export function AuthGateStep({ onAuthenticated }: AuthGateStepProps) {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailNotFound, setEmailNotFound] = useState<string | null>(null)
   const [resetSent, setResetSent] = useState(false)
 
   async function handleLogin() {
     setError(null)
+    setEmailNotFound(null)
     setLoading(true)
+    const trimmedEmail = email.trim()
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: trimmedEmail,
       password,
     })
-    setLoading(false)
-    if (error) {
-      setError('Feil e-post eller passord. Prøv igjen.')
+
+    if (error?.message === 'Email not confirmed') {
+      setLoading(false)
+      setError(
+        'E-posten er ikke bekreftet. Sjekk innboksen din for bekreftelseslenke.'
+      )
       return
     }
+
+    if (error) {
+      // Login failed -- check whether it's because the account doesn't
+      // exist, so we can point new customers at registration instead of
+      // just telling them the password was wrong.
+      const exists = await checkEmailExists(trimmedEmail)
+      setLoading(false)
+      if (!exists) {
+        setEmailNotFound(trimmedEmail)
+      } else {
+        setError('Feil e-post eller passord. Prøv igjen.')
+      }
+      return
+    }
+    setLoading(false)
     onAuthenticated()
   }
 
@@ -116,8 +139,8 @@ export function AuthGateStep({ onAuthenticated }: AuthGateStepProps) {
           Logg inn for å fortsette
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Du må være innlogget for å fullføre bookingen. Bookingprosessen din er
-          lagret.
+          Du må være innlogget for å fullføre bookingen. Har du ikke konto
+          ennå, kan du opprette en under. Bookingprosessen din er lagret.
         </p>
       </div>
 
@@ -134,7 +157,10 @@ export function AuthGateStep({ onAuthenticated }: AuthGateStepProps) {
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              setEmailNotFound(null)
+            }}
             placeholder="din@epost.no"
             required
           />
@@ -157,15 +183,40 @@ export function AuthGateStep({ onAuthenticated }: AuthGateStepProps) {
         </Button>
       </form>
 
-      <button
-        onClick={() => {
-          setView('forgot')
-          setError(null)
-        }}
-        className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-      >
-        Glemt passord?
-      </button>
+      {emailNotFound && (
+        <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <p>Vi fant ingen konto med denne e-postadressen.</p>
+          <Button asChild size="sm">
+            <Link
+              href={`/registrering?email=${encodeURIComponent(emailNotFound)}`}
+            >
+              Opprett konto
+            </Link>
+          </Button>
+        </div>
+      )}
+
+      {/* Resetting a password only makes sense for an account that exists --
+          hide this once we already know it doesn't, so it doesn't dangle a
+          dead-end "reset" action next to the "no account" message. */}
+      {!emailNotFound && (
+        <button
+          onClick={() => {
+            setView('forgot')
+            setError(null)
+          }}
+          className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+        >
+          Glemt passord?
+        </button>
+      )}
+
+      <div className="border-t pt-4 text-center text-sm">
+        Har du ikke en konto?{' '}
+        <Link href="/registrering" className="underline underline-offset-4">
+          Opprett konto
+        </Link>
+      </div>
     </div>
   )
 }

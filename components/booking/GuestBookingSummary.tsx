@@ -65,7 +65,8 @@ export function GuestBookingSummary({
       <div>
         <h2 className="text-2xl font-semibold tracking-tight">Oppsummering</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Logg inn for å velge katter og sende bookingforespørsel.
+          Logg inn eller opprett konto for å velge katter og sende
+          bookingforespørsel.
         </p>
       </div>
 
@@ -141,8 +142,9 @@ export function GuestBookingSummary({
       <div className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
-          Logg inn for å velge katter og sende bookingforespørsel. Periode og
-          burtype huskes.
+          Ny kunde? Du må opprette en konto før du kan sende forespørselen.
+          Har du allerede konto, logger du bare inn. Periode og burtype
+          huskes.
         </p>
       </div>
 
@@ -151,16 +153,18 @@ export function GuestBookingSummary({
           Tilbake
         </Button>
         <Button size="lg" onClick={() => setShowAuthDialog(true)}>
-          Logg inn og fortsett
+          Logg inn / opprett konto
         </Button>
       </div>
 
       <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
         <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Logg inn for å fortsette</DialogTitle>
-
-            <DialogDescription className="sr-only">
+          {/* AuthGateStep renders its own visible heading; these stay
+              screen-reader-only so the dialog still has an accessible name
+              without printing "Logg inn" a second time on screen. */}
+          <DialogHeader className="sr-only">
+            <DialogTitle>Logg inn eller opprett konto</DialogTitle>
+            <DialogDescription>
               Logg inn eller registrer deg for å fullføre bookingen
             </DialogDescription>
           </DialogHeader>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/client'
 import { signUpSchema } from '@/schemas/signUpSchema'
@@ -28,8 +28,9 @@ type FieldErrors = {
 const SignUpForm = () => {
   const router = useRouter()
   const supabase = createClient()
+  const searchParams = useSearchParams()
 
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(searchParams.get('email') ?? '')
   const [password, setPassword] = useState('')
   const [repeatPassword, setRepeatPassword] = useState('')
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
