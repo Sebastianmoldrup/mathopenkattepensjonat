@@ -40,6 +40,7 @@ export interface Incident {
   follow_up: string | null
   created_at: string
   cat_names: string | null
+  cat_ids: string[]
 }
 
 export interface IncidentOverview {
@@ -50,12 +51,24 @@ export interface IncidentOverview {
   actions_taken: string | null
   follow_up: string | null
   cat_names: string | null
+  cat_ids: string[]
   owner_first: string | null
   owner_last: string | null
   cage_type: string
   cage_count: number
   date_from: string
   date_to: string
+}
+
+/** Minimal shape IncidentFormDialog needs to enter edit mode -- both
+ * Incident and IncidentOverview satisfy this structurally. */
+export interface EditableIncident {
+  id: string
+  occurred_at: string
+  what_happened: string
+  actions_taken: string | null
+  follow_up: string | null
+  cat_ids: string[]
 }
 
 export interface AdminCat {

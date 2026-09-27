@@ -2,25 +2,78 @@
 
 import { useMemo, useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { IncidentOverview, formatDateNO, CAGE_LABELS } from '@/lib/admin/utils'
-import { AlertTriangle } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  AdminBooking,
+  IncidentOverview,
+  formatDateNO,
+  CAGE_LABELS,
+} from '@/lib/admin/utils'
+import { AlertTriangle, Pencil } from 'lucide-react'
+import { IncidentFormDialog } from './IncidentFormDialog'
+
+const MONTHS_NO = [
+  'Januar',
+  'Februar',
+  'Mars',
+  'April',
+  'Mai',
+  'Juni',
+  'Juli',
+  'August',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
+]
+
+const ALL = 'alle'
 
 interface IncidentsOverviewProps {
   incidents: IncidentOverview[]
+  bookings: AdminBooking[]
 }
 
-export function IncidentsOverview({ incidents }: IncidentsOverviewProps) {
+export function IncidentsOverview({
+  incidents,
+  bookings,
+}: IncidentsOverviewProps) {
   const [search, setSearch] = useState('')
+  const [year, setYear] = useState(ALL)
+  const [month, setMonth] = useState(ALL)
+  const [editing, setEditing] = useState<IncidentOverview | null>(null)
+
+  const bookingsById = useMemo(() => {
+    const map = new Map<string, AdminBooking>()
+    for (const b of bookings) map.set(b.id, b)
+    return map
+  }, [bookings])
+
+  const years = useMemo(() => {
+    const set = new Set(
+      incidents.map((i) => String(new Date(i.occurred_at).getFullYear()))
+    )
+    return Array.from(set).sort((a, b) => Number(b) - Number(a))
+  }, [incidents])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    if (!q) return incidents
     return incidents.filter((i) => {
+      const occurred = new Date(i.occurred_at)
+      if (year !== ALL && String(occurred.getFullYear()) !== year) return false
+      if (month !== ALL && String(occurred.getMonth()) !== month) return false
+      if (!q) return true
       const owner = `${i.owner_first ?? ''} ${i.owner_last ?? ''}`.toLowerCase()
       const cats = (i.cat_names ?? '').toLowerCase()
       return owner.includes(q) || cats.includes(q)
     })
-  }, [incidents, search])
+  }, [incidents, search, year, month])
 
   if (incidents.length === 0) {
     return (
@@ -30,14 +83,44 @@ export function IncidentsOverview({ incidents }: IncidentsOverviewProps) {
     )
   }
 
+  const editingBooking = editing ? (bookingsById.get(editing.booking_id) ?? null) : null
+
   return (
     <div className="space-y-4">
-      <Input
-        placeholder="Søk etter eier eller katt..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="h-9 max-w-xs text-sm"
-      />
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          placeholder="Søk etter eier eller katt..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-9 max-w-xs text-sm"
+        />
+        <Select value={year} onValueChange={setYear}>
+          <SelectTrigger className="h-9 w-[110px] text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Alle år</SelectItem>
+            {years.map((y) => (
+              <SelectItem key={y} value={y}>
+                {y}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={month} onValueChange={setMonth}>
+          <SelectTrigger className="h-9 w-[140px] text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Alle måneder</SelectItem>
+            {MONTHS_NO.map((m, i) => (
+              <SelectItem key={m} value={String(i)}>
+                {m}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {filtered.length === 0 ? (
         <div className="flex h-32 items-center justify-center rounded-xl border bg-card text-sm text-muted-foreground">
@@ -71,9 +154,19 @@ export function IncidentsOverview({ incidents }: IncidentsOverviewProps) {
                       {formatDateNO(incident.date_to)}
                     </p>
                   </div>
-                  <span className="shrink-0 text-xs font-medium text-muted-foreground">
-                    {formatDateNO(incident.occurred_at)}
-                  </span>
+                  <div className="flex shrink-0 items-center gap-3">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {formatDateNO(incident.occurred_at)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setEditing(incident)}
+                      className="flex items-center gap-1 text-xs font-medium text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                    >
+                      <Pencil className="h-3 w-3" />
+                      Rediger
+                    </button>
+                  </div>
                 </div>
 
                 <p className="text-sm">{incident.what_happened}</p>
@@ -96,6 +189,15 @@ export function IncidentsOverview({ incidents }: IncidentsOverviewProps) {
           })}
         </div>
       )}
+
+      <IncidentFormDialog
+        booking={editingBooking}
+        open={editing !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditing(null)
+        }}
+        initialEditIncident={editing}
+      />
     </div>
   )
 }

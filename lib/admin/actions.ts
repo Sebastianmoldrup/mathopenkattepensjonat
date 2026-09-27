@@ -486,6 +486,9 @@ export interface CheckinCheckoutEntry {
   event_type: 'checkin' | 'checkout'
   date_from: string
   date_to: string
+  checkin_time: string | null
+  checkout_time: string | null
+  time_notes: string | null
   owner_first: string | null
   owner_last: string | null
   owner_email: string

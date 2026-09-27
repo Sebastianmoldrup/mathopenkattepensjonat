@@ -36,10 +36,10 @@ importers:
         specifier: ^4.4.1
         version: 4.5.1(react@19.2.5)
       '@supabase/ssr':
-        specifier: latest
+        specifier: 0.10.2
         version: 0.10.2(@supabase/supabase-js@2.104.1)
       '@supabase/supabase-js':
-        specifier: latest
+        specifier: 2.104.1
         version: 2.104.1
       '@tanstack/react-table':
         specifier: ^8.21.3

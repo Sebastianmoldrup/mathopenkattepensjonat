@@ -29,6 +29,7 @@ import {
   ClipboardList,
   Printer,
   CheckCheck,
+  Clock,
 } from 'lucide-react'
 import {
   adminGetCheckinCheckoutByDate,
@@ -609,6 +610,11 @@ function EntryCard({
     format(parseISO(entry.date_to), 'd. MMM yyyy', { locale: nb }) +
     ` · ${stayNights} natt${stayNights !== 1 ? 'er' : ''}`
 
+  // Older bookings (predating drop-off/pickup time selection) have no
+  // recorded time -- show nothing rather than a misleading "kl. –".
+  const relevantTime =
+    type === 'checkin' ? entry.checkin_time : entry.checkout_time
+
   const isCompleted =
     type === 'checkin' ? entry.is_checked_in : entry.is_checked_out
   const completedAt =
@@ -635,6 +641,12 @@ function EntryCard({
             <p className="text-sm font-medium">{ownerName}</p>
           </div>
           <p className="text-xs text-muted-foreground">{periodLabel}</p>
+          {relevantTime && (
+            <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-foreground">
+              <Clock className="h-3 w-3" />
+              kl. {relevantTime}
+            </p>
+          )}
           {isCompleted && completedAt && (
             <p className="mt-0.5 text-xs text-muted-foreground">
               Fullført{' '}
@@ -747,6 +759,13 @@ function EntryCard({
         <div className="flex items-start gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
           <span>{entry.special_instructions}</span>
+        </div>
+      )}
+
+      {entry.time_notes && (
+        <div className="flex items-start gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          <Clock className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+          <span>Kommentar om tidspunkt: {entry.time_notes}</span>
         </div>
       )}
 

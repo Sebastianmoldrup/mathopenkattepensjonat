@@ -190,6 +190,31 @@ export async function adminCreateIncident(
   return { success: true }
 }
 
+export async function adminUpdateIncident(
+  incidentId: string,
+  catIds: string[],
+  whatHappened: string,
+  actionsTaken: string,
+  followUp: string,
+  occurredAt: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { error } = await supabase.rpc('admin_update_incident', {
+    p_incident_id: incidentId,
+    p_cat_ids: catIds,
+    p_what_happened: whatHappened,
+    p_actions_taken: actionsTaken || null,
+    p_follow_up: followUp || null,
+    p_occurred_at: occurredAt,
+  })
+  if (error) {
+    console.error('[adminUpdateIncident]', error.message)
+    return { success: false, error: 'Kunne ikke oppdatere avvik.' }
+  }
+  revalidatePath('/admin/avvik')
+  return { success: true }
+}
+
 export async function adminGetAllIncidents(): Promise<IncidentOverview[]> {
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('admin_get_all_incidents')

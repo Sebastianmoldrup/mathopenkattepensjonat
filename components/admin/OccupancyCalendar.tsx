@@ -82,6 +82,7 @@ interface DayData {
   catCount: number
   innCount: number
   utCount: number
+  stayCount: number
   bookings: AdminBooking[]
 }
 
@@ -192,7 +193,7 @@ export function OccupancyCalendar({
     function getDay(key: string): DayData {
       let entry = map.get(key)
       if (!entry) {
-        entry = { catCount: 0, innCount: 0, utCount: 0, bookings: [] }
+        entry = { catCount: 0, innCount: 0, utCount: 0, stayCount: 0, bookings: [] }
         map.set(key, entry)
       }
       return entry
@@ -210,6 +211,12 @@ export function OccupancyCalendar({
         const day = getDay(key)
         day.catCount += booking.num_cats
         day.bookings.push(booking)
+        // "Staying" excludes both ends -- a same-day booking (date_from ===
+        // date_to) is simultaneously an arrival and a departure that day,
+        // never a "staying" cat.
+        if (key !== booking.date_from && key !== booking.date_to) {
+          day.stayCount += booking.num_cats
+        }
         current.setDate(current.getDate() + 1)
       }
 
@@ -396,6 +403,27 @@ export function OccupancyCalendar({
               ? ` (${selectedDay.bookings.length})`
               : ' — ingen aktive bookinger'}
           </h3>
+          {selectedDay && (
+            <div className="flex flex-wrap items-center gap-4 rounded-lg border bg-muted/30 px-3 py-2 text-xs">
+              <span className="flex items-center gap-1.5 text-green-700">
+                <LogIn className="h-3.5 w-3.5" />
+                <span className="font-semibold">{selectedDay.innCount}</span>{' '}
+                ankommer
+              </span>
+              <span className="flex items-center gap-1.5 text-blue-700">
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="font-semibold">{selectedDay.utCount}</span>{' '}
+                drar
+              </span>
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Cat className="h-3.5 w-3.5" />
+                <span className="font-semibold text-foreground">
+                  {selectedDay.stayCount}
+                </span>{' '}
+                blir
+              </span>
+            </div>
+          )}
           {selectedDay ? (
             <div className="space-y-2">
               {sortedBookings.map((b) => {
