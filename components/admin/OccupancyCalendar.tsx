@@ -16,7 +16,15 @@ import {
 } from '@/lib/admin/cageActions'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, ChevronRight, LogIn, LogOut, Cat, Repeat } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  LogIn,
+  LogOut,
+  Cat,
+  Repeat,
+  Banknote,
+} from 'lucide-react'
 
 // Physical cages are numbered globally 1-max across the whole building, not
 // restarting per section (confirmed by the owner: Standard 1-14, Senior &
@@ -83,6 +91,10 @@ interface DayData {
   innCount: number
   utCount: number
   stayCount: number
+  /** Sum of `price` for bookings checking in this day -- customers pay
+   * the full booking amount at arrival, not per night, so this is what's
+   * actually expected to come in that day (not a per-day rate). */
+  earnings: number
   bookings: AdminBooking[]
 }
 
@@ -193,7 +205,14 @@ export function OccupancyCalendar({
     function getDay(key: string): DayData {
       let entry = map.get(key)
       if (!entry) {
-        entry = { catCount: 0, innCount: 0, utCount: 0, stayCount: 0, bookings: [] }
+        entry = {
+          catCount: 0,
+          innCount: 0,
+          utCount: 0,
+          stayCount: 0,
+          earnings: 0,
+          bookings: [],
+        }
         map.set(key, entry)
       }
       return entry
@@ -220,7 +239,9 @@ export function OccupancyCalendar({
         current.setDate(current.getDate() + 1)
       }
 
-      getDay(booking.date_from).innCount += booking.num_cats
+      const arrivalDay = getDay(booking.date_from)
+      arrivalDay.innCount += booking.num_cats
+      arrivalDay.earnings += booking.price
       getDay(booking.date_to).utCount += booking.num_cats
     }
 
@@ -421,6 +442,17 @@ export function OccupancyCalendar({
                   {selectedDay.stayCount}
                 </span>{' '}
                 blir
+              </span>
+            </div>
+          )}
+          {selectedDay && selectedDay.innCount > 0 && (
+            <div className="flex items-center gap-1.5 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-800">
+              <Banknote className="h-3.5 w-3.5" />
+              <span>
+                Forventet innbetaling ved innsjekk i dag:{' '}
+                <span className="font-semibold">
+                  {selectedDay.earnings.toLocaleString('nb-NO')} kr
+                </span>
               </span>
             </div>
           )}
