@@ -1,13 +1,120 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { Suspense } from 'react'
+import { connection } from 'next/server'
 import { Button } from '@/components/ui/button'
 import { OPENING_HOURS, formatRange } from '@/lib/booking/hours'
+import { getActivePricing } from '@/lib/booking/pricing'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Priser – Kattepensjonat i Bergen | Mathopen',
-  description:
-    'Se priser for kattepensjonat i Bergen – lavsesong fra 220 kr/døgn, høysesong fra 250 kr/døgn. Les om vaksinekrav, avbestilling og betingelser hos Mathopen Kattepensjonat.',
+// generateMetadata (not a static `metadata` object) so this is evaluated
+// per-request like the page body below, not frozen at whatever price was
+// active the last time the server process started -- otherwise the meta
+// description could silently show a stale price after a scheduled price
+// change takes effect without a fresh deploy.
+export async function generateMetadata(): Promise<Metadata> {
+  await connection()
+  const pricing = getActivePricing()
+  return {
+    title: 'Priser – Kattepensjonat i Bergen | Mathopen',
+    description: `Se priser for kattepensjonat i Bergen – lavsesong fra ${pricing.standard.low[1]} kr/døgn, høysesong fra ${pricing.standard.high[1]} kr/døgn. Les om vaksinekrav, avbestilling og betingelser hos Mathopen Kattepensjonat.`,
+  }
+}
+
+// getActivePricing() reads the current time (which version is active
+// "now") -- Next.js forbids that during static generation unless the
+// render is explicitly marked dynamic first (connection()) AND isolated
+// inside a <Suspense> boundary, so only this price-dependent fragment
+// defers to request time while the rest of the page still prerenders
+// statically (same split already used for app/admin/innsjekk's dynamic
+// content).
+async function PricingCards() {
+  await connection()
+  // Single source of truth (lib/booking/types.ts PRICING_VERSIONS) --
+  // standard and senior_comfort share the same 1/2-cat prices today, so
+  // "standard" is shown here as the representative number; 3 cats always
+  // means a suite (standard/senior_comfort only hold up to 2).
+  const pricing = getActivePricing()
+  return (
+    <>
+      {/* Low season */}
+      <div className="rounded-2xl bg-background p-6 shadow-sm">
+        <h2 className="mb-6 text-xl font-semibold text-foreground">
+          Lavsesong
+        </h2>
+
+        <div className="mb-6 space-y-3 text-lg">
+          <div className="flex justify-between font-medium">
+            <span>1 katt</span>
+            <span>{pricing.standard.low[1]} kr / døgn</span>
+          </div>
+          <div className="flex justify-between">
+            <span>2 katter</span>
+            <span>{pricing.standard.low[2]} kr / døgn</span>
+          </div>
+          <div className="flex justify-between">
+            <span>3 katter</span>
+            <span>{pricing.suite.low[3]} kr / døgn</span>
+          </div>
+        </div>
+
+        <div className="space-y-2 border-t pt-4 text-sm text-muted-foreground">
+          <p>Minstebeløp tilsvarer 2 døgn</p>
+          <p>Ordinær pris per katt dersom de må bo på hvert sitt rom</p>
+          <p>Avbestilling senest 24t før ankomst</p>
+          <p>Deretter betales 50 % av oppholdet</p>
+        </div>
+      </div>
+
+      {/* High season */}
+      <div className="rounded-2xl bg-background p-6 shadow-sm">
+        <h2 className="mb-6 text-xl font-semibold text-foreground">
+          Høysesong
+        </h2>
+
+        <div className="mb-6 space-y-3 text-lg">
+          <div className="flex justify-between font-medium">
+            <span>1 katt</span>
+            <span>{pricing.standard.high[1]} kr / døgn</span>
+          </div>
+          <div className="flex justify-between">
+            <span>2 katter</span>
+            <span>{pricing.standard.high[2]} kr / døgn</span>
+          </div>
+          <div className="flex justify-between">
+            <span>3 katter</span>
+            <span>{pricing.suite.high[3]} kr / døgn</span>
+          </div>
+        </div>
+
+        <div className="space-y-2 border-t pt-4 text-sm text-muted-foreground">
+          <p>Minstebeløp tilsvarer 2 døgn</p>
+          <p>Avbestilling senest 7 dager før ankomst</p>
+          <p>Deretter betales 50 % av oppholdet</p>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function PricingCardsFallback() {
+  return (
+    <>
+      {[0, 1].map((i) => (
+        <div key={i} className="rounded-2xl bg-background p-6 shadow-sm">
+          <div className="mb-6 h-6 w-28 animate-pulse rounded bg-muted" />
+          <div className="mb-6 space-y-3">
+            {[0, 1, 2].map((j) => (
+              <div key={j} className="h-6 animate-pulse rounded bg-muted" />
+            ))}
+          </div>
+          <div className="space-y-2 border-t pt-4">
+            <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+      ))}
+    </>
+  )
 }
 
 export default function Page() {
@@ -25,64 +132,9 @@ export default function Page() {
 
       {/* Price overvieew */}
       <section className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
-        {/* Low season */}
-
-        <div className="rounded-2xl bg-background p-6 shadow-sm">
-          <h2 className="mb-6 text-xl font-semibold text-foreground">
-            Lavsesong
-          </h2>
-
-          <div className="mb-6 space-y-3 text-lg">
-            <div className="flex justify-between font-medium">
-              <span>1 katt</span>
-              <span>220 kr / døgn</span>
-            </div>
-            <div className="flex justify-between">
-              <span>2 katter</span>
-              <span>320 kr / døgn</span>
-            </div>
-            <div className="flex justify-between">
-              <span>3 katter</span>
-              <span>400 kr / døgn</span>
-            </div>
-          </div>
-
-          <div className="space-y-2 border-t pt-4 text-sm text-muted-foreground">
-            <p>Minstebeløp tilsvarer 2 døgn</p>
-            <p>Ordinær pris per katt dersom de må bo på hvert sitt rom</p>
-            <p>Avbestilling senest 24t før ankomst</p>
-            <p>Deretter betales 50 % av oppholdet</p>
-          </div>
-        </div>
-
-        {/* High season */}
-
-        <div className="rounded-2xl bg-background p-6 shadow-sm">
-          <h2 className="mb-6 text-xl font-semibold text-foreground">
-            Høysesong
-          </h2>
-
-          <div className="mb-6 space-y-3 text-lg">
-            <div className="flex justify-between font-medium">
-              <span>1 katt</span>
-              <span>250 kr / døgn</span>
-            </div>
-            <div className="flex justify-between">
-              <span>2 katter</span>
-              <span>350 kr / døgn</span>
-            </div>
-            <div className="flex justify-between">
-              <span>3 katter</span>
-              <span>450 kr / døgn</span>
-            </div>
-          </div>
-
-          <div className="space-y-2 border-t pt-4 text-sm text-muted-foreground">
-            <p>Minstebeløp tilsvarer 2 døgn</p>
-            <p>Avbestilling senest 7 dager før ankomst</p>
-            <p>Deretter betales 50 % av oppholdet</p>
-          </div>
-        </div>
+        <Suspense fallback={<PricingCardsFallback />}>
+          <PricingCards />
+        </Suspense>
       </section>
 
       {/* Long stay */}

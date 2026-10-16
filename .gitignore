@@ -46,3 +46,7 @@ next-env.d.ts
 # never be committed until the fixes they describe are applied
 /supabase/SECURITY_FIXES.md
 /supabase/manual-migrations/
+
+# local-only internal fixlog (bugs found/fixed and why) -- not user-facing,
+# not meant to ship
+/FIXLOG.md

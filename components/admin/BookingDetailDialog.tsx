@@ -339,7 +339,10 @@ export function BookingDetailDialog({
       {/* ── HOVED DIALOG ─────────────────────────────────────────────── */}
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-h-[92vh] max-w-3xl overflow-y-auto p-6">
-          <DialogHeader className="pb-2">
+          {/* Extra top/right room so the title+badge row doesn't crowd the
+           * close button -- on narrow phone widths the default dialog
+           * padding put them close enough to feel cramped. */}
+          <DialogHeader className="pt-2 pr-8 pb-2">
             <DialogTitle className="flex flex-wrap items-center gap-3">
               Booking
               <Badge

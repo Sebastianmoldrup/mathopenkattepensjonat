@@ -130,7 +130,6 @@ export interface CreateBookingPayload {
   cageType: import('./types').CageType
   cageCount: number
   numCats: number
-  price: number
   specialInstructions?: string
   wantsOutdoorCage?: boolean
   waitlistRequested?: boolean
@@ -195,6 +194,21 @@ export async function createBooking(
   //   )
   // }
 
+  // Price is computed here, server-side, rather than trusted from the
+  // client -- calculatePriceBreakdown's version lookup (getActivePricing)
+  // defaults to "now", so this uses the SERVER's clock to decide which
+  // price list applies, not whatever the browser had cached on page load.
+  // That matters specifically for the rare case of a customer submitting
+  // right as a scheduled price change takes effect: the server's answer
+  // is authoritative, not the client's.
+  const breakdown = calculatePriceBreakdown(
+    payload.cageType,
+    payload.cageCount,
+    payload.numCats,
+    payload.dateFrom,
+    payload.dateTo
+  )
+
   // Insert booking
   const { data: bookingId, error: insertError } = await supabase.rpc(
     'create_booking_with_cats',
@@ -205,7 +219,7 @@ export async function createBooking(
       p_cage_type: payload.cageType,
       p_cage_count: payload.cageCount,
       p_num_cats: payload.numCats,
-      p_price: payload.price,
+      p_price: breakdown.totalPrice,
       p_cat_ids: payload.catIds,
       p_special_instructions: payload.specialInstructions ?? null,
       p_wants_outdoor_cage: payload.wantsOutdoorCage ?? false,
@@ -222,6 +236,12 @@ export async function createBooking(
   }
 
   // ── Lagre snapshot ──────────────────────────────────────────────────
+  // Goes through a SECURITY DEFINER RPC rather than a direct table
+  // insert -- booking_snapshots has RLS enabled with no INSERT policy
+  // for plain authenticated users, so a direct insert here always failed
+  // (42501, silently swallowed by this same try/catch) and no snapshot
+  // was ever actually recorded. See create_booking_snapshot in migration
+  // 016 for the ownership check this now goes through instead.
   try {
     const { data: userProfile } = await supabase
       .from('users')
@@ -234,44 +254,39 @@ export async function createBooking(
       .select('name, gender, breed, age, id_chip')
       .in('id', payload.catIds)
 
-    await supabase.from('booking_snapshots').insert({
-      booking_id: bookingId,
-      snapshot_at: new Date().toISOString(),
-      owner_name: userProfile
-        ? `${userProfile.first_name ?? ''} ${userProfile.last_name ?? ''}`.trim()
-        : payload.userFirstName,
-      owner_email: userProfile?.email ?? payload.userEmail,
-      owner_phone: userProfile?.phone ?? null,
-      owner_address: userProfile?.address ?? null,
-      cats: (catRows ?? []).map((c) => ({
-        name: c.name,
-        gender: c.gender,
-        breed: c.breed,
-        age: c.age,
-        id_chip: c.id_chip,
-      })),
-    })
+    const { error: snapshotError } = await supabase.rpc(
+      'create_booking_snapshot',
+      {
+        p_booking_id: bookingId,
+        p_owner_name: userProfile
+          ? `${userProfile.first_name ?? ''} ${userProfile.last_name ?? ''}`.trim()
+          : payload.userFirstName,
+        p_owner_email: userProfile?.email ?? payload.userEmail,
+        p_owner_phone: userProfile?.phone ?? null,
+        p_owner_address: userProfile?.address ?? null,
+        p_cats: (catRows ?? []).map((c) => ({
+          name: c.name,
+          gender: c.gender,
+          breed: c.breed,
+          age: c.age,
+          id_chip: c.id_chip,
+        })),
+      }
+    )
+    if (snapshotError) throw snapshotError
   } catch (snapshotErr) {
     console.error('[createBooking] snapshot failed:', snapshotErr)
   }
 
   // Send confirmation email
   try {
-    const days = calculatePriceBreakdown(
-      payload.cageType,
-      payload.cageCount,
-      payload.numCats,
-      payload.dateFrom,
-      payload.dateTo
-    ).totalDays
-
     await sendBookingRequestEmail({
       userEmail: payload.userEmail,
       userFirstName: payload.userFirstName ?? '',
       catNames: payload.catNames,
       dateFrom: payload.dateFrom,
       dateTo: payload.dateTo,
-      days,
+      days: breakdown.totalDays,
       wantsOutdoorCage: payload.wantsOutdoorCage ?? false,
       waitlistRequested: payload.waitlistRequested ?? false,
     })

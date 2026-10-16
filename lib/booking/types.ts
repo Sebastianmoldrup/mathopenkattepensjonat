@@ -51,26 +51,70 @@ export const FIXED_HIGH_SEASON_RANGES: SeasonRange[] = [
 ]
 
 // ─── Pricing (day-based: both check-in and check-out are billed) ──────────────
+// Versioned, like OPENING_HOURS in lib/booking/hours.ts is for hours: one
+// file is the single source of truth for every price shown anywhere
+// (booking wizard, /priser, booking emails), and the version that applies
+// to a given moment is picked automatically by `effectiveFrom`.
+//
+// This does NOT touch already-created bookings -- booking.price is a
+// snapshot column written once at creation (see createBooking in
+// lib/booking/actions.ts), so an existing booking (even one dated far in
+// the future) keeps whatever price it was created with no matter what
+// gets added here later.
+//
+// To change prices for real: append a new entry to PRICING_VERSIONS below
+// with the new `pricing` table and the date the change should take effect
+// (`effectiveFrom`, inclusive, local date). Entries MUST stay sorted
+// ascending by effectiveFrom -- getActivePricing() in pricing.ts assumes
+// this and picks the LAST entry that has already started. No other code
+// change is needed: once that date arrives (server clock, at the moment a
+// booking is actually created -- see createBooking, which recomputes the
+// price itself server-side rather than trusting whatever the browser had
+// cached), new bookings automatically start using the new prices, and
+// /priser automatically shows them too.
+//
+// Only ONE version exists today (the baseline, in effect since the site's
+// pricing was first set) -- nothing is scheduled to change yet.
 
 export interface PriceTable {
   low: Record<number, number>
   high: Record<number, number>
 }
 
-export const PRICING: Record<CageType, PriceTable> = {
-  standard: {
-    low: { 1: 220, 2: 320 },
-    high: { 1: 250, 2: 350 },
-  },
-  senior_comfort: {
-    low: { 1: 220, 2: 320 },
-    high: { 1: 250, 2: 350 },
-  },
-  suite: {
-    low: { 1: 400, 2: 400, 3: 400 },
-    high: { 1: 450, 2: 450, 3: 450 },
-  },
+export interface PricingVersion {
+  effectiveFrom: string // YYYY-MM-DD, local date, inclusive
+  pricing: Record<CageType, PriceTable>
 }
+
+export const PRICING_VERSIONS: PricingVersion[] = [
+  {
+    effectiveFrom: '2020-01-01',
+    pricing: {
+      standard: {
+        low: { 1: 220, 2: 320 },
+        high: { 1: 250, 2: 350 },
+      },
+      senior_comfort: {
+        low: { 1: 220, 2: 320 },
+        high: { 1: 250, 2: 350 },
+      },
+      suite: {
+        low: { 1: 400, 2: 400, 3: 400 },
+        high: { 1: 450, 2: 450, 3: 450 },
+      },
+    },
+  },
+  // Example of a future change -- uncomment, fill in the real numbers and
+  // date, and deploy ahead of the effective date:
+  // {
+  //   effectiveFrom: '2027-01-01',
+  //   pricing: {
+  //     standard: { low: { 1: 0, 2: 0 }, high: { 1: 0, 2: 0 } },
+  //     senior_comfort: { low: { 1: 0, 2: 0 }, high: { 1: 0, 2: 0 } },
+  //     suite: { low: { 1: 0, 2: 0, 3: 0 }, high: { 1: 0, 2: 0, 3: 0 } },
+  //   },
+  // },
+]
 
 // ─── Cats ─────────────────────────────────────────────────────────────────────
 

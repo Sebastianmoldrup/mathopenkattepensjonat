@@ -1,10 +1,11 @@
 import {
   Season,
   FIXED_HIGH_SEASON_RANGES,
-  PRICING,
+  PRICING_VERSIONS,
   CageType,
   PriceBreakdown,
   DayBreakdown,
+  PriceTable,
 } from './types'
 
 export function getEasterSunday(year: number): Date {
@@ -89,18 +90,39 @@ export function getSeason(date: Date): Season {
   return 'low'
 }
 
+/** Picks the price table in effect at `asOf` (defaults to right now).
+ * PRICING_VERSIONS must stay sorted ascending by effectiveFrom -- this
+ * walks forward and keeps the last entry whose effectiveFrom has already
+ * started, i.e. the most recent version that applies. */
+export function getActivePricing(asOf: Date = new Date()): Record<CageType, PriceTable> {
+  const asOfDay = toDateOnly(asOf)
+  let active = PRICING_VERSIONS[0]
+  for (const version of PRICING_VERSIONS) {
+    if (toDateOnly(parseDateStr(version.effectiveFrom)) <= asOfDay) {
+      active = version
+    } else {
+      break
+    }
+  }
+  return active.pricing
+}
+
 export function getPricePerCagePerDay(
   cageType: CageType,
   catsInCage: number,
-  season: Season
+  season: Season,
+  pricing: Record<CageType, PriceTable>
 ): number {
-  return PRICING[cageType][season][catsInCage] ?? 0
+  return pricing[cageType][season][catsInCage] ?? 0
 }
 
-function getPriceForStandardSplit(season: Season): number {
+function getPriceForStandardSplit(
+  season: Season,
+  pricing: Record<CageType, PriceTable>
+): number {
   return (
-    getPricePerCagePerDay('standard', 2, season) +
-    getPricePerCagePerDay('standard', 1, season)
+    getPricePerCagePerDay('standard', 2, season, pricing) +
+    getPricePerCagePerDay('standard', 1, season, pricing)
   )
 }
 
@@ -113,12 +135,19 @@ export function calculatePriceBreakdown(
   cageCount: number,
   numCats: number,
   dateFrom: Date | string,
-  dateTo: Date | string
+  dateTo: Date | string,
+  // Which price version applies -- defaults to right now, i.e. "whatever
+  // prices are active at the moment this quote is calculated", NOT the
+  // stay's own dates. A stay booked today for next summer is priced at
+  // today's rates; it's only ever recomputed for a NEW booking, not for
+  // one already created (see the PRICING_VERSIONS comment in types.ts).
+  asOf: Date = new Date()
 ): PriceBreakdown {
   const from =
     typeof dateFrom === 'string' ? parseDateStr(dateFrom) : toDateOnly(dateFrom)
   const to =
     typeof dateTo === 'string' ? parseDateStr(dateTo) : toDateOnly(dateTo)
+  const activePricing = getActivePricing(asOf)
 
   const days: DayBreakdown[] = []
   const current = new Date(from)
@@ -133,10 +162,10 @@ export function calculatePriceBreakdown(
     let total: number
 
     if (cageType === 'standard' && cageCount === 2 && numCats === 3) {
-      pricePerCage = getPricePerCagePerDay('standard', 2, season)
-      total = getPriceForStandardSplit(season)
+      pricePerCage = getPricePerCagePerDay('standard', 2, season, activePricing)
+      total = getPriceForStandardSplit(season, activePricing)
     } else {
-      pricePerCage = getPricePerCagePerDay(cageType, numCats, season)
+      pricePerCage = getPricePerCagePerDay(cageType, numCats, season, activePricing)
       total = pricePerCage * cageCount
     }
 

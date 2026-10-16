@@ -9,7 +9,7 @@ import { getSeason } from './pricing'
 // which is exactly the kind of drift that caused the suite-pricing and
 // cage-numbering issues earlier -- update it here, not per-page.
 //
-// Low season: weekdays 18:30-19:30, Saturday closed, Sunday 13:00-14:00.
+// Low season: weekdays 18:30-19:30, Saturday closed, Sunday 19:00-20:00.
 // High season: open every day -- weekdays 17:30-19:00, Sat+Sun 13:00-14:30.
 // "High season" and Saturday-closure follow the same season definition
 // already used for pricing and the low-season-Saturday booking block
@@ -36,7 +36,7 @@ export const OPENING_HOURS: Record<
   low: {
     weekday: { opens: '18:30', closes: '19:30' },
     saturday: null,
-    sunday: { opens: '13:00', closes: '14:00' },
+    sunday: { opens: '19:00', closes: '20:00' },
   },
   high: {
     weekday: { opens: '17:30', closes: '19:00' },

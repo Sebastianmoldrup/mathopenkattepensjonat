@@ -94,7 +94,6 @@ export function BookingSummary({
         cageType,
         cageCount,
         numCats,
-        price: breakdown.totalPrice,
         catIds: selectedCats.map((c) => c.id),
         catNames: selectedCats.map((c) => c.name),
         specialInstructions: specialInstructions || undefined,
