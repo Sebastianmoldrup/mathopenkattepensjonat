@@ -5,6 +5,14 @@ import { getUpcomingBookings, getUserCats } from '@/lib/booking/actions'
 import { BookingWizard } from '@/components/booking/BookingWizard'
 import { Loader2 } from 'lucide-react'
 
+// Raises the server-action timeout for this route (incl. createCatAndReturn,
+// called from the wizard's "legg til katt" step) past the platform default
+// -- a customer on a slow upload connection could otherwise have the whole
+// request killed mid-upload with a raw platform error instead of one of
+// our own messages. Only takes effect up to whatever the hosting plan
+// allows; see the 2026-10-18 FIXLOG entry.
+export const maxDuration = 60
+
 async function BookingLoader() {
   await connection()
   const supabase = await createClient()

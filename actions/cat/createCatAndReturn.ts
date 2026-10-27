@@ -4,6 +4,13 @@ import { CatInput } from '@/lib/validation/cat'
 import { readCatBucket } from './readCatBucket'
 import { Cat } from '@/lib/booking/types'
 
+// Note: maxDuration can't be exported from this file -- a 'use server'
+// file may only export async functions. It's set instead on the page(s)
+// that render the components calling this action (see
+// app/booking/page.tsx) -- see the 2026-10-18 FIXLOG entry on suspected
+// serverless function timeouts under real-world (slow/mobile) upload
+// speeds.
+
 export async function createCatAndReturn(
   values: CatInput,
   file: File
@@ -26,24 +33,37 @@ export async function createCatAndReturn(
   }
 
   const uuid = crypto.randomUUID()
-
-  const { data: cat, error: insertError } = await supabase
-    .from('cats')
-    .insert({ ...values, owner_id: user.id })
-    .select('id, name, breed, gender, age, image_url, owner_id')
-    .single()
-
-  if (insertError) {
-    console.error('[createCatAndReturn] insert failed:', insertError.message)
-    throw new Error('Kunne ikke lagre katten. Prøv igjen.')
-  }
-
   const ext = file.name.split('.').pop()
   const imagePath = `${uuid}.${ext}`
 
-  const { error: uploadError } = await supabase.storage
-    .from('catphotos')
-    .upload(imagePath, file)
+  // The cat row and the photo upload don't actually depend on each other
+  // -- imagePath is keyed by a fresh uuid, not the row's id -- so running
+  // them concurrently instead of sequentially roughly halves the total
+  // time spent on the two slowest, network-bound steps here. That
+  // directly reduces exposure to any per-request time limit (see
+  // maxDuration above) for someone on a slow upload connection.
+  const [insertResult, uploadResult] = await Promise.all([
+    supabase
+      .from('cats')
+      .insert({ ...values, owner_id: user.id })
+      .select('id, name, breed, gender, age, image_url, owner_id')
+      .single(),
+    supabase.storage.from('catphotos').upload(imagePath, file),
+  ])
+
+  const { data: cat, error: insertError } = insertResult
+  const { error: uploadError } = uploadResult
+
+  if (insertError) {
+    console.error('[createCatAndReturn] insert failed:', insertError.message)
+    // The upload may have succeeded even though the insert didn't --
+    // clean it up so a failed attempt doesn't leave an orphaned file in
+    // storage with nothing in the database ever referencing it.
+    if (!uploadError) {
+      await supabase.storage.from('catphotos').remove([imagePath])
+    }
+    throw new Error('Kunne ikke lagre katten. Prøv igjen.')
+  }
 
   if (uploadError) {
     console.error('[createCatAndReturn] upload failed:', uploadError.message)

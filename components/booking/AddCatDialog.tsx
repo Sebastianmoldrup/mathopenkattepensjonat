@@ -174,10 +174,23 @@ export function AddCatDialog({
     } catch (err) {
       let msg = 'Noe gikk galt ved lagring.'
       if (err instanceof Error) {
-        if (err.message.includes('size') || err.message.includes('large'))
+        const m = err.message.toLowerCase()
+        if (m.includes('size') || m.includes('large'))
           msg = 'Bildet er for stort. Maks 4.4MB.'
-        else if (err.message.includes('type') || err.message.includes('mime'))
+        else if (m.includes('type') || m.includes('mime'))
           msg = 'Filtypen støttes ikke. Bruk JPEG, PNG eller WEBP.'
+        else if (
+          // Browser-level network/fetch failures (e.g. Safari's generic
+          // "Load failed" for a dropped connection mid-upload) never reach
+          // our server code at all -- they're thrown by fetch() itself,
+          // so they'd otherwise leak raw, unhelpful English text here
+          // instead of a message the customer can actually act on.
+          m.includes('load failed') ||
+          m.includes('failed to fetch') ||
+          m.includes('network')
+        )
+          msg =
+            'Opplastingen ble avbrutt, sannsynligvis pga. tilkoblingen. Sjekk internett og prøv igjen.'
         else msg = err.message
       }
       alert(msg)
