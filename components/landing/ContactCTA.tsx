@@ -33,7 +33,7 @@ export function ContactCTA() {
           className={`mb-8 text-lg text-slate-600 transition-all delay-100 duration-700 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
         >
           Du er hjertelig velkommen til å komme på besøk for å se lokalet før du
-          bestiller opphold. Kattepensjonatet åpner imidlertid først 1. juli.
+          bestiller opphold.
         </p>
         <div
           className={`mb-10 flex flex-col justify-center gap-4 transition-all delay-200 duration-700 sm:flex-row ${visible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'}`}
