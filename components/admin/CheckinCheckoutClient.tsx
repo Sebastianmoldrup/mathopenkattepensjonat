@@ -33,12 +33,14 @@ import {
 } from 'lucide-react'
 import {
   adminGetCheckinCheckoutByDate,
+  adminGetBookingById,
   adminUpsertCheckin,
   adminUpsertCheckout,
   CheckinCheckoutEntry,
 } from '@/lib/admin/actions'
-import { CAGE_LABELS, nightsBetween } from '@/lib/admin/utils'
+import { CAGE_LABELS, nightsBetween, AdminBooking } from '@/lib/admin/utils'
 import { cn } from '@/lib/utils'
+import { BookingDetailDialog } from './BookingDetailDialog'
 
 type Props = {
   initialEntries: CheckinCheckoutEntry[]
@@ -156,6 +158,42 @@ export default function CheckinCheckoutClient({
   const [checklist, setChecklist] = useState<Record<string, boolean>>({})
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  // Full booking detail -- same dialog /admin/bookinger uses, reused here
+  // so admins get identical depth of info (and the same edit/status
+  // actions) directly from the innsjekk page. innsjekk only has the
+  // specialized CheckinCheckoutEntry shape loaded, not full AdminBooking
+  // records, so this is fetched on demand rather than kept in sync with
+  // `entries` -- same lazy-load-on-open pattern already used for health
+  // logs/behavior notes/incidents elsewhere in the admin panel.
+  const [detailBooking, setDetailBooking] = useState<AdminBooking | null>(
+    null
+  )
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [loadingBookingId, setLoadingBookingId] = useState<string | null>(
+    null
+  )
+
+  function refreshEntries() {
+    adminGetCheckinCheckoutByDate(date).then(setEntries)
+  }
+
+  async function openBookingDetail(bookingId: string) {
+    setLoadingBookingId(bookingId)
+    const booking = await adminGetBookingById(bookingId)
+    setLoadingBookingId(null)
+    if (!booking) return
+    setDetailBooking(booking)
+    setDetailOpen(true)
+  }
+
+  function closeBookingDetail(open: boolean) {
+    setDetailOpen(open)
+    // Refresh in case the admin edited or changed status/deleted the
+    // booking from the detail dialog -- entries isn't automatically kept
+    // in sync with that dialog's own mutations.
+    if (!open) refreshEntries()
+  }
 
   const checkins = entries.filter((e) => e.event_type === 'checkin')
   const checkouts = entries.filter((e) => e.event_type === 'checkout')
@@ -367,6 +405,10 @@ export default function CheckinCheckoutClient({
                           onLabelPrinted={() =>
                             handleLabelPrinted(entry.booking_id)
                           }
+                          onOpenDetails={() =>
+                            openBookingDetail(entry.booking_id)
+                          }
+                          loadingDetails={loadingBookingId === entry.booking_id}
                         />
                       ))}
                   </div>
@@ -390,6 +432,10 @@ export default function CheckinCheckoutClient({
                           onLabelPrinted={() =>
                             handleLabelPrinted(entry.booking_id)
                           }
+                          onOpenDetails={() =>
+                            openBookingDetail(entry.booking_id)
+                          }
+                          loadingDetails={loadingBookingId === entry.booking_id}
                         />
                       ))}
                   </div>
@@ -424,6 +470,10 @@ export default function CheckinCheckoutClient({
                           onLabelPrinted={() =>
                             handleLabelPrinted(entry.booking_id)
                           }
+                          onOpenDetails={() =>
+                            openBookingDetail(entry.booking_id)
+                          }
+                          loadingDetails={loadingBookingId === entry.booking_id}
                         />
                       ))}
                   </div>
@@ -447,6 +497,10 @@ export default function CheckinCheckoutClient({
                           onLabelPrinted={() =>
                             handleLabelPrinted(entry.booking_id)
                           }
+                          onOpenDetails={() =>
+                            openBookingDetail(entry.booking_id)
+                          }
+                          loadingDetails={loadingBookingId === entry.booking_id}
                         />
                       ))}
                   </div>
@@ -580,6 +634,14 @@ export default function CheckinCheckoutClient({
           </div>
         </DialogContent>
       </Dialog>
+
+      <BookingDetailDialog
+        booking={detailBooking}
+        open={detailOpen}
+        onOpenChange={closeBookingDetail}
+        onDeleted={() => closeBookingDetail(false)}
+        hideStatusActions
+      />
     </div>
   )
 }
@@ -589,11 +651,15 @@ function EntryCard({
   type,
   onOpenChecklist,
   onLabelPrinted,
+  onOpenDetails,
+  loadingDetails,
 }: {
   entry: CheckinCheckoutEntry
   type: 'checkin' | 'checkout'
   onOpenChecklist: () => void
   onLabelPrinted: () => void
+  onOpenDetails: () => void
+  loadingDetails: boolean
 }) {
   // const cageLabel =
   //   entry.cage_count === 2
@@ -638,7 +704,17 @@ function EntryCard({
         <div>
           <div className="flex items-center gap-2">
             {isCompleted && <CheckCircle2 className="h-4 w-4 text-green-600" />}
-            <p className="text-sm font-medium">{ownerName}</p>
+            <button
+              type="button"
+              onClick={onOpenDetails}
+              disabled={loadingDetails}
+              className="flex items-center gap-1.5 text-sm font-medium underline-offset-2 hover:underline disabled:opacity-60"
+            >
+              {ownerName}
+              {loadingDetails && (
+                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+              )}
+            </button>
           </div>
           <p className="text-xs text-muted-foreground">{periodLabel}</p>
           {relevantTime && (

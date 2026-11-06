@@ -78,6 +78,13 @@ interface BookingDetailDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onDeleted?: () => void
+  // Hides the status-change buttons -- used from /admin/innsjekk, where
+  // this dialog is opened purely to look someone up while checking
+  // in/out, not to manage their booking's lifecycle. Editing and delete
+  // stay available; only status-change is scoped out. Defaults to
+  // showing them, so /admin/bookinger (the original caller) is
+  // unaffected.
+  hideStatusActions?: boolean
 }
 
 const CAGE_TYPE_OPTIONS = [
@@ -100,6 +107,7 @@ export function BookingDetailDialog({
   open,
   onOpenChange,
   onDeleted,
+  hideStatusActions = false,
 }: BookingDetailDialogProps) {
   const [notes, setNotes] = useState(booking?.admin_notes ?? '')
   const [isPending, startTransition] = useTransition()
@@ -372,31 +380,33 @@ export function BookingDetailDialog({
 
           <div className="space-y-5 pt-2">
               {/* Status */}
-              <div className="space-y-2">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Status
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {ALL_STATUSES.map((s) => {
-                    const isActive = currentStatus === s
-                    return (
-                      <Button
-                        key={s}
-                        size="sm"
-                        variant={isActive ? 'default' : 'outline'}
-                        onClick={() => handleStatusChange(s)}
-                        disabled={isPending || isActive}
-                        className={cn('gap-1.5', isActive && STATUS_COLORS[s])}
-                      >
-                        {activeAction === s && (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        )}
-                        {STATUS_LABELS[s]}
-                      </Button>
-                    )
-                  })}
+              {!hideStatusActions && (
+                <div className="space-y-2">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Status
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {ALL_STATUSES.map((s) => {
+                      const isActive = currentStatus === s
+                      return (
+                        <Button
+                          key={s}
+                          size="sm"
+                          variant={isActive ? 'default' : 'outline'}
+                          onClick={() => handleStatusChange(s)}
+                          disabled={isPending || isActive}
+                          className={cn('gap-1.5', isActive && STATUS_COLORS[s])}
+                        >
+                          {activeAction === s && (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          )}
+                          {STATUS_LABELS[s]}
+                        </Button>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Edit button */}
               <div className="flex justify-end">

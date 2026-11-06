@@ -55,6 +55,18 @@ export async function adminGetCurrentUserName(): Promise<string | null> {
 
 // ─── Bookings ─────────────────────────────────────────────────────────────────
 
+// Same "fetch all, find one" pattern already used elsewhere in this file
+// (see the completed-status guard below) -- avoids a second RPC just for
+// a single row, at the cost of pulling the full list to pick one out of
+// it. Used for on-demand detail views (e.g. the innsjekk page) where the
+// caller doesn't already have the full bookings list loaded.
+export async function adminGetBookingById(
+  bookingId: string
+): Promise<AdminBooking | null> {
+  const bookings = await adminGetAllBookings()
+  return bookings.find((b) => b.id === bookingId) ?? null
+}
+
 export async function adminGetAllBookings(): Promise<AdminBooking[]> {
   const supabase = await createClient()
 
